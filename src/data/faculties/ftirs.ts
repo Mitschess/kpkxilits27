@@ -1,0 +1,205 @@
+import type { Faculty } from "./types";
+import { Settings } from "lucide-react";
+
+export const FTIRS: Faculty = {
+  id: "ftirs",
+  name: "Fakultas Teknologi Industri dan Rekayasa Sistem",
+  accent: "#f2554f",
+  icon: Settings,
+  description: "Mesin, Industri, Material, Kimia, Fisika Teknik",
+  departments: [
+    {
+      name: "Teknik Mesin",
+      slug: "teknik-mesin",
+      description:
+        "Departemen Teknik Mesin mempelajari prinsip fisika yang diimplementasikan pada analisis, desain, manufaktur, dan pemeliharaan mesin serta konversi energi.",
+      image:
+        "/images/dept/teknik-mesin.webp",
+      stats: { snbp: 40, snbt: 60, mandiri: 100 },
+      competition: { snbp: "Tinggi", snbt: "Tinggi", mandiri: "Tinggi" },
+      accreditation: "Unggul",
+      asiin: true,
+      competencies: [
+        "Sistem Energi dan Pembakaran",
+        "Mekanika Fluida",
+        "Rekayasa Termal",
+        "Mekanika Benda Padat",
+        "Metalurgi",
+        "Manufaktur",
+        "Otomotif",
+        "Otomasi Industri",
+        "Perencanaan Produk",
+      ],
+      careers: [
+        "Supervisor Teknik",
+        "Technopreneur",
+        "Konsultan Teknik",
+        "Insinyur Desain",
+        "Insinyur Proyek",
+      ],
+      relatedSubjects: ["MATEMATIKA", "FISIKA", "KIMIA"],
+      contact: "@teknikmesin_its",
+    },
+    {
+      name: "Rekayasa Keselamatan Proses",
+      slug: "rekayasa-keselamatan-proses",
+      description:
+        "Departemen Rekayasa Keselamatan Proses mempelajari pencegahan kecelakaan industri melalui perancangan sistem industri yang aman.",
+      image:
+        "/images/dept/rekayasa-keselamatan-proses.webp",
+      stats: { snbp: 10, snbt: 15, mandiri: 20 },
+      competition: { snbp: "Rendah", snbt: "Rendah", mandiri: "Rendah" },
+      accreditation: "Prodi Baru",
+      asiin: false,
+      competencies: [
+        "Perencanaan Keselamatan Proses",
+        "Operasi Keselamatan Proses",
+        "Pemeliharaan Keselamatan Proses",
+        "Investigasi dan Modifikasi Keselamatan",
+      ],
+      careers: [
+        "Safety Consultant",
+        "Safety Engineer",
+        "Process Safety Engineer",
+        "Safety Auditor",
+        "Pengawas Ketenagakerjaan",
+        "Safetypreneur",
+      ],
+      relatedSubjects: ["MATEMATIKA", "FISIKA", "KIMIA"],
+      contact: "@processsafety.eng",
+    },
+    {
+      name: "Teknik Kimia",
+      slug: "teknik-kimia",
+      description:
+        "Teknik Kimia mempelajari perancangan dan pengoperasian pabrik untuk mengolah bahan baku menjadi produk bernilai ekonomi.",
+      image:
+        "/images/dept/teknik-kimia.webp",
+      stats: { snbp: 40, snbt: 60, mandiri: 100 },
+      competition: { snbp: "Tinggi", snbt: "Sedang", mandiri: "Tinggi" },
+      accreditation: "Unggul",
+      asiin: true,
+      competencies: [
+        "Perpindahan Panas dan Massa",
+        "Teknologi Material",
+        "Reaksi Kimia dan Biomassa",
+        "Pengolahan Limbah Industri",
+        "Termodinamika",
+        "Elektrokimia dan Korosi",
+        "Rekayasa Sistem Proses",
+      ],
+      careers: [
+        "Pertambangan",
+        "Perminyakan",
+        "Quality Control",
+        "Petrokimia",
+        "Peneliti",
+      ],
+      relatedSubjects: ["MATEMATIKA", "FISIKA", "KIMIA"],
+      contact: "@its_teknikkimia",
+    },
+    {
+      name: "Teknik Pangan",
+      slug: "teknik-pangan",
+      description:
+        "Teknik Pangan berfokus pada desain proses pangan untuk menghasilkan industri pangan yang kompetitif dan berkelanjutan.",
+      image:
+        "/images/dept/teknik-pangan.webp",
+      stats: { snbp: 16, snbt: 24, mandiri: 40 },
+      competition: { snbp: "Tinggi", snbt: "Tinggi", mandiri: "Tinggi" },
+      accreditation: "Unggul",
+      asiin: true,
+      competencies: [
+        "Desain Proses Produksi Pangan",
+        "Pengembangan Produk Pangan",
+        "Diversifikasi Produk",
+        "Ekonomi Pangan Berkelanjutan",
+      ],
+      careers: [
+        "Pengembangan Produk Pangan",
+        "Industri Pangan",
+        "Nutrisi dan Kesehatan",
+      ],
+      relatedSubjects: ["MATEMATIKA", "BIOLOGI", "KIMIA"],
+      contact: "@its_teknikkimia",
+    },
+    {
+      name: "Teknik Fisika",
+      slug: "teknik-fisika",
+      description:
+        "Teknik Fisika memadukan rekayasa dengan fisika dan matematika untuk menghasilkan solusi inovatif di bidang industri.",
+      image:
+        "/images/dept/teknik-fisika.webp",
+      stats: { snbp: 40, snbt: 80, mandiri: 100 },
+      competition: { snbp: "Tinggi", snbt: "Tinggi", mandiri: "Tinggi" },
+      accreditation: "Unggul",
+      asiin: true,
+      competencies: [
+        "Rekayasa Instrumentasi",
+        "Rekayasa Energi",
+        "Pengkondisian Lingkungan",
+        "Rekayasa Bahan",
+        "Vibrasi dan Akustik",
+      ],
+      careers: ["Oil and Gas", "EPCC", "Manufaktur", "Telekomunikasi", "BUMN"],
+      relatedSubjects: ["MATEMATIKA", "FISIKA", "KIMIA"],
+      contact: "@tekfis_its",
+    },
+    {
+      name: "Teknik Industri",
+      slug: "teknik-industri",
+      description:
+        "Teknik Industri mempelajari perancangan, pengelolaan, dan optimalisasi sistem industri dan organisasi.",
+      image:
+        "/images/dept/teknik-industri.webp",
+      stats: { snbp: 40, snbt: 60, mandiri: 100 },
+      competition: { snbp: "Tinggi", snbt: "Tinggi", mandiri: "Tinggi" },
+      accreditation: "Unggul",
+      asiin: true,
+      competencies: [
+        "Ergonomi dan Sistem Kerja",
+        "Pemodelan Kuantitatif",
+        "Analisis Kebijakan Industri",
+        "Logistik dan Supply Chain",
+      ],
+      careers: [
+        "Data Science Industri",
+        "Konsultan",
+        "HR Management",
+        "Supply Chain Manager",
+        "Wirausahawan",
+      ],
+      relatedSubjects: ["MATEMATIKA", "FISIKA", "EKONOMI"],
+      contact: "@its_indsys.eng",
+    },
+    {
+      name: "Teknik Material dan Metalurgi",
+      slug: "teknik-material-dan-metalurgi",
+      description:
+        "Teknik Material dan Metalurgi mempelajari hubungan struktur, proses, dan performa material untuk inovasi material baru.",
+      image:
+        "/images/dept/teknik-material-dan-metalurgi.webp",
+      stats: { snbp: 40, snbt: 60, mandiri: 100 },
+      competition: { snbp: "Tinggi", snbt: "Tinggi", mandiri: "Tinggi" },
+      accreditation: "Unggul",
+      asiin: true,
+      competencies: [
+        "Inovasi Material",
+        "Metalurgi Manufaktur",
+        "Pengolahan Mineral",
+        "Korosi dan Kegagalan Material",
+        "Kimia Material",
+        "Fisika Material",
+      ],
+      careers: [
+        "Material Engineer",
+        "Welding Engineer",
+        "Manufacturing Engineer",
+        "Metallurgist",
+        "Computational Modelling",
+      ],
+      relatedSubjects: ["MATEMATIKA", "FISIKA", "EKONOMI"],
+      contact: "@dtmm_its",
+    },
+  ],
+};

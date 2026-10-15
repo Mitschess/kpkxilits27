@@ -1,0 +1,304 @@
+@import "tailwindcss";
+@import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource-variable/plus-jakarta-sans";
+@import "@fontsource/instrument-serif/latin-400.css";
+@import "@fontsource/instrument-serif/latin-400-italic.css";
+@import "lenis/dist/lenis.css";
+
+/*
+ * Theme: "Damar Kurung" — a night festival of Gresik's paper lanterns,
+ * lit along the route from home (Gresik) to campus (ITS).
+ */
+@theme {
+  --color-night-950: #050920;
+  --color-night-900: #0a1033;
+  --color-night-850: #0d1540;
+  --color-night-800: #121c4d;
+  --color-night-700: #1b2866;
+  --color-night-600: #2a3b88;
+  --color-its: #4672ff;
+  --color-its-deep: #204dc0;
+  --color-lantern: #ffb23f;
+  --color-gold: #ffd76a;
+  --color-ember: #f0592a;
+  --color-magenta: #ec3b92;
+  --color-teal: #22b89a;
+  --color-mint: #7be8c3;
+  --color-paper: #fff3dc;
+  --color-mist: #aab4dd;
+  --color-ink: #2a130b;
+
+  --font-sans: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque Variable", "Plus Jakarta Sans Variable", ui-sans-serif, sans-serif;
+  --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-bob: bob 7s ease-in-out infinite;
+  --animate-spin-y: spin-y 22s linear infinite;
+  --animate-flicker: flicker 3.4s ease-in-out infinite;
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-rise: rise 22s linear infinite;
+  --animate-swing: swing 4s ease-in-out infinite;
+  --animate-fade-in: fade-in 0.25s ease-out;
+  --animate-fade-out: fade-out 0.2s ease-in;
+  --animate-sheet-in: sheet-in 0.45s var(--ease-out-expo);
+  --animate-sheet-out: sheet-out 0.25s ease-in;
+
+  @keyframes bob {
+    0%,
+    100% {
+      translate: 0 0;
+    }
+    50% {
+      translate: 0 -14px;
+    }
+  }
+  @keyframes spin-y {
+    from {
+      transform: rotateX(-12deg) rotateY(0deg);
+    }
+    to {
+      transform: rotateX(-12deg) rotateY(360deg);
+    }
+  }
+  @keyframes flicker {
+    0%,
+    100% {
+      opacity: 0.9;
+    }
+    30% {
+      opacity: 0.75;
+    }
+    55% {
+      opacity: 1;
+    }
+    70% {
+      opacity: 0.82;
+    }
+  }
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes rise {
+    0% {
+      transform: translate3d(0, 0, 0) rotate(-4deg);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    50% {
+      transform: translate3d(24px, -55vh, 0) rotate(4deg);
+    }
+    90% {
+      opacity: 0.9;
+    }
+    100% {
+      transform: translate3d(-12px, -110vh, 0) rotate(-3deg);
+      opacity: 0;
+    }
+  }
+  @keyframes swing {
+    0%,
+    100% {
+      rotate: -5deg;
+    }
+    50% {
+      rotate: 5deg;
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes fade-out {
+    to {
+      opacity: 0;
+    }
+  }
+  @keyframes sheet-in {
+    from {
+      transform: translateX(100%);
+    }
+  }
+  @keyframes sheet-out {
+    to {
+      transform: translateX(100%);
+    }
+  }
+}
+
+/* ---------- Base ---------- */
+
+html {
+  background: var(--color-night-950);
+  color-scheme: dark;
+  scroll-padding-top: 6rem;
+}
+
+body {
+  background: var(--color-night-950);
+  color: var(--color-paper);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--color-lantern);
+  color: var(--color-night-950);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* ---------- Reusable pieces ---------- */
+
+@utility glass {
+  background: color-mix(in oklab, var(--color-night-800) 62%, transparent);
+  border: 1px solid color-mix(in oklab, var(--color-paper) 9%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+@utility text-glow {
+  text-shadow:
+    0 0 18px rgb(255 178 63 / 0.55),
+    0 0 46px rgb(255 178 63 / 0.25);
+}
+
+@utility eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+/* Film grain over everything for a warmer, printed feel */
+@utility grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Diagonal "batik-ish" weave used behind cards */
+@utility weave {
+  background-image:
+    repeating-linear-gradient(45deg, rgb(255 243 220 / 0.035) 0 1px, transparent 1px 14px),
+    repeating-linear-gradient(-45deg, rgb(255 243 220 / 0.035) 0 1px, transparent 1px 14px);
+}
+
+/* ---------- Damar Kurung lantern (3D paper box) ---------- */
+
+.lantern {
+  --w: 120px;
+  --h: 168px;
+  position: relative;
+  width: var(--w);
+  height: var(--h);
+  perspective: 900px;
+}
+
+.lantern-cube {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(-12deg) rotateY(var(--ry, -28deg));
+}
+
+.lantern-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border: 3px solid var(--color-ink);
+  background: radial-gradient(ellipse at 50% 52%, #fff7dd 0%, #ffd58f 42%, #f2a03c 82%, #d9731f 100%);
+  box-shadow: inset 0 0 18px rgb(120 40 0 / 0.45);
+}
+
+.lantern-face:nth-child(1) {
+  transform: translateZ(calc(var(--w) / 2));
+}
+.lantern-face:nth-child(2) {
+  transform: rotateY(90deg) translateZ(calc(var(--w) / 2));
+}
+.lantern-face:nth-child(3) {
+  transform: rotateY(180deg) translateZ(calc(var(--w) / 2));
+}
+.lantern-face:nth-child(4) {
+  transform: rotateY(-90deg) translateZ(calc(var(--w) / 2));
+}
+
+.lantern-cap {
+  position: absolute;
+  left: 0;
+  top: calc(50% - var(--w) / 2);
+  width: var(--w);
+  height: var(--w);
+  background: #3a1a0e;
+  border: 3px solid var(--color-ink);
+}
+.lantern-cap.top {
+  transform: rotateX(90deg) translateZ(calc(var(--h) / 2));
+}
+.lantern-cap.bottom {
+  transform: rotateX(-90deg) translateZ(calc(var(--h) / 2));
+  background: radial-gradient(circle, #ffcf7a 0%, #b4561a 70%);
+}
+
+.lantern.unlit .lantern-face {
+  background: radial-gradient(ellipse at 50% 52%, #9aa3c7 0%, #6b739a 60%, #4a5178 100%);
+  box-shadow: inset 0 0 18px rgb(0 0 0 / 0.5);
+}
+.lantern.unlit .lantern-face svg {
+  opacity: 0.55;
+  filter: grayscale(1);
+}
+.lantern.unlit .lantern-cap.bottom {
+  background: #3a3f5c;
+}
+
+/* ---------- Radix dialog animations ---------- */
+
+.dialog-overlay[data-state="open"] {
+  animation: var(--animate-fade-in);
+}
+.dialog-overlay[data-state="closed"] {
+  animation: var(--animate-fade-out);
+}
+.sheet-content[data-state="open"] {
+  animation: var(--animate-sheet-in);
+}
+.sheet-content[data-state="closed"] {
+  animation: var(--animate-sheet-out);
+}
+
+/* ---------- Radix slider ---------- */
+
+.slider-root {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 28px;
+  touch-action: none;
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
