@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, BadgeCheck, BookOpen, Briefcase, ChevronRight, Instagram, Sparkles } from "lucide-react";
+import { ArrowLeft, BadgeCheck, BookOpen, Briefcase, ChevronRight, Instagram, Sparkles, Star, Ticket } from "lucide-react";
 import type { Competition, Department, Faculty } from "@/data/faculties";
 import { cn } from "@/lib/utils";
 
@@ -10,7 +10,7 @@ const LEVEL: Record<Competition, string> = {
   Tinggi: "bg-pink-light text-pink-dark",
 };
 
-const accreditation = (a: string) => (/prodi baru/i.test(a) ? "Prodi baru ✨" : `Akreditasi ${a}`);
+const accreditation = (a: string) => (/prodi baru/i.test(a) ? "Prodi baru" : `Akreditasi ${a}`);
 
 const slide = {
   initial: (dir: number) => ({ opacity: 0, x: 40 * dir }),
@@ -66,7 +66,7 @@ function DepartmentList({ faculty, onSelect }: { faculty: Faculty; onSelect: (d:
 
       <div className="px-4 py-8 md:px-8">
         <p className="mb-3 px-2 font-hand text-2xl font-bold text-ink-soft">
-          {faculty.departments.length} departemen & prodi, pilih satu 👇
+          {faculty.departments.length} departemen & prodi, pilih satu
         </p>
         <ul className="space-y-3">
           {faculty.departments.map((d) => (
@@ -144,7 +144,7 @@ function DepartmentDetail({ faculty, dept, onBack }: { faculty: Faculty; dept: D
             <ul className="space-y-2">
               {dept.careers.map((c, i) => (
                 <li key={i} className="flex gap-2 text-sm font-semibold text-ink">
-                  <span aria-hidden="true">⭐</span>
+                  <Star size={15} strokeWidth={2.5} className="mt-0.5 shrink-0 fill-sun text-sun-dark" aria-hidden="true" />
                   {c}
                 </li>
               ))}
@@ -154,7 +154,9 @@ function DepartmentDetail({ faculty, dept, onBack }: { faculty: Faculty; dept: D
 
         {dept.relatedSubjects.length > 0 && (
           <div className="mt-4 rounded-[1.5rem] bg-sun-light p-5 ring-2 ring-sun/60">
-            <p className="font-display text-lg font-extrabold text-ink">📘 Mapel pendukung</p>
+            <p className="flex items-center gap-2 font-display text-lg font-extrabold text-ink">
+              <BookOpen size={19} strokeWidth={2.5} aria-hidden="true" /> Mapel pendukung
+            </p>
             <ul className="mt-3 flex flex-wrap gap-2">
               {dept.relatedSubjects.map((s) => (
                 <li key={s} className="rounded-full bg-white px-3 py-1 text-sm font-bold text-ink">
@@ -167,7 +169,9 @@ function DepartmentDetail({ faculty, dept, onBack }: { faculty: Faculty; dept: D
 
         <div className="mt-4 rounded-[1.5rem] bg-white p-5 ring-2 ring-ink/10 md:p-6">
           <div className="flex items-center justify-between">
-            <p className="font-display text-xl font-extrabold text-ink">🎟️ Kuota mahasiswa</p>
+            <p className="flex items-center gap-2 font-display text-xl font-extrabold text-ink">
+              <Ticket size={20} strokeWidth={2.5} aria-hidden="true" /> Kuota mahasiswa
+            </p>
             <span className="rounded-full bg-ink px-2.5 py-1 text-[0.68rem] font-bold text-white">2026</span>
           </div>
           <div className="mt-5 space-y-4">

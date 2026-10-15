@@ -8,6 +8,7 @@ import CommuteCalculator from "@/components/home/CommuteCalculator";
 import MythQuiz from "@/components/home/MythQuiz";
 import GallerySection from "@/components/home/GallerySection";
 import RouteRail from "@/components/home/RouteRail";
+import { SectionBlend } from "@/components/deco/SectionFade";
 import FacultyTeaser from "@/components/home/FacultyTeaser";
 import { useReveal } from "@/hooks/useReveal";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -24,6 +25,7 @@ export default function HomePage() {
       <Ticker />
       <AboutSection />
       <PhilosophySection />
+      <SectionBlend from="var(--color-sun-light)" via="#a9dcff" to="var(--color-its)" />
       <EventsSection />
       <FacultyTeaser />
       <CommuteCalculator />

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Send } from "lucide-react";
+import { Heart, Inbox, MessageCircle, MessageSquareHeart, PenLine, Send } from "lucide-react";
 import PageHero from "@/components/ui/PageHero";
 import { buttonClass } from "@/components/ui/button";
 import { supabase, type GuestbookMessage } from "@/lib/supabase";
@@ -104,23 +104,27 @@ export default function GuestbookPage() {
   return (
     <div ref={root} className="bg-cream">
       <PageHero
-        emoji="💌"
+        icon={MessageSquareHeart}
         eyebrow="Buku Tamu"
         title={<>Tinggalkan <em>jejakmu</em> di sini!</>}
-        description="Hai! Seneng kamu mampir ke sini ✨ Yuk tinggalin pesan buat kenang-kenangan~"
+        description="Hai! Seneng kamu mampir ke sini. Yuk tinggalin pesan buat kenang-kenangan~"
       />
 
       <div className="mx-auto grid max-w-7xl items-start gap-8 px-6 pb-24 lg:grid-cols-[400px_1fr]">
         {/* form */}
         <div data-reveal className="card p-6 md:p-8 lg:sticky lg:top-28">
           <div className="flex items-center justify-between">
-            <h2 className="font-display text-2xl font-extrabold text-ink">✍️ Tulis pesan</h2>
+            <h2 className="flex items-center gap-2 font-display text-2xl font-extrabold text-ink">
+              <PenLine size={22} strokeWidth={2.5} aria-hidden="true" /> Tulis pesan
+            </h2>
             {remaining > 0 && <span className="rounded-full bg-sun-light px-3 py-1 text-xs font-bold text-ink ring-2 ring-sun">Sisa kuota: {remaining}</span>}
           </div>
 
           {remaining <= 0 ? (
             <div className="mt-6 rounded-[1.5rem] bg-mint-light px-6 py-10 text-center">
-              <p className="text-4xl">🙌</p>
+              <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-white text-mint-dark" aria-hidden="true">
+                <Heart size={28} strokeWidth={2.25} />
+              </span>
               <p className="mt-3 font-display text-lg font-extrabold text-ink">Makasih udah nulis!</p>
               <p className="mt-1 text-sm text-ink-soft">Kuota nulismu sudah habis.</p>
             </div>
@@ -165,7 +169,7 @@ export default function GuestbookPage() {
               )}
               {success && (
                 <p role="status" className="rounded-2xl bg-mint-light px-4 py-3 text-sm font-semibold text-mint-dark">
-                  Pesan berhasil dikirim! 🎉
+                  Pesan berhasil dikirim!
                 </p>
               )}
 
@@ -185,7 +189,9 @@ export default function GuestbookPage() {
         {/* messages */}
         <div>
           <div className="mb-6 flex items-center justify-between">
-            <h2 className="font-display text-2xl font-extrabold text-ink">💬 Pesan masuk</h2>
+            <h2 className="flex items-center gap-2 font-display text-2xl font-extrabold text-ink">
+              <MessageCircle size={22} strokeWidth={2.5} aria-hidden="true" /> Pesan masuk
+            </h2>
             <span className="rounded-full bg-white px-3 py-1 text-sm font-bold text-ink ring-2 ring-ink/10">{messages.length} pesan</span>
           </div>
 
@@ -197,7 +203,9 @@ export default function GuestbookPage() {
             </div>
           ) : messages.length === 0 ? (
             <div className="rounded-[1.75rem] border-4 border-dashed border-ink/10 bg-white/60 px-6 py-16 text-center">
-              <p className="text-4xl">📭</p>
+              <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-cream text-ink-soft" aria-hidden="true">
+                <Inbox size={28} strokeWidth={2.25} />
+              </span>
               <p className="mt-3 font-display text-xl font-extrabold text-ink">Belum ada pesan nih.</p>
               <p className="mt-1 text-ink-soft">Jadilah yang pertama nulis!</p>
             </div>

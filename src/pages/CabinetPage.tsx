@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Users } from "lucide-react";
 import PageHero from "@/components/ui/PageHero";
 import MemberCard, { DIVISION_COLOR } from "@/components/cabinet/MemberCard";
 import { CABINET_DATA, type CabinetDivision, type CabinetMember } from "@/data/cabinet";
@@ -29,7 +30,7 @@ export default function CabinetPage() {
   return (
     <div ref={root} className="bg-cream">
       <PageHero
-        emoji="🙌"
+        icon={Users}
         eyebrow="Struktur Kabinet KPK 2026"
         title={<>Kenalan sama <em>panitia</em> KPK!</>}
         description="Orang-orang hebat di balik layar yang siap menggebrak masa depan!"

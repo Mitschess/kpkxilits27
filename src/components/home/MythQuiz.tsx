@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import confetti from "canvas-confetti";
-import { ArrowRight, RotateCcw } from "lucide-react";
+import { ArrowRight, Check, CircleHelp, PartyPopper, RotateCcw, Star, Trophy, X } from "lucide-react";
+import SectionFade from "@/components/deco/SectionFade";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { buttonClass } from "@/components/ui/button";
 import { MYTHS } from "@/data/home";
@@ -51,7 +52,9 @@ export default function MythQuiz() {
   };
 
   return (
-    <section id="mitos" className="dots relative overflow-hidden bg-pink-light py-24 md:py-32">
+    <section id="mitos" className="dots screen-section relative isolate overflow-hidden bg-pink-light">
+      <SectionFade edge="top" color="var(--color-pink-light)" className="h-24" />
+      <SectionFade edge="bottom" color="var(--color-cream)" />
       {/* floating question marks */}
       {["top-[12%] left-[6%]", "top-[30%] right-[8%]", "bottom-[14%] left-[12%]", "bottom-[20%] right-[14%]"].map((pos, i) => (
         <span
@@ -64,31 +67,30 @@ export default function MythQuiz() {
         </span>
       ))}
 
-      <div className="relative mx-auto max-w-7xl px-6">
+      <div className="relative mx-auto grid w-full max-w-7xl items-center gap-12 px-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-14">
         <SectionHeading
-          align="center"
-          stop="05"
-          emoji="🤔"
+          icon={CircleHelp}
           label="Mitos vs Fakta"
           highlight="#ffffff"
           title={<>Katanya sih gitu… <em>bener nggak</em>?</>}
           description="Tebak dulu, baru intip faktanya!"
         />
 
-        <div data-reveal className="relative mx-auto mt-12 max-w-3xl">
+        <div data-reveal className="relative mx-auto w-full max-w-3xl">
           {/* the rest of the deck */}
           <div className="absolute inset-x-6 -bottom-4 h-full rotate-[2deg] rounded-[2rem] bg-sun ring-2 ring-ink/10" />
           <div className="absolute inset-x-3 -bottom-2 h-full -rotate-[1.5deg] rounded-[2rem] bg-mint ring-2 ring-ink/10" />
 
-          <div className="card relative min-h-[420px] overflow-hidden p-7 md:p-12">
+          <div className="card relative min-h-[420px] overflow-hidden p-7 md:p-12 lg:min-h-[clamp(20rem,54vh,26rem)] lg:p-[clamp(1.75rem,4.6vh,3rem)]">
             <div className="flex items-center justify-between">
               <div className="flex gap-1.5" aria-hidden="true">
                 {MYTHS.map((_, i) => (
                   <span key={i} className={cn("h-2.5 w-9 rounded-full transition-colors", i < index || (i === index && guess) ? "bg-pink" : "bg-ink/10")} />
                 ))}
               </div>
-              <span className="rounded-full bg-sun-light px-3 py-1 text-sm font-bold text-ink ring-2 ring-sun">
-                Skor {score}/{MYTHS.length} ⭐
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-sun-light px-3 py-1 text-sm font-bold text-ink ring-2 ring-sun">
+                <Star size={14} strokeWidth={2.5} className="fill-sun text-sun-dark" aria-hidden="true" />
+                Skor {score}/{MYTHS.length}
               </span>
             </div>
 
@@ -100,15 +102,15 @@ export default function MythQuiz() {
                   animate={{ opacity: 1, scale: 1 }}
                   className="flex min-h-[300px] flex-col items-center justify-center text-center"
                 >
-                  <p className="text-6xl" aria-hidden="true">
-                    {score === MYTHS.length ? "🏆" : "🎉"}
-                  </p>
+                  <span className="grid h-20 w-20 place-items-center rounded-full bg-sun-light text-ink ring-4 ring-sun" aria-hidden="true">
+                    {score === MYTHS.length ? <Trophy size={38} strokeWidth={2.25} /> : <PartyPopper size={38} strokeWidth={2.25} />}
+                  </span>
                   <p className="mt-4 font-display text-6xl font-extrabold text-ink">
                     {score}/{MYTHS.length}
                   </p>
                   <p className="mt-3 max-w-md text-lg text-ink-soft">
                     {score === MYTHS.length
-                      ? "Mantap! Kamu udah kenal ITS luar dalam. Tinggal daftar 😎"
+                      ? "Mantap! Kamu udah kenal ITS luar dalam. Tinggal daftar!"
                       : "Ternyata ITS nggak seseram katanya, kan? Masih banyak yang bisa kamu temukan!"}
                   </p>
                   <button type="button" onClick={restart} className={buttonClass("white", "mt-8")}>
@@ -133,10 +135,10 @@ export default function MythQuiz() {
                     {!guess ? (
                       <motion.div key="ask" exit={{ opacity: 0, y: -8 }} className="mt-10 grid grid-cols-2 gap-4 sm:max-w-md">
                         <button type="button" onClick={(e) => answer("fakta", e)} className={buttonClass("white", "py-4 text-base")}>
-                          ✅ Fakta
+                          <Check size={18} strokeWidth={3} aria-hidden="true" /> Fakta
                         </button>
                         <button type="button" onClick={(e) => answer("mitos", e)} className={buttonClass("pink", "py-4 text-base")}>
-                          🙅 Mitos
+                          <X size={18} strokeWidth={3} aria-hidden="true" /> Mitos
                         </button>
                       </motion.div>
                     ) : (
@@ -151,7 +153,7 @@ export default function MythQuiz() {
                             Mitos!
                           </motion.span>
                           <span className={cn("rounded-full px-3 py-1 text-sm font-bold", guess === "mitos" ? "bg-mint-light text-mint-dark" : "bg-sun-light text-ink")}>
-                            {guess === "mitos" ? "Tebakanmu tepat 🎉" : "Eits, kena tipu 😄"}
+                            {guess === "mitos" ? "Tebakanmu tepat!" : "Eits, kena tipu!"}
                           </span>
                         </div>
                         <p className="mt-5 max-w-2xl rounded-2xl bg-cream p-5 text-lg leading-relaxed text-pretty text-ink">{card.fact}</p>

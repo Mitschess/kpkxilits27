@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <defs>
+    <path id="k" d="M4 3 16 3.7 22.9 21.9 4.7 15z"/>
+    <path id="t" d="M22.9 21.9c1.6 1.5.4 3.2 2.4 4.4s3 .9 3.9 3.2"/>
+  </defs>
+  <use href="#k" fill="#1b1f3b" stroke="#1b1f3b" stroke-width="2" stroke-linejoin="round" opacity=".22" transform="translate(1.4 2)"/>
+  <use href="#t" fill="none" stroke="#fff" stroke-width="4"/>
+  <use href="#k" fill="none" stroke="#fff" stroke-width="4.5" stroke-linejoin="round"/>
+  <use href="#t" fill="none" stroke="#1b1f3b" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M4 3 16 3.7 22.9 21.9z" fill="#ffc93c"/>
+  <path d="M4 3 22.9 21.9 4.7 15z" fill="#ff4fa3"/>
+  <path d="M4 3 22.9 21.9M4.7 15 16 3.7" stroke="#1b1f3b" stroke-width="1.4" stroke-linecap="round"/>
+  <use href="#k" fill="none" stroke="#1b1f3b" stroke-width="2.1" stroke-linejoin="round"/>
+  <path d="M25.3 26.3l-2.6-1.5v3zM25.3 26.3l2.6-1.5v3z" fill="#1fbf9a" stroke="#1b1f3b" stroke-width="1.1" stroke-linejoin="round"/>
+</svg>

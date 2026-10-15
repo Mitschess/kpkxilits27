@@ -137,7 +137,7 @@ export default function DistrictPicker({ value, onChange }: DistrictPickerProps)
           onClick={show}
           onBlur={dismiss}
           onKeyDown={onKeyDown}
-          className="w-full rounded-2xl bg-cream py-4 pr-12 pl-11 font-semibold text-ink ring-2 ring-ink/10 transition outline-none placeholder:font-medium placeholder:text-ink-soft/60 hover:ring-ink/25 focus:ring-its"
+          className="w-full rounded-2xl bg-cream py-4 pr-12 pl-11 lg:py-3 font-semibold text-ink ring-2 ring-ink/10 transition outline-none placeholder:font-medium placeholder:text-ink-soft/60 hover:ring-ink/25 focus:ring-its"
         />
         <button
           type="button"
@@ -167,7 +167,7 @@ export default function DistrictPicker({ value, onChange }: DistrictPickerProps)
         >
           {results.length === 0 ? (
             <li role="presentation" className="px-3 py-4 text-sm font-medium text-ink-soft">
-              Hmm, “{query}” belum ada di daftar 😅
+              Hmm, “{query}” belum ada di daftar.
               <br />
               Coba cek ejaannya, atau pilih kecamatan terdekat.
             </li>

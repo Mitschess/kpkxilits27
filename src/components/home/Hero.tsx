@@ -5,7 +5,6 @@ import { SCENE_SETS } from "@/components/lantern/Lantern";
 import Bunting from "@/components/deco/Bunting";
 import Clouds from "@/components/deco/Clouds";
 import Road from "@/components/deco/Road";
-import Sun from "@/components/deco/Sun";
 import Townscape from "@/components/deco/Townscape";
 import { buttonClass } from "@/components/ui/button";
 import { gsap, useGSAP } from "@/lib/motion";
@@ -72,10 +71,10 @@ export default function Hero() {
       />
 
       {/* Sized against the viewport height too, so copy + badge + town all fit on the first screen */}
-      <div className="relative mx-auto grid w-full max-w-7xl flex-1 items-center gap-10 px-6 pt-[clamp(8.5rem,19vh,11rem)] pb-6 lg:grid-cols-[1.08fr_0.92fr] lg:gap-6">
+      <div className="relative mx-auto grid w-full max-w-7xl flex-1 items-center gap-10 px-6 pt-[clamp(7.5rem,19vh,11rem)] pb-6 lg:pb-3 lg:grid-cols-[1.08fr_0.92fr] lg:gap-6">
         {/* copy */}
         <div className="relative z-10">
-          <h1 className="font-display text-[clamp(2.9rem,min(7.6vw,8.6vh),7rem)] leading-[0.92] font-extrabold tracking-[-0.04em] text-ink">
+          <h1 className="font-display text-[clamp(2.9rem,min(7.6vw,8.2vh),7rem)] leading-[0.92] font-extrabold tracking-[-0.04em] text-ink">
             <span className="block overflow-hidden pb-[0.08em]">
               <span data-hero-word className="inline-block">
                 Kampus
@@ -112,41 +111,40 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* logo badge, with the sun shining from behind it */}
-        <div className="relative mx-auto [perspective:1000px]" style={{ width: "min(100%, 30rem, 56vh)" }}>
-          {/* rays start just outside the ring text */}
-          <Sun className="absolute -inset-[15%] -z-10 opacity-90" rayInner={73} rayOuter={96} rays={24} />
-          <div data-hero-badge>
-            <div data-tilt className="relative aspect-square">
-              <svg viewBox="0 0 400 400" className="absolute inset-0 h-full w-full animate-spin-slow" aria-hidden="true">
-                <defs>
-                  <path id="ring" d="M200,200 m-176,0 a176,176 0 1,1 352,0 a176,176 0 1,1 -352,0" />
-                </defs>
-                {/* textLength = circumference, so the phrase wraps the circle exactly once */}
-                <text fontFamily="Bricolage Grotesque Variable, sans-serif" fontWeight="800" fontSize="21" fill="#1b1f3b">
-                  <textPath href="#ring" textLength={Math.floor(2 * Math.PI * 176) - 4} lengthAdjust="spacing">
-                    {RING_TEXT}
-                  </textPath>
-                </text>
-              </svg>
-              <div className="absolute inset-[13%] rounded-full bg-white shadow-[0_10px_0_rgb(27_31_59/0.1),0_30px_60px_-20px_rgb(47_91_234/0.45)] ring-4 ring-white" />
-              <div className="absolute inset-[13%] rounded-full bg-[conic-gradient(from_0deg,#fff2c4,#ffe1ef,#d3f7eb,#e2f3ff,#fff2c4)] opacity-70" />
-              <img
-                src="/images/logo/hero.webp"
-                alt="Logo KPK × Ini Lho ITS! 2026"
-                width={810}
-                height={810}
-                fetchPriority="high"
-                className="absolute inset-[11%] h-[78%] w-[78%] scale-110 object-contain drop-shadow-[0_10px_14px_rgb(27_31_59/0.18)]"
-              />
+        {/* logo badge */}
+        <div className="relative mx-auto" style={{ width: "min(100%, 30rem, 52vh)" }}>
+          <div className="[perspective:1000px]">
+            <div data-hero-badge>
+              <div data-tilt className="relative aspect-square">
+                <svg viewBox="0 0 400 400" className="absolute inset-0 h-full w-full animate-spin-slow" aria-hidden="true">
+                  <defs>
+                    <path id="ring" d="M200,200 m-176,0 a176,176 0 1,1 352,0 a176,176 0 1,1 -352,0" />
+                  </defs>
+                  {/* textLength = circumference, so the phrase wraps the circle exactly once */}
+                  <text fontFamily="Bricolage Grotesque Variable, sans-serif" fontWeight="800" fontSize="21" fill="#1b1f3b">
+                    <textPath href="#ring" textLength={Math.floor(2 * Math.PI * 176) - 4} lengthAdjust="spacing">
+                      {RING_TEXT}
+                    </textPath>
+                  </text>
+                </svg>
+                <div className="absolute inset-[13%] rounded-full bg-white shadow-[0_10px_0_rgb(27_31_59/0.1),0_30px_60px_-20px_rgb(47_91_234/0.45)] ring-4 ring-white" />
+                <div className="absolute inset-[13%] rounded-full bg-[conic-gradient(from_0deg,#fff2c4,#ffe1ef,#d3f7eb,#e2f3ff,#fff2c4)] opacity-70" />
+                <img
+                  src="/images/logo/hero.webp"
+                  alt="Logo KPK × Ini Lho ITS! 2026"
+                  width={810}
+                  height={810}
+                  fetchPriority="high"
+                  className="absolute inset-[11%] h-[78%] w-[78%] scale-110 object-contain drop-shadow-[0_10px_14px_rgb(27_31_59/0.18)]"
+                />
+              </div>
             </div>
           </div>
-
         </div>
       </div>
 
       <div className="relative">
-        <Townscape className="h-[clamp(80px,12vh,170px)]" />
+        <Townscape className="h-[clamp(64px,12vh,170px)]" />
         <Road />
       </div>
     </section>

@@ -198,6 +198,25 @@ body {
 
 /* ---------- Reusable pieces ---------- */
 
+/* Home sections. On laptops and up each one is a full screen with its content centred,
+   so you see one section at a time; the padding follows the screen height and the top
+   leaves room for the floating navbar. Give `mx-auto` containers inside `w-full`, or
+   the flex column shrinks them to their content. */
+@utility screen-section {
+  padding-block: 6rem;
+  @media (width >= 48rem) {
+    padding-block: 8rem;
+  }
+  @media (width >= 64rem) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100svh;
+    padding-top: clamp(5.25rem, 12.5vh, 8rem);
+    padding-bottom: clamp(2.25rem, 6vh, 6rem);
+  }
+}
+
 @utility eyebrow {
   font-family: var(--font-sans);
   font-size: 0.75rem;
@@ -350,8 +369,14 @@ body {
 /* Cartoon cursors, mouse/trackpad only (touch screens never show one). Kept outside
    the Tailwind layers so they win over utilities like `cursor-pointer`. */
 @media (hover: hover) and (pointer: fine) {
-  html {
-    cursor: url("./assets/cursors/arrow.svg") 4 3, auto;
+  html,
+  :disabled {
+    cursor: url("./assets/cursors/kite-static.svg") 4 3, auto;
+  }
+  /* while <KiteTail> draws a moving tail, the cursor itself is just the kite */
+  html.kite-trail,
+  html.kite-trail :disabled {
+    cursor: url("./assets/cursors/kite-flying.svg") 3 2, auto;
   }
   a[href],
   button:not(:disabled),
@@ -366,10 +391,7 @@ body {
   input[type="radio"],
   input[type="range"],
   .cursor-pointer {
-    cursor: url("./assets/cursors/pointer.svg") 12 3, pointer;
-  }
-  :disabled {
-    cursor: url("./assets/cursors/arrow.svg") 4 3, default;
+    cursor: url("./assets/cursors/hand.svg") 12 3, pointer;
   }
   input:not([type="checkbox"], [type="radio"], [type="range"], [type="button"], [type="submit"]),
   textarea,

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Instagram, Search } from "lucide-react";
+import { Instagram, Medal, Search, Trophy } from "lucide-react";
 import Bus from "@/components/deco/Bus";
 import PageHero from "@/components/ui/PageHero";
 import { buttonClass } from "@/components/ui/button";
@@ -13,9 +13,9 @@ import { cn } from "@/lib/utils";
 const SHOW_RANKING = false;
 
 const PODIUM = [
-  { medal: "🥇", bg: "bg-sun-light", ring: "ring-sun" },
-  { medal: "🥈", bg: "bg-its-light", ring: "ring-sky" },
-  { medal: "🥉", bg: "bg-orange-light", ring: "ring-orange" },
+  { medal: "#e5a500", bg: "bg-sun-light", ring: "ring-sun" },
+  { medal: "#8a97b0", bg: "bg-its-light", ring: "ring-sky" },
+  { medal: "#c96a2b", bg: "bg-orange-light", ring: "ring-orange" },
 ];
 
 export default function RankingPage() {
@@ -26,7 +26,7 @@ export default function RankingPage() {
   return (
     <div ref={root} className="bg-cream">
       <PageHero
-        emoji="🏆"
+        icon={Trophy}
         eyebrow="Pengumuman Ranking"
         title={<>Ranking <em>TOSN</em> 2026</>}
         description="Selamat untuk para peserta TOSN terbaik! Berikut adalah daftar ranking peserta."
@@ -52,9 +52,9 @@ function ComingSoon() {
         Segera hadir!
       </p>
       <h2 className="relative mt-4 font-display text-4xl font-extrabold tracking-tight text-ink md:text-5xl">
-        Rankingnya masih <span className="marker">otw</span> 🚌
+        Rankingnya masih <span className="marker">otw</span>
       </h2>
-      <p className="relative mx-auto mt-4 max-w-md text-ink-soft">Data ranking sedang dalam proses rekapitulasi. Pantengin Instagram KPK yaaa! 🔥</p>
+      <p className="relative mx-auto mt-4 max-w-md text-ink-soft">Data ranking sedang dalam proses rekapitulasi. Pantengin Instagram KPK yaaa!</p>
       <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className={buttonClass("pink", "relative mt-8")}>
         <Instagram size={18} /> Pantau di Instagram
       </a>
@@ -128,9 +128,7 @@ function RankingBoard() {
         <div className="grid gap-4 md:grid-cols-3">
           {rows.slice(0, 3).map((p, i) => (
             <div key={p.id} className={cn("rounded-[1.75rem] p-6 ring-2", PODIUM[i].bg, PODIUM[i].ring)}>
-              <p className="text-4xl" aria-label={`Juara ${i + 1}`}>
-                {PODIUM[i].medal}
-              </p>
+              <Medal size={40} strokeWidth={2.25} style={{ color: PODIUM[i].medal }} role="img" aria-label={`Juara ${i + 1}`} />
               <p className="mt-4 font-display text-xl font-extrabold text-ink">{p.nama}</p>
               <p className="mt-1 text-sm font-medium text-ink-soft">{p.asal_sekolah}</p>
               <p className="mt-4 font-display text-3xl font-extrabold text-its">{p.skor}</p>
@@ -156,7 +154,11 @@ function RankingBoard() {
               {rows.map((p) => (
                 <tr key={p.id} className="transition hover:bg-cream">
                   <td className="px-5 py-4 font-display font-extrabold text-ink tabular-nums">
-                    {p.ranking <= 3 ? PODIUM[p.ranking - 1].medal : `#${p.ranking}`}
+                    {p.ranking <= 3 ? (
+                      <Medal size={22} strokeWidth={2.5} style={{ color: PODIUM[p.ranking - 1].medal }} role="img" aria-label={`Juara ${p.ranking}`} />
+                    ) : (
+                      `#${p.ranking}`
+                    )}
                   </td>
                   <td className="px-5 py-4 font-semibold text-ink">
                     {p.nama}

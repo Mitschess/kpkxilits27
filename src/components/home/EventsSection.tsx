@@ -1,5 +1,6 @@
 import { useRef } from "react";
-import { ArrowRight, CalendarDays } from "lucide-react";
+import { ArrowRight, CalendarDays, GraduationCap } from "lucide-react";
+import SectionFade from "@/components/deco/SectionFade";
 import Bus from "@/components/deco/Bus";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { EVENTS } from "@/data/home";
@@ -33,6 +34,7 @@ export default function EventsSection() {
 
   return (
     <section ref={root} id="acara" className="dots-light relative isolate overflow-hidden bg-its lg:h-[100svh]">
+      <SectionFade edge="top" color="var(--color-its)" className="h-20 lg:h-28" />
       <div
         ref={track}
         className="relative flex flex-col gap-10 px-6 py-24 lg:h-full lg:w-max lg:flex-row lg:items-center lg:gap-10 lg:py-0 lg:pr-[14vw] lg:pl-[max(1.5rem,calc((100vw-80rem)/2+1.5rem))]"
@@ -40,8 +42,7 @@ export default function EventsSection() {
         <div className="shrink-0 lg:w-[min(30rem,34vw)]">
           <SectionHeading
             inverted
-            stop="03"
-            emoji="🎪"
+            icon={CalendarDays}
             label="Rangkaian Acara"
             title={<>Lima <em>pemberhentian</em> menuju ITS.</>}
             description="Dari kunjungan ke sekolahmu sampai pesta penutupan. Ikuti rutenya, jangan sampai ketinggalan satu pun!"
@@ -93,8 +94,8 @@ export default function EventsSection() {
         <div ref={bus} className="absolute bottom-[40%] w-28">
           <Bus className="w-full" />
         </div>
-        <span className="absolute right-6 bottom-full mb-2 rounded-lg border-[3px] border-ink bg-sun px-2.5 py-1 text-sm font-extrabold text-ink">
-          ITS 🎓
+        <span className="absolute right-6 bottom-full mb-2 inline-flex items-center gap-1.5 rounded-lg border-[3px] border-ink bg-sun px-2.5 py-1 text-sm font-extrabold text-ink">
+          ITS <GraduationCap size={16} strokeWidth={2.5} aria-hidden="true" />
         </span>
       </div>
     </section>

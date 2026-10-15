@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { GraduationCap } from "lucide-react";
 import Bus from "@/components/deco/Bus";
 import Clouds from "@/components/deco/Clouds";
 import { finishIntro } from "@/lib/intro";
@@ -71,7 +72,9 @@ export default function LoadingScreen() {
             </div>
             <div className="mt-3 flex justify-between text-sm font-bold text-ink">
               <span>Gresik</span>
-              <span className="text-its">ITS 🎓</span>
+              <span className="inline-flex items-center gap-1 text-its">
+                ITS <GraduationCap size={16} strokeWidth={2.5} aria-hidden="true" />
+              </span>
             </div>
           </div>
         </motion.div>

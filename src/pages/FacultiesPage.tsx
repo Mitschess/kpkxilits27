@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { ChevronRight, Search, X } from "lucide-react";
+import { ChevronRight, Landmark, Search, Sparkles, X } from "lucide-react";
 import FacultyCards from "@/components/faculty/FacultyCards";
 import FacultyPanel from "@/components/faculty/FacultyPanel";
 import PageHero from "@/components/ui/PageHero";
@@ -60,7 +60,7 @@ export default function FacultiesPage() {
   return (
     <div ref={root} className="bg-cream">
       <PageHero
-        emoji="🏛️"
+        icon={Landmark}
         eyebrow="Fakultas & Departemen"
         title={<>Delapan fakultas, <em>satu</em> kampus.</>}
         description={`Ada ${FACULTIES.length} fakultas dan ${DEPARTMENT_COUNT} departemen & prodi di ITS. Pilih fakultasnya, atau langsung cari jurusan yang cocok sama minatmu.`}
@@ -112,7 +112,9 @@ export default function FacultiesPage() {
           <FacultyCards onSelect={(f) => show(f)} />
         ) : hits.length === 0 ? (
           <div className="card mx-auto max-w-xl p-10 text-center">
-            <p className="text-5xl">🔍</p>
+            <span className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-sun-light text-ink" aria-hidden="true">
+              <Search size={34} strokeWidth={2.25} />
+            </span>
             <p className="mt-4 font-display text-2xl font-extrabold text-ink">“{query}” belum ketemu</p>
             <p className="mt-2 text-ink-soft">Coba kata lain, atau jelajahi fakultasnya satu per satu.</p>
             <button type="button" onClick={() => setQuery("")} className="mt-6 font-bold text-its underline-offset-4 hover:underline">
@@ -139,7 +141,11 @@ export default function FacultiesPage() {
                         <span className="rounded-full px-2 py-0.5 text-[0.7rem] font-extrabold text-ink uppercase" style={{ background: `${f.accent}40` }}>
                           {f.id}
                         </span>
-                        {reason && <span className="rounded-full bg-sun-light px-2 py-0.5 text-[0.7rem] font-bold text-ink">✨ {reason}</span>}
+                        {reason && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-sun-light px-2 py-0.5 text-[0.7rem] font-bold text-ink">
+                            <Sparkles size={11} strokeWidth={2.5} aria-hidden="true" /> {reason}
+                          </span>
+                        )}
                       </span>
                     </span>
                     <ChevronRight size={18} className="shrink-0 text-ink-soft transition group-hover:translate-x-1" />

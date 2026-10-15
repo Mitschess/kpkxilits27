@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { ArrowUpRight, Heart, Instagram, MessageSquareHeart } from "lucide-react";
+import { ArrowUpRight, Flag, Heart, Instagram, MessageSquareHeart } from "lucide-react";
 import Bunting from "@/components/deco/Bunting";
 import Clouds from "@/components/deco/Clouds";
 import Road from "@/components/deco/Road";
@@ -32,11 +32,11 @@ export default function Footer() {
 
         <div className="mx-auto max-w-4xl px-6 pt-36 pb-16 text-center md:pt-44">
           <p className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-1.5 text-ink shadow-[0_3px_0_rgb(27_31_59/0.12)] ring-2 ring-ink/10">
-            <span aria-hidden="true">🏁</span>
+            <Flag size={15} strokeWidth={2.5} aria-hidden="true" />
             <span className="eyebrow text-[0.7rem]">Pemberhentian terakhir · ITS</span>
           </p>
           <h2 className="mt-6 font-display text-5xl leading-[0.98] font-extrabold tracking-tight text-balance text-ink md:text-7xl">
-            Sampai jumpa di <span className="marker [--hl:var(--color-pink-light)]">kampung halaman</span>! 👋
+            Sampai jumpa di <span className="marker [--hl:var(--color-pink-light)]">kampung halaman</span>!
           </h2>
           <p className="mx-auto mt-6 max-w-xl text-lg text-pretty text-ink-soft">
             Semoga info di sini bermanfaat buat masa depanmu. Jangan lupa pulang kampung & bangun Gresik bareng-bareng ya!

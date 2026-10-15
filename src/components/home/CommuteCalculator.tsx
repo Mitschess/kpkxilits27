@@ -1,6 +1,7 @@
 import { useState } from "react";
 import * as Slider from "@radix-ui/react-slider";
-import { Bike, Bus as BusIcon, Car, Home, type LucideIcon } from "lucide-react";
+import { Bike, Bus as BusIcon, Calculator, CalendarDays, Car, ChevronDown, GraduationCap, Home, House, MapPin, type LucideIcon } from "lucide-react";
+import SectionFade from "@/components/deco/SectionFade";
 import Bus from "@/components/deco/Bus";
 import DistrictPicker from "./DistrictPicker";
 import AnimatedNumber from "@/components/ui/AnimatedNumber";
@@ -40,26 +41,28 @@ export default function CommuteCalculator() {
   const [days, setDays] = useState(5);
 
   const r = estimate(district.km, transport, days);
+  const TransportIcon = TRANSPORTS.find((t) => t.id === transport)?.icon ?? Bike;
   const max = Math.max(r.laju, KOS_AVG_COST);
 
   return (
-    <section id="kalkulator" className="dots relative overflow-hidden bg-mint-light py-24 md:py-32">
-      <div className="relative mx-auto max-w-7xl px-6">
-        <SectionHeading
-          stop="04"
-          emoji="🧮"
-          label="Ngekos vs Laju"
-          highlight="#ffffff"
-          title={<>Ngekos atau <em>laju</em>?</>}
-          description="Dilema abadi arek Gresik. Hitung kasarnya di sini sebelum boncos!"
-        />
+    <section id="kalkulator" className="dots screen-section relative isolate overflow-hidden bg-mint-light">
+      <SectionFade edge="top" color="var(--color-mint-light)" className="h-24" />
+      <SectionFade edge="bottom" color="var(--color-pink-light)" />
+      <div className="relative mx-auto grid w-full max-w-7xl gap-5 px-6 lg:grid-cols-[1fr_1.15fr] lg:items-end lg:gap-6">
+        <div>
+          <SectionHeading
+            icon={Calculator}
+            label="Ngekos vs Laju"
+            highlight="#ffffff"
+            title={<>Ngekos atau <em>laju</em>?</>}
+            description="Dilema abadi arek Gresik. Hitung kasarnya di sini sebelum boncos!"
+          />
 
-        <div className="mt-12 grid gap-5 lg:grid-cols-[1fr_1.15fr]">
           {/* inputs */}
-          <div data-reveal className="card p-6 md:p-8">
+          <div data-reveal className="card mt-12 p-6 md:p-8 lg:mt-[clamp(1rem,3vh,2rem)] lg:p-[clamp(1.25rem,3.4vh,2rem)]">
             <DistrictPicker value={district} onChange={setDistrict} />
 
-            <fieldset className="mt-8">
+            <fieldset className="mt-8 lg:mt-[clamp(1rem,3vh,2rem)]">
               <legend className="flex items-center gap-2 font-display text-lg font-extrabold text-ink">
                 <span className="grid h-8 w-8 place-items-center rounded-xl bg-mint-light text-mint-dark">
                   <Bike size={16} />
@@ -71,7 +74,7 @@ export default function CommuteCalculator() {
                   <label
                     key={t.id}
                     className={cn(
-                      "flex cursor-pointer flex-col items-center gap-1.5 rounded-2xl py-4 text-sm font-bold transition-all duration-200 ease-bounce has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-its",
+                      "flex cursor-pointer flex-col items-center gap-1.5 rounded-2xl py-4 text-sm font-bold transition-all duration-200 ease-bounce has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-its lg:flex-row lg:justify-center lg:gap-2 lg:py-3",
                       transport === t.id
                         ? "-translate-y-1 bg-its text-white shadow-[0_5px_0_#1d3fb5]"
                         : "bg-cream text-ink-soft ring-2 ring-ink/10 hover:text-ink hover:ring-ink/25",
@@ -85,10 +88,12 @@ export default function CommuteCalculator() {
               </div>
             </fieldset>
 
-            <div className="mt-8">
+            <div className="mt-8 lg:mt-[clamp(1rem,3vh,2rem)]">
               <div className="flex items-baseline justify-between">
                 <span id="days-label" className="flex items-center gap-2 font-display text-lg font-extrabold text-ink">
-                  <span className="grid h-8 w-8 place-items-center rounded-xl bg-sun-light text-sun-dark">📅</span>
+                  <span className="grid h-8 w-8 place-items-center rounded-xl bg-sun-light text-sun-dark">
+                    <CalendarDays size={16} />
+                  </span>
                   Ke kampus per minggu
                 </span>
                 <span className="font-display text-3xl font-extrabold text-its">
@@ -96,7 +101,7 @@ export default function CommuteCalculator() {
                   <span className="text-base font-bold text-ink-soft"> hari</span>
                 </span>
               </div>
-              <Slider.Root className="slider-root mt-4" min={1} max={6} step={1} value={[days]} onValueChange={([v]) => setDays(v)} aria-labelledby="days-label">
+              <Slider.Root className="slider-root mt-4 lg:mt-2" min={1} max={6} step={1} value={[days]} onValueChange={([v]) => setDays(v)} aria-labelledby="days-label">
                 <Slider.Track className="relative h-3 grow overflow-hidden rounded-full bg-ink/10">
                   <Slider.Range className="absolute h-full rounded-full bg-gradient-to-r from-sky to-its" />
                 </Slider.Track>
@@ -105,82 +110,93 @@ export default function CommuteCalculator() {
                   className="block h-8 w-8 rounded-full border-4 border-its bg-white shadow-[0_3px_0_#1d3fb5] transition hover:scale-110 focus:outline-none focus-visible:ring-4 focus-visible:ring-its/30"
                 />
               </Slider.Root>
-              <div className="mt-2 flex justify-between font-hand text-lg font-bold text-ink-soft">
-                <span>Santuy 😎</span>
-                <span>Sepuh 🔥</span>
+              <div className="mt-2 flex justify-between font-hand text-lg font-bold text-ink-soft lg:mt-0 lg:text-base">
+                <span>Santuy</span>
+                <span>Sepuh</span>
               </div>
             </div>
 
-            <p className="mt-6 rounded-2xl bg-cream p-4 text-xs leading-relaxed text-ink-soft">
-              <strong className="text-ink">Asumsi:</strong> bensin {rupiah(FUEL_PRICE)}/L · motor {KM_PER_LITER.motor} km/L · mobil{" "}
-              {KM_PER_LITER.mobil} km/L · servis {rupiah(SERVICE_COST_PER_KM)}/km · angkutan umum {rupiah(PUBLIC_TRANSPORT_PER_DAY)}/hari · 4 minggu/bulan.
-            </p>
           </div>
+        </div>
 
-          {/* result */}
-          <div data-reveal aria-live="polite" className="card flex flex-col p-6 md:p-8">
-            {/* route */}
-            <div className="relative overflow-hidden rounded-[1.5rem] bg-sky-light p-5 pb-0">
-              <div className="flex items-center justify-between text-sm font-bold text-ink">
-                <span className="rounded-full bg-white px-3 py-1 ring-2 ring-ink/10">📍 {district.name}</span>
-                <span className="rounded-full bg-its px-3 py-1 text-white">ITS 🎓</span>
-              </div>
-              <p className="mt-3 text-center text-sm font-semibold text-ink-soft">
+        {/* result */}
+        <div data-reveal aria-live="polite" className="card flex flex-col p-6 md:p-8">
+          {/* route */}
+          <div className="relative overflow-hidden rounded-[1.5rem] bg-sky-light p-5 pb-0 lg:p-4 lg:pb-0">
+            {/* on laptops the distance sits between the two chips to save a line */}
+            <div className="grid grid-cols-[auto_1fr_auto] items-center gap-x-2 gap-y-3 text-sm font-bold text-ink">
+              <span className="col-start-1 row-start-1 inline-flex items-center gap-1 justify-self-start rounded-full bg-white px-3 py-1 ring-2 ring-ink/10">
+                <MapPin size={13} strokeWidth={2.5} aria-hidden="true" /> {district.name}
+              </span>
+              <span className="col-start-3 row-start-1 inline-flex items-center gap-1 justify-self-end rounded-full bg-its px-3 py-1 text-white">
+                ITS <GraduationCap size={14} strokeWidth={2.5} aria-hidden="true" />
+              </span>
+              <p className="col-span-3 row-start-2 text-center text-sm font-semibold text-ink-soft lg:col-span-1 lg:col-start-2 lg:row-start-1">
                 {district.km * 2} km pulang-pergi · {days}× seminggu ·{" "}
                 <AnimatedNumber value={r.monthlyKm} format={(n) => `${Math.round(n).toLocaleString("id-ID")} km/bulan`} className="text-ink" />
               </p>
-              <div className="relative mt-4 h-16">
-                <div className="absolute inset-x-0 bottom-0 h-6 border-t-[3px] border-ink bg-[#4a5070]">
-                  <div className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 bg-[repeating-linear-gradient(90deg,#fff_0_18px,transparent_18px_36px)]" />
-                </div>
-                <div className="absolute bottom-3 left-0 w-20 animate-drive [animation-duration:7s]">
-                  <Bus className="w-full" />
-                </div>
+            </div>
+            <div className="relative mt-4 h-16 lg:mt-2 lg:h-[clamp(2.75rem,7.5vh,4rem)]">
+              <div className="absolute inset-x-0 bottom-0 h-6 border-t-[3px] border-ink bg-[#4a5070]">
+                <div className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 bg-[repeating-linear-gradient(90deg,#fff_0_18px,transparent_18px_36px)]" />
+              </div>
+              <div className="absolute bottom-3 left-0 w-20 animate-drive [animation-duration:7s]">
+                <Bus className="w-full" />
               </div>
             </div>
-
-            {/* costs */}
-            <div className="mt-6 space-y-5">
-              <CostRow
-                icon={TRANSPORTS.find((t) => t.id === transport)!.icon}
-                label="Biaya laju / bulan"
-                note={transport === "umum" ? "Ongkos angkutan umum" : "Bensin + servis"}
-                value={r.laju}
-                width={(r.laju / max) * 100}
-                bar="bg-pink"
-                chip="bg-pink-light text-pink-dark"
-              />
-              <CostRow icon={Home} label="Rata-rata kos / bulan" note="Kamar + listrik + air" value={KOS_AVG_COST} width={(KOS_AVG_COST / max) * 100} bar="bg-mint" chip="bg-mint-light text-mint-dark" />
-            </div>
-
-            {/* verdict */}
-            <div
-              className={cn(
-                "mt-7 flex items-center gap-4 rounded-[1.5rem] p-5 transition-colors duration-500",
-                r.ngekos ? "bg-pink text-white shadow-[0_5px_0_#db2b81]" : "bg-mint text-white shadow-[0_5px_0_#0f9a7a]",
-              )}
-            >
-              <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-white/25 text-4xl" aria-hidden="true">
-                {r.ngekos ? "🏠" : "🛵"}
-              </span>
-              <div>
-                <p className="eyebrow text-[0.68rem] text-white/80">Saran kami</p>
-                <p className="font-display text-4xl leading-none font-extrabold tracking-tight">Tim {r.ngekos ? "Ngekos" : "Laju"}!</p>
-                <p className="mt-1.5 text-sm font-medium text-white/95">
-                  {r.ngekos ? (
-                    <>
-                      Laju lebih boros <AnimatedNumber value={r.diff} format={rupiah} className="font-extrabold" />/bulan. Mending ngekos, hemat waktu & tenaga!
-                    </>
-                  ) : (
-                    <>
-                      Hemat <AnimatedNumber value={r.diff} format={rupiah} className="font-extrabold" />/bulan dibanding ngekos. Gaspol!
-                    </>
-                  )}
-                </p>
-              </div>
-            </div>
-            <p className="mt-4 font-hand text-lg font-bold text-ink-soft">*Estimasi kasar. Belum termasuk jajan cilok di jalan 😋</p>
           </div>
+
+          {/* costs */}
+          <div className="mt-6 space-y-5 lg:mt-[clamp(1rem,3vh,1.5rem)] lg:space-y-[clamp(0.75rem,2.4vh,1.25rem)]">
+            <CostRow
+              icon={TRANSPORTS.find((t) => t.id === transport)!.icon}
+              label="Biaya laju / bulan"
+              note={transport === "umum" ? "Ongkos angkutan umum" : "Bensin + servis"}
+              value={r.laju}
+              width={(r.laju / max) * 100}
+              bar="bg-pink"
+              chip="bg-pink-light text-pink-dark"
+            />
+            <CostRow icon={Home} label="Rata-rata kos / bulan" note="Kamar + listrik + air" value={KOS_AVG_COST} width={(KOS_AVG_COST / max) * 100} bar="bg-mint" chip="bg-mint-light text-mint-dark" />
+          </div>
+
+          {/* verdict */}
+          <div
+            className={cn(
+              "mt-7 flex items-center gap-4 rounded-[1.5rem] p-5 transition-colors duration-500 lg:mt-[clamp(1rem,3vh,1.75rem)] lg:p-4",
+              r.ngekos ? "bg-pink text-white shadow-[0_5px_0_#db2b81]" : "bg-mint text-white shadow-[0_5px_0_#0f9a7a]",
+            )}
+          >
+            <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-white/25 lg:h-14 lg:w-14" aria-hidden="true">
+              {r.ngekos ? <House size={32} strokeWidth={2.25} /> : <TransportIcon size={32} strokeWidth={2.25} />}
+            </span>
+            <div>
+              <p className="eyebrow text-[0.68rem] text-white/80">Saran kami</p>
+              <p className="font-display text-4xl leading-none font-extrabold tracking-tight">Tim {r.ngekos ? "Ngekos" : "Laju"}!</p>
+              <p className="mt-1.5 text-sm font-medium text-white/95">
+                {r.ngekos ? (
+                  <>
+                    Laju lebih boros <AnimatedNumber value={r.diff} format={rupiah} className="font-extrabold" />/bulan. Mending ngekos, hemat waktu & tenaga!
+                  </>
+                ) : (
+                  <>
+                    Hemat <AnimatedNumber value={r.diff} format={rupiah} className="font-extrabold" />/bulan dibanding ngekos. Gaspol!
+                  </>
+                )}
+              </p>
+            </div>
+          </div>
+          <details className="group mt-4 rounded-2xl bg-cream px-4 py-3 text-xs leading-relaxed text-ink-soft">
+            <summary className="flex cursor-pointer list-none items-center justify-between font-bold text-ink [&::-webkit-details-marker]:hidden">
+              Estimasi kasar · lihat asumsinya
+              <ChevronDown size={16} className="transition group-open:rotate-180" aria-hidden="true" />
+            </summary>
+            <p className="mt-2">
+              Bensin {rupiah(FUEL_PRICE)}/L · motor {KM_PER_LITER.motor} km/L · mobil {KM_PER_LITER.mobil} km/L · servis {rupiah(SERVICE_COST_PER_KM)}/km ·
+              angkutan umum {rupiah(PUBLIC_TRANSPORT_PER_DAY)}/hari · 4 minggu/bulan.
+            </p>
+            <p className="mt-1 font-hand text-base font-bold">Belum termasuk jajan cilok di jalan.</p>
+          </details>
         </div>
       </div>
     </section>

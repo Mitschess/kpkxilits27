@@ -3,7 +3,8 @@ import Lightbox from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/captions.css";
-import { Expand } from "lucide-react";
+import { Camera, Expand, Flame, Heart, Music, PartyPopper, Smile, type LucideIcon } from "lucide-react";
+import SectionFade from "@/components/deco/SectionFade";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { GALLERY } from "@/data/home";
 import { useScrollLock } from "@/hooks/useScrollLock";
@@ -11,29 +12,31 @@ import { cn } from "@/lib/utils";
 
 // bento layout: first photo is the big one
 const TILES = [
-  { span: "col-span-2 row-span-2", tilt: "md:-rotate-1", emoji: "🥳" },
-  { span: "", tilt: "md:rotate-2", emoji: "🔥" },
-  { span: "", tilt: "md:-rotate-2", emoji: "💛" },
-  { span: "", tilt: "md:rotate-1", emoji: "😁" },
-  { span: "", tilt: "md:-rotate-1", emoji: "🎶" },
+  { span: "col-span-2 row-span-2", tilt: "md:-rotate-1", icon: PartyPopper },
+  { span: "", tilt: "md:rotate-2", icon: Flame },
+  { span: "", tilt: "md:-rotate-2", icon: Heart },
+  { span: "", tilt: "md:rotate-1", icon: Smile },
+  { span: "", tilt: "md:-rotate-1", icon: Music },
 ];
+
+const CaptionIcon = ({ icon: Icon }: { icon: LucideIcon }) => <Icon size={15} strokeWidth={2.5} aria-hidden="true" />;
 
 export default function GallerySection() {
   const [index, setIndex] = useState(-1);
   useScrollLock(index >= 0);
 
   return (
-    <section id="galeri" className="relative bg-cream py-24 md:py-32">
-      <div className="mx-auto max-w-7xl px-6">
+    <section id="galeri" className="screen-section relative isolate bg-cream">
+      <SectionFade edge="bottom" color="var(--color-sun-light)" />
+      <div className="mx-auto w-full max-w-7xl px-6">
         <SectionHeading
-          stop="06"
-          emoji="📸"
+          icon={Camera}
           label="Galeri"
           title={<>Keseruan dari <em>tahun lalu</em>!</>}
           description="Intip keseruan KPK sebelumnya. Klik fotonya buat lihat lebih besar."
         />
 
-        <div className="mt-12 grid auto-rows-[160px] grid-cols-2 gap-4 md:auto-rows-[230px] md:grid-cols-4 md:gap-6">
+        <div className="mt-12 grid auto-rows-[160px] grid-cols-2 gap-4 md:auto-rows-[230px] md:grid-cols-4 md:gap-6 lg:mt-[clamp(1.5rem,4vh,3rem)] lg:auto-rows-[clamp(140px,25vh,230px)]">
           {GALLERY.map((p, i) => (
             <button
               key={p.src}
@@ -58,7 +61,7 @@ export default function GallerySection() {
                 </span>
               </span>
               <span className="absolute -bottom-3 left-4 inline-flex -rotate-2 items-center gap-1.5 rounded-full bg-sun px-3.5 py-1.5 text-sm font-extrabold text-ink shadow-[0_3px_0_#e5a500]">
-                <span aria-hidden="true">{TILES[i].emoji}</span> {p.caption}
+                <CaptionIcon icon={TILES[i].icon} /> {p.caption}
               </span>
             </button>
           ))}

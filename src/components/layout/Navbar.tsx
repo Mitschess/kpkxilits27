@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpRight, Instagram, Menu, X } from "lucide-react";
+import { ArrowUpRight, House, Info, Instagram, Landmark, Menu, MessageSquareHeart, Trophy, Users, X, type LucideIcon } from "lucide-react";
 import { buttonClass } from "@/components/ui/button";
 import { INSTAGRAM_URL } from "@/data/home";
 import { useScrollLock } from "@/hooks/useScrollLock";
 import { cn } from "@/lib/utils";
 
 // `section` links point into the home page and light up while that part is on screen.
-const LINKS: { label: string; to: string; emoji: string; section?: string }[] = [
-  { label: "Tentang", to: "/#tentang", emoji: "👀", section: "tentang" },
-  { label: "Fakultas", to: "/fakultas", emoji: "🏛️" },
-  { label: "Kabinet", to: "/kabinet", emoji: "🙌" },
-  { label: "Ranking TOSN", to: "/ranking", emoji: "🏆" },
-  { label: "Buku Tamu", to: "/guestbook", emoji: "💌" },
+const LINKS: { label: string; to: string; icon: LucideIcon; section?: string }[] = [
+  { label: "Tentang", to: "/#tentang", icon: Info, section: "tentang" },
+  { label: "Fakultas", to: "/fakultas", icon: Landmark },
+  { label: "Kabinet", to: "/kabinet", icon: Users },
+  { label: "Ranking TOSN", to: "/ranking", icon: Trophy },
+  { label: "Buku Tamu", to: "/guestbook", icon: MessageSquareHeart },
 ];
-const MOBILE_LINKS = [{ label: "Beranda", to: "/", emoji: "🏠" }, ...LINKS];
+const MOBILE_LINKS = [{ label: "Beranda", to: "/", icon: House }, ...LINKS];
 const MENU_COLORS = ["#ffc93c", "#2f5bea", "#ff4fa3", "#1fbf9a", "#ff8a3d", "#9b7bff"];
 
 // Which nav item a home-page section belongs to (others light nothing up)
@@ -55,7 +55,7 @@ function useActiveSection(enabled: boolean) {
 export function Logo({ className }: { className?: string }) {
   return (
     <Link to="/" className={cn("flex items-center gap-2.5", className)} aria-label="KPK × Ini Lho ITS! 2026 — Beranda">
-      <span className="grid h-11 w-11 place-items-center overflow-hidden rounded-2xl bg-white shadow-[0_3px_0_rgb(27_31_59/0.12)] ring-2 ring-ink/10">
+      <span className="grid h-11 w-11 place-items-center overflow-hidden rounded-2xl bg-white ring-2 ring-ink/10">
         <img src="/images/logo/hero.webp" alt="" className="h-full w-full scale-[1.45] object-contain" />
       </span>
       <span className="leading-none">
@@ -140,7 +140,8 @@ export default function Navbar() {
               href={INSTAGRAM_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className={buttonClass("sun", "hidden px-5 py-2.5 text-sm sm:inline-flex")}
+              // flat inside the pill: the usual button ledge would make the gap below look smaller
+              className="hidden h-11 items-center gap-2 rounded-full bg-sun px-5 text-sm font-bold text-ink ring-2 ring-sun-dark/30 transition hover:bg-[#ffd75e] sm:inline-flex"
             >
               <Instagram size={16} /> Ikuti kami
             </a>
@@ -149,7 +150,7 @@ export default function Navbar() {
               onClick={() => setOpen((o) => !o)}
               aria-expanded={open}
               aria-label={open ? "Tutup menu" : "Buka menu"}
-              className="grid h-11 w-11 place-items-center rounded-full bg-white text-ink shadow-[0_3px_0_rgb(27_31_59/0.12)] ring-2 ring-ink/10 transition lg:hidden"
+              className="grid h-11 w-11 place-items-center rounded-full bg-white text-ink ring-2 ring-ink/10 transition lg:hidden"
             >
               {open ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -184,7 +185,7 @@ export default function Navbar() {
                       style={{ background: `${MENU_COLORS[i % MENU_COLORS.length]}33` }}
                       aria-hidden="true"
                     >
-                      {l.emoji}
+                      <l.icon size={20} strokeWidth={2.25} />
                     </span>
                     {l.label}
                   </Link>

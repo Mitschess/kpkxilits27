@@ -1,3 +1,4 @@
+import { Star } from "lucide-react";
 import type { CabinetDivision, CabinetMember } from "@/data/cabinet";
 
 export const DIVISION_COLOR: Record<CabinetDivision["color"], { solid: string; light: string; shadow: string }> = {
@@ -36,10 +37,10 @@ export default function MemberCard({ member, color, featured }: MemberCardProps)
         />
         {featured && (
           <span
-            className="absolute top-3 left-3 -rotate-3 rounded-full px-2.5 py-1 text-[0.68rem] font-extrabold text-ink uppercase"
+            className="absolute top-3 left-3 inline-flex -rotate-3 items-center gap-1 rounded-full px-2.5 py-1 text-[0.68rem] font-extrabold text-ink uppercase"
             style={{ background: "#ffc93c", boxShadow: "0 3px 0 #e5a500" }}
           >
-            ⭐ Kepala
+            <Star size={11} strokeWidth={3} className="fill-ink" aria-hidden="true" /> Kepala
           </span>
         )}
       </div>
