@@ -1,120 +1,101 @@
 import { useRef } from "react";
 import { ArrowRight, CalendarDays } from "lucide-react";
+import Bus from "@/components/deco/Bus";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { EVENTS } from "@/data/home";
 import { gsap, useGSAP } from "@/lib/motion";
 
+const TINTS = ["#ffc93c", "#ff4fa3", "#1fbf9a", "#9b7bff", "#ff8a3d"];
+
 /**
- * The event line-up as stops along a route. On desktop the section pins and
- * vertical scrolling drives the cards sideways; on phones it's a vertical timeline.
+ * The event line-up as stops along the road to ITS. On desktop the section pins
+ * and vertical scrolling drives the cards (and the bus) sideways; on phones
+ * it's a vertical timeline.
  */
 export default function EventsSection() {
   const root = useRef<HTMLElement>(null);
   const track = useRef<HTMLDivElement>(null);
-  const progress = useRef<HTMLDivElement>(null);
+  const bus = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
       mm.add("(min-width: 1024px) and (prefers-reduced-motion: no-preference)", () => {
         const distance = () => track.current!.scrollWidth - window.innerWidth;
-        const tween = gsap.to(track.current, {
-          x: () => -distance(),
-          ease: "none",
-          scrollTrigger: {
-            trigger: root.current,
-            start: "top top",
-            end: () => `+=${distance()}`,
-            pin: true,
-            scrub: 0.9,
-            invalidateOnRefresh: true,
-          },
-        });
-        gsap.fromTo(progress.current, { scaleX: 0 }, { scaleX: 1, ease: "none", scrollTrigger: { trigger: root.current, start: "top top", end: () => `+=${distance()}`, scrub: true } });
-
-        // each photo drifts a little inside its frame as it travels
-        gsap.utils.toArray<HTMLElement>("[data-event-img]").forEach((img) => {
-          gsap.fromTo(
-            img,
-            { xPercent: -8 },
-            {
-              xPercent: 8,
-              ease: "none",
-              scrollTrigger: { trigger: img, containerAnimation: tween, start: "left right", end: "right left", scrub: true },
-            },
-          );
-        });
+        const scroll = { trigger: root.current, start: "top top", end: () => `+=${distance()}`, scrub: 0.9, invalidateOnRefresh: true };
+        gsap.to(track.current, { x: () => -distance(), ease: "none", scrollTrigger: { ...scroll, pin: true } });
+        // the bus drives along the bottom as you go
+        gsap.fromTo(bus.current, { left: "2%" }, { left: "88%", ease: "none", scrollTrigger: scroll });
       });
     },
     { scope: root },
   );
 
   return (
-    <section ref={root} id="acara" className="relative isolate overflow-hidden bg-night-950 lg:h-[100svh]">
-      <div
-        className="absolute inset-0 -z-10"
-        style={{ background: "radial-gradient(ellipse 60% 50% at 85% 70%, rgb(236 59 146 / 0.13), transparent 60%)" }}
-      />
-
+    <section ref={root} id="acara" className="dots-light relative isolate overflow-hidden bg-its lg:h-[100svh]">
       <div
         ref={track}
-        className="relative flex flex-col gap-10 px-6 py-28 lg:h-full lg:w-max lg:flex-row lg:items-center lg:gap-12 lg:py-0 lg:pr-[14vw] lg:pl-[max(1.5rem,calc((100vw-80rem)/2+1.5rem))]"
+        className="relative flex flex-col gap-10 px-6 py-24 lg:h-full lg:w-max lg:flex-row lg:items-center lg:gap-10 lg:py-0 lg:pr-[14vw] lg:pl-[max(1.5rem,calc((100vw-80rem)/2+1.5rem))]"
       >
-        <div className="shrink-0 lg:w-[min(32rem,36vw)]">
+        <div className="shrink-0 lg:w-[min(30rem,34vw)]">
           <SectionHeading
+            inverted
             stop="03"
+            emoji="🎪"
             label="Rangkaian Acara"
             title={<>Lima <em>pemberhentian</em> menuju ITS.</>}
-            description="Dari kunjungan ke sekolahmu sampai pesta penutupan. Ikuti rutenya, jangan sampai ketinggalan satu pun."
+            description="Dari kunjungan ke sekolahmu sampai pesta penutupan. Ikuti rutenya, jangan sampai ketinggalan satu pun!"
           />
-          <p data-reveal className="mt-8 hidden items-center gap-2 text-sm text-lantern lg:flex">
-            Terus gulir <ArrowRight size={16} className="animate-pulse" />
+          <p data-reveal className="mt-8 hidden -rotate-2 items-center gap-2 font-hand text-2xl font-bold text-sun lg:flex">
+            Terus gulir, busnya jalan! <ArrowRight size={20} />
           </p>
         </div>
 
-        {/* mobile timeline line */}
-        <ol className="relative flex flex-col gap-10 border-l border-dashed border-paper/20 pl-6 lg:flex-row lg:gap-10 lg:border-0 lg:pl-0">
-          {/* the road the stops sit on (desktop) */}
-          <li
-            aria-hidden="true"
-            className="pointer-events-none absolute -right-[14vw] -bottom-[34px] -left-12 hidden h-px bg-[repeating-linear-gradient(to_right,rgb(255_243_220/0.3)_0_10px,transparent_10px_20px)] lg:block"
-          />
+        <ol className="relative flex flex-col gap-8 border-l-4 border-dashed border-white/40 pl-6 lg:flex-row lg:gap-8 lg:border-0 lg:pl-0">
           {EVENTS.map((e, i) => (
-            <li key={e.title} data-reveal className="relative lg:w-[min(27rem,30vw)] lg:shrink-0">
-              {/* stop marker */}
-              <span className="absolute top-2 -left-[31px] h-3 w-3 rounded-full bg-lantern shadow-[0_0_14px_3px_rgb(255_178_63/0.6)] lg:hidden" />
+            <li key={e.title} data-reveal className="relative lg:w-[min(24rem,28vw)] lg:shrink-0">
+              {/* stop marker on the mobile timeline */}
+              <span className="absolute top-6 -left-[38px] grid h-6 w-6 place-items-center rounded-full border-[3px] border-ink bg-sun lg:hidden" />
 
-              <article className="group relative">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-[1.75rem] ring-1 ring-paper/10">
+              <article
+                className={`group card relative p-3 transition duration-300 ease-bounce hover:-translate-y-2 ${i % 2 ? "lg:mt-16 lg:rotate-1" : "lg:-rotate-1"}`}
+              >
+                <div className="relative aspect-[4/3] overflow-hidden rounded-[1.4rem]">
                   <img
-                    data-event-img
                     src={e.image}
                     alt={e.title}
                     decoding="async"
-                    className="absolute inset-0 h-full w-full scale-[1.18] object-cover saturate-[0.85] transition duration-700 group-hover:saturate-110"
+                    className="absolute inset-0 h-full w-full object-cover transition duration-700 ease-out-expo group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-night-950 via-night-950/20 to-transparent" />
-                  <div className="absolute inset-0 bg-lantern/10 mix-blend-overlay" />
-                  <span className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-night-950/70 px-3 py-1.5 text-xs font-medium text-paper backdrop-blur">
-                    <CalendarDays size={13} className="text-lantern" /> {e.date}
-                  </span>
-                  <span className="absolute right-5 bottom-2 font-display text-[6.5rem] leading-none font-bold text-transparent [-webkit-text-stroke:1.5px_rgb(255_243_220/0.55)]">
-                    0{i + 1}
+                  <span
+                    className="absolute top-3 left-3 grid h-12 w-12 place-items-center rounded-full border-[3px] border-ink font-display text-lg font-extrabold text-ink"
+                    style={{ background: TINTS[i % TINTS.length] }}
+                  >
+                    {i + 1}
                   </span>
                 </div>
-                <h3 className="mt-6 font-display text-3xl font-semibold tracking-tight text-paper">{e.title}</h3>
-                <p className="mt-2 text-mist">{e.desc}</p>
-                {/* stop on the road (desktop) */}
-                <span className="absolute -bottom-10 left-0 hidden h-3 w-3 rounded-full bg-lantern shadow-[0_0_14px_3px_rgb(255_178_63/0.6)] lg:block" />
+                <div className="px-3 pt-4 pb-3">
+                  <span className="inline-flex -rotate-1 items-center gap-1.5 rounded-full bg-sun-light px-3 py-1 text-xs font-bold text-ink ring-2 ring-sun">
+                    <CalendarDays size={13} /> {e.date}
+                  </span>
+                  <h3 className="mt-3 font-display text-2xl leading-tight font-extrabold tracking-tight text-ink">{e.title}</h3>
+                  <p className="mt-1 text-ink-soft">{e.desc}</p>
+                </div>
               </article>
             </li>
           ))}
         </ol>
       </div>
 
-      {/* progress along the route */}
-      <div className="absolute right-6 bottom-8 left-6 mx-auto hidden h-0.5 max-w-7xl overflow-hidden rounded-full bg-paper/10 lg:block">
-        <div ref={progress} className="h-full origin-left bg-lantern" />
+      {/* road with the bus (desktop) */}
+      <div className="absolute inset-x-0 bottom-0 hidden h-14 border-t-[3px] border-ink bg-[#4a5070] lg:block" aria-hidden="true">
+        <div className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 bg-[repeating-linear-gradient(90deg,#fff_0_34px,transparent_34px_68px)]" />
+        <div ref={bus} className="absolute bottom-[40%] w-28">
+          <Bus className="w-full" />
+        </div>
+        <span className="absolute right-6 bottom-full mb-2 rounded-lg border-[3px] border-ink bg-sun px-2.5 py-1 text-sm font-extrabold text-ink">
+          ITS 🎓
+        </span>
       </div>
     </section>
   );

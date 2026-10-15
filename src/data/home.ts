@@ -60,25 +60,25 @@ export const VALUES: { name: string; art: ArtVariant; text: string; color: strin
     name: "Eksplorasi",
     art: "eksplorasi",
     text: "Seperti menjelajahi budaya yang memperkaya cara kita melihat dunia.",
-    color: "#ffd76a",
+    color: "#ff8a3d",
   },
   {
     name: "Kebudayaan",
     art: "kebudayaan",
     text: "Memahami berbagai nilai dan pengalaman membantu kita menyiapkan langkah menuju masa depan.",
-    color: "#ec3b92",
+    color: "#ff4fa3",
   },
   {
     name: "Solidaritas",
     art: "solidaritas",
     text: "Dengan mengenal keberagaman, kita belajar bekerja sama, membangun solidaritas, dan menemukan arah yang ingin dituju.",
-    color: "#22b89a",
+    color: "#1fbf9a",
   },
   {
     name: "Masa Depan",
     art: "masa-depan",
     text: "Dari eksplorasi itulah lahir masa depan yang lebih terbuka, terarah, dan penuh peluang.",
-    color: "#4672ff",
+    color: "#2f5bea",
   },
 ];
 

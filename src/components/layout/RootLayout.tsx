@@ -5,7 +5,6 @@ import { ScrollTrigger, startSmoothScroll } from "@/lib/motion";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import LoadingScreen from "./LoadingScreen";
-import CursorGlow from "./CursorGlow";
 import ScrollManager from "./ScrollManager";
 
 export default function RootLayout() {
@@ -45,7 +44,6 @@ export default function RootLayout() {
     <>
       <ScrollManager />
       <LoadingScreen />
-      <CursorGlow />
       <Navbar />
       <main ref={mainRef} className="relative">
         {/* Opacity only: a transform here would break pinned (position: fixed) sections */}
@@ -56,7 +54,6 @@ export default function RootLayout() {
         </motion.div>
       </main>
       <Footer />
-      <div aria-hidden="true" className="grain pointer-events-none fixed inset-0 z-[95] opacity-[0.06] mix-blend-overlay" />
     </>
   );
 }

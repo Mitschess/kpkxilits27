@@ -53,7 +53,7 @@ const Lantern = forwardRef<HTMLDivElement, LanternProps>(function Lantern(
       <div className="absolute bottom-full left-1/2 h-[60vh] w-px -translate-x-1/2 bg-gradient-to-t from-[#5a2c14] to-transparent" />
       {/* roof */}
       <div
-        className="absolute left-1/2 z-10 -translate-x-1/2 bg-ink"
+        className="absolute left-1/2 z-10 -translate-x-1/2 bg-wood"
         style={{ width: w * 0.62, height: h * 0.07, top: -h * 0.09, clipPath: "polygon(18% 0, 82% 0, 100% 100%, 0 100%)" }}
       />
 
@@ -73,10 +73,10 @@ const Lantern = forwardRef<HTMLDivElement, LanternProps>(function Lantern(
 
       {/* tassel */}
       <div className="absolute top-full left-1/2 flex -translate-x-1/2 flex-col items-center" style={{ marginTop: h * 0.06 }}>
-        <div className="h-3 w-px bg-ink" />
-        <div className="h-2 w-2 rounded-full bg-ember" />
+        <div className="h-3 w-px bg-wood" />
+        <div className="h-2 w-2 rounded-full bg-orange" />
         <div
-          className="bg-gradient-to-b from-ember to-magenta"
+          className="bg-gradient-to-b from-orange to-pink"
           style={{ width: w * 0.16, height: h * 0.2, clipPath: "polygon(30% 0, 70% 0, 100% 100%, 0 100%)" }}
         />
       </div>

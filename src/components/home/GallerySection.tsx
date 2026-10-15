@@ -10,23 +10,30 @@ import { useScrollLock } from "@/hooks/useScrollLock";
 import { cn } from "@/lib/utils";
 
 // bento layout: first photo is the big one
-const SPANS = ["col-span-2 row-span-2", "", "", "", ""];
+const TILES = [
+  { span: "col-span-2 row-span-2", tilt: "md:-rotate-1", emoji: "🥳" },
+  { span: "", tilt: "md:rotate-2", emoji: "🔥" },
+  { span: "", tilt: "md:-rotate-2", emoji: "💛" },
+  { span: "", tilt: "md:rotate-1", emoji: "😁" },
+  { span: "", tilt: "md:-rotate-1", emoji: "🎶" },
+];
 
 export default function GallerySection() {
   const [index, setIndex] = useState(-1);
   useScrollLock(index >= 0);
 
   return (
-    <section id="galeri" className="relative bg-night-950 py-28 md:py-36">
+    <section id="galeri" className="relative bg-cream py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeading
           stop="07"
+          emoji="📸"
           label="Galeri"
-          title={<>Kenangan dari <em>tahun lalu</em>.</>}
-          description="Intip keseruan KPK sebelumnya. Klik foto untuk memperbesar."
+          title={<>Keseruan dari <em>tahun lalu</em>!</>}
+          description="Intip keseruan KPK sebelumnya. Klik fotonya buat lihat lebih besar."
         />
 
-        <div className="mt-14 grid auto-rows-[160px] grid-cols-2 gap-3 md:auto-rows-[240px] md:grid-cols-4 md:gap-4">
+        <div className="mt-12 grid auto-rows-[160px] grid-cols-2 gap-4 md:auto-rows-[230px] md:grid-cols-4 md:gap-6">
           {GALLERY.map((p, i) => (
             <button
               key={p.src}
@@ -34,22 +41,24 @@ export default function GallerySection() {
               data-reveal
               onClick={() => setIndex(i)}
               className={cn(
-                "group relative overflow-hidden rounded-[1.5rem] ring-1 ring-paper/10 transition duration-500 hover:ring-lantern/60 hover:shadow-[0_0_60px_-12px_rgb(255_178_63/0.5)]",
-                SPANS[i],
+                "group relative rounded-[1.75rem] bg-white p-2 shadow-[0_6px_0_rgb(27_31_59/0.1)] ring-2 ring-ink/10 transition duration-300 ease-bounce hover:z-10 hover:scale-[1.03] hover:rotate-0",
+                TILES[i].span,
+                TILES[i].tilt,
               )}
             >
-              <img
-                src={p.src}
-                alt={p.caption}
-                loading="lazy"
-                className="absolute inset-0 h-full w-full object-cover transition duration-700 ease-out-expo group-hover:scale-[1.06]"
-              />
-              <span className="absolute inset-0 bg-gradient-to-t from-night-950/85 via-transparent to-transparent opacity-80 transition group-hover:opacity-100" />
-              <span className="absolute right-4 bottom-4 left-4 flex items-end justify-between gap-2 text-left">
-                <span className="font-serif text-xl text-paper italic md:text-2xl">{p.caption}</span>
-                <span className="grid h-9 w-9 shrink-0 translate-y-2 place-items-center rounded-full bg-paper/15 text-paper opacity-0 backdrop-blur transition group-hover:translate-y-0 group-hover:opacity-100">
+              <span className="relative block h-full w-full overflow-hidden rounded-[1.35rem]">
+                <img
+                  src={p.src}
+                  alt={p.caption}
+                  loading="lazy"
+                  className="absolute inset-0 h-full w-full object-cover transition duration-700 ease-out-expo group-hover:scale-110"
+                />
+                <span className="absolute top-3 right-3 grid h-9 w-9 scale-0 place-items-center rounded-full bg-white text-ink shadow-[0_3px_0_rgb(27_31_59/0.15)] transition duration-300 ease-bounce group-hover:scale-100">
                   <Expand size={15} />
                 </span>
+              </span>
+              <span className="absolute -bottom-3 left-4 inline-flex -rotate-2 items-center gap-1.5 rounded-full bg-sun px-3.5 py-1.5 text-sm font-extrabold text-ink shadow-[0_3px_0_#e5a500]">
+                <span aria-hidden="true">{TILES[i].emoji}</span> {p.caption}
               </span>
             </button>
           ))}
@@ -62,7 +71,7 @@ export default function GallerySection() {
         close={() => setIndex(-1)}
         slides={GALLERY.map((p) => ({ src: p.src, alt: p.caption, title: p.caption }))}
         plugins={[Captions]}
-        styles={{ container: { backgroundColor: "rgb(5 9 32 / 0.96)" } }}
+        styles={{ container: { backgroundColor: "rgb(27 31 59 / 0.94)" } }}
       />
     </section>
   );

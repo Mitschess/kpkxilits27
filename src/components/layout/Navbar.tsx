@@ -7,6 +7,8 @@ import { INSTAGRAM_URL } from "@/data/home";
 import { useScrollLock } from "@/hooks/useScrollLock";
 import { cn } from "@/lib/utils";
 
+const MENU_COLORS = ["#2f5bea", "#ff4fa3", "#1fbf9a", "#ff8a3d", "#9b7bff", "#ffc93c"];
+
 const LINKS = [
   { label: "Beranda", to: "/" },
   { label: "Acara", to: "/#acara" },
@@ -19,10 +21,12 @@ const LINKS = [
 export function Logo({ className }: { className?: string }) {
   return (
     <Link to="/" className={cn("flex items-center gap-2.5", className)} aria-label="KPK × Ini Lho ITS! 2026 — Beranda">
-      <img src="/images/logo/hero.webp" alt="" className="h-10 w-10 scale-[1.35] object-contain" />
+      <span className="grid h-11 w-11 place-items-center overflow-hidden rounded-2xl bg-white shadow-[0_3px_0_rgb(27_31_59/0.12)] ring-2 ring-ink/10">
+        <img src="/images/logo/hero.webp" alt="" className="h-full w-full scale-[1.45] object-contain" />
+      </span>
       <span className="leading-none">
-        <span className="block font-display text-lg font-bold tracking-tight text-paper">KPK</span>
-        <span className="eyebrow block text-[0.6rem] text-lantern">× ILITS 2026</span>
+        <span className="block font-display text-lg font-extrabold tracking-tight text-ink">KPK</span>
+        <span className="eyebrow block text-[0.6rem] text-its">× Ini Lho ITS!</span>
       </span>
     </Link>
   );
@@ -67,7 +71,9 @@ export default function Navbar() {
         <nav
           className={cn(
             "mx-auto flex max-w-7xl items-center justify-between rounded-full py-2 pr-2 pl-4 transition-all duration-500",
-            scrolled || open ? "glass shadow-[0_10px_40px_-12px_rgb(0_0_0/0.6)]" : "border border-transparent",
+            scrolled || open
+              ? "bg-white/90 shadow-[0_4px_0_rgb(27_31_59/0.08),0_18px_40px_-20px_rgb(27_31_59/0.35)] ring-2 ring-ink/10 backdrop-blur-md"
+              : "ring-2 ring-transparent",
           )}
         >
           <Logo />
@@ -80,8 +86,8 @@ export default function Navbar() {
                   end
                   className={({ isActive }) =>
                     cn(
-                      "rounded-full px-4 py-2 text-sm font-medium text-paper/75 transition hover:bg-paper/[0.07] hover:text-paper",
-                      isActive && !l.to.includes("#") && "bg-paper/[0.08] text-paper",
+                      "rounded-full px-4 py-2 text-sm font-semibold text-ink/75 transition hover:bg-ink/[0.06] hover:text-ink",
+                      isActive && !l.to.includes("#") && "bg-its-light text-its",
                     )
                   }
                 >
@@ -96,7 +102,7 @@ export default function Navbar() {
               href={INSTAGRAM_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className={buttonClass("lantern", "hidden px-5 py-2.5 text-sm sm:inline-flex")}
+              className={buttonClass("sun", "hidden px-5 py-2.5 text-sm sm:inline-flex")}
             >
               <Instagram size={16} /> Ikuti kami
             </a>
@@ -105,7 +111,7 @@ export default function Navbar() {
               onClick={() => setOpen((o) => !o)}
               aria-expanded={open}
               aria-label={open ? "Tutup menu" : "Buka menu"}
-              className="grid h-11 w-11 place-items-center rounded-full bg-paper/[0.07] text-paper ring-1 ring-paper/10 transition hover:bg-paper/15 lg:hidden"
+              className="grid h-11 w-11 place-items-center rounded-full bg-white text-ink shadow-[0_3px_0_rgb(27_31_59/0.12)] ring-2 ring-ink/10 transition lg:hidden"
             >
               {open ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -116,16 +122,12 @@ export default function Navbar() {
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed inset-0 z-40 flex flex-col bg-night-950/96 px-6 pt-28 pb-10 backdrop-blur-xl lg:hidden"
+            className="dots fixed inset-0 z-40 flex flex-col bg-cream px-6 pt-28 pb-10 lg:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
           >
-            <div
-              className="pointer-events-none absolute inset-0"
-              style={{ background: "radial-gradient(circle at 80% 10%, rgb(255 178 63 / 0.18), transparent 50%)" }}
-            />
             <ul className="relative space-y-1">
               {LINKS.map((l, i) => (
                 <motion.li
@@ -137,9 +139,14 @@ export default function Navbar() {
                   <Link
                     to={l.to}
                     onClick={() => setOpen(false)}
-                    className="flex items-baseline gap-4 border-b border-paper/10 py-4 font-display text-4xl font-semibold tracking-tight text-paper"
+                    className="flex items-center gap-4 border-b-2 border-dashed border-ink/10 py-3.5 font-display text-4xl font-extrabold tracking-tight text-ink"
                   >
-                    <span className="eyebrow text-lantern/80">0{i + 1}</span>
+                    <span
+                      className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm text-white"
+                      style={{ background: MENU_COLORS[i % MENU_COLORS.length] }}
+                    >
+                      {i + 1}
+                    </span>
                     {l.label}
                   </Link>
                 </motion.li>
@@ -149,7 +156,7 @@ export default function Navbar() {
               href={INSTAGRAM_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className={buttonClass("lantern", "relative mt-auto w-full")}
+              className={buttonClass("sun", "relative mt-auto w-full")}
             >
               <Instagram size={18} /> Ikuti @kpk.2026 <ArrowUpRight size={18} />
             </a>

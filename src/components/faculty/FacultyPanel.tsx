@@ -5,12 +5,12 @@ import type { Competition, Department, Faculty } from "@/data/faculties";
 import { cn } from "@/lib/utils";
 
 const LEVEL: Record<Competition, string> = {
-  Rendah: "bg-teal/15 text-mint ring-teal/30",
-  Sedang: "bg-lantern/15 text-gold ring-lantern/30",
-  Tinggi: "bg-magenta/15 text-[#ff8cc0] ring-magenta/30",
+  Rendah: "bg-mint-light text-mint-dark",
+  Sedang: "bg-sun-light text-[#8a6100]",
+  Tinggi: "bg-pink-light text-pink-dark",
 };
 
-const accreditation = (a: string) => (/prodi baru/i.test(a) ? "Prodi baru" : `Akreditasi ${a}`);
+const accreditation = (a: string) => (/prodi baru/i.test(a) ? "Prodi baru ✨" : `Akreditasi ${a}`);
 
 const slide = {
   initial: (dir: number) => ({ opacity: 0, x: 40 * dir }),
@@ -50,41 +50,40 @@ function DepartmentList({ faculty, onSelect }: { faculty: Faculty; onSelect: (d:
   const Icon = faculty.icon;
   return (
     <>
-      <header className="relative overflow-hidden px-6 pt-16 pb-10 md:px-10">
-        <div className="absolute inset-0 opacity-50" style={{ background: `radial-gradient(circle at 15% 0%, ${faculty.accent}55, transparent 60%)` }} />
+      <header className="relative overflow-hidden px-6 pt-16 pb-10 md:px-10" style={{ background: `${faculty.accent}2e` }}>
+        <span className="absolute -top-16 -right-16 h-56 w-56 rounded-full opacity-40" style={{ background: faculty.accent }} />
         <div className="relative">
-          <span
-            className="grid h-14 w-14 place-items-center rounded-2xl"
-            style={{ background: `${faculty.accent}22`, color: faculty.accent, boxShadow: `inset 0 0 0 1px ${faculty.accent}55` }}
-          >
-            <Icon size={26} strokeWidth={1.7} />
+          <span className="grid h-16 w-16 place-items-center rounded-2xl border-[3px] border-ink text-ink" style={{ background: faculty.accent }}>
+            <Icon size={30} strokeWidth={2} />
           </span>
-          <p className="eyebrow mt-6" style={{ color: faculty.accent }}>
+          <p className="mt-6 inline-block rounded-full bg-white px-3 py-1 text-xs font-extrabold tracking-wider text-ink uppercase ring-2 ring-ink/10">
             {faculty.id}
           </p>
-          <h2 className="mt-2 font-display text-3xl leading-tight font-semibold tracking-tight text-balance text-paper md:text-4xl">
-            {faculty.name}
-          </h2>
-          <p className="mt-3 text-mist">{faculty.description}</p>
+          <h2 className="mt-3 font-display text-3xl leading-tight font-extrabold tracking-tight text-balance text-ink md:text-4xl">{faculty.name}</h2>
+          <p className="mt-2 font-medium text-ink-soft">{faculty.description}</p>
         </div>
       </header>
 
-      <div className="px-4 pb-10 md:px-8">
-        <p className="eyebrow mb-3 px-2 text-paper/50">{faculty.departments.length} departemen & prodi</p>
-        <ul className="space-y-2">
+      <div className="px-4 py-8 md:px-8">
+        <p className="mb-3 px-2 font-hand text-2xl font-bold text-ink-soft">
+          {faculty.departments.length} departemen & prodi, pilih satu 👇
+        </p>
+        <ul className="space-y-3">
           {faculty.departments.map((d) => (
             <li key={d.slug}>
               <button
                 type="button"
                 onClick={() => onSelect(d)}
-                className="group flex w-full items-center gap-4 rounded-2xl p-2 pr-4 text-left transition hover:bg-paper/[0.05]"
+                className="group flex w-full items-center gap-4 rounded-[1.4rem] bg-white p-2 pr-4 text-left ring-2 ring-ink/10 transition duration-200 ease-bounce hover:-translate-y-0.5 hover:shadow-[0_5px_0_rgb(27_31_59/0.1)]"
               >
-                <img src={d.image} alt="" loading="lazy" className="h-16 w-24 shrink-0 rounded-xl object-cover ring-1 ring-paper/10" />
+                <img src={d.image} alt="" loading="lazy" className="h-16 w-24 shrink-0 rounded-xl object-cover" />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate font-display text-lg font-semibold text-paper">{d.name}</span>
-                  <span className="mt-0.5 block text-xs text-mist">{accreditation(d.accreditation)}</span>
+                  <span className="block truncate font-display text-lg font-extrabold text-ink">{d.name}</span>
+                  <span className="mt-0.5 block text-xs font-semibold text-ink-soft">{accreditation(d.accreditation)}</span>
                 </span>
-                <ChevronRight size={18} className="shrink-0 text-mist transition group-hover:translate-x-1 group-hover:text-[var(--accent)]" />
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full transition group-hover:translate-x-1" style={{ background: `${faculty.accent}40` }}>
+                  <ChevronRight size={18} className="text-ink" />
+                </span>
               </button>
             </li>
           ))}
@@ -107,45 +106,45 @@ function DepartmentDetail({ faculty, dept, onBack }: { faculty: Faculty; dept: D
     <article className="pb-12">
       <div className="relative aspect-[16/9] overflow-hidden">
         <img src={dept.image} alt={dept.name} className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-night-900 via-night-900/30 to-night-900/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-cream via-cream/10 to-transparent" />
         <button
           type="button"
           onClick={onBack}
-          className="absolute top-4 left-4 inline-flex items-center gap-2 rounded-full bg-night-950/70 py-2 pr-4 pl-3 text-sm text-paper ring-1 ring-paper/15 backdrop-blur transition hover:bg-night-700"
+          className="absolute top-4 left-4 inline-flex items-center gap-2 rounded-full bg-white py-2 pr-4 pl-3 text-sm font-bold text-ink shadow-[0_3px_0_rgb(27_31_59/0.15)] ring-2 ring-ink/10 transition hover:-translate-x-0.5"
         >
           <ArrowLeft size={16} /> {faculty.id.toUpperCase()}
         </button>
       </div>
 
-      <div className="relative -mt-16 px-6 md:px-10">
+      <div className="relative -mt-12 px-6 md:px-10">
         <div className="flex flex-wrap gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-lantern px-3 py-1 text-xs font-semibold text-night-950">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-sun px-3 py-1.5 text-xs font-extrabold text-ink shadow-[0_3px_0_#e5a500]">
             <BadgeCheck size={14} /> {accreditation(dept.accreditation)}
           </span>
           {dept.asiin && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-paper/10 px-3 py-1 text-xs font-semibold text-paper ring-1 ring-paper/20 backdrop-blur">
-              <Sparkles size={14} className="text-gold" /> Terakreditasi ASIIN
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-its px-3 py-1.5 text-xs font-extrabold text-white shadow-[0_3px_0_#1d3fb5]">
+              <Sparkles size={14} /> Terakreditasi ASIIN
             </span>
           )}
         </div>
-        <h2 className="mt-4 font-display text-4xl leading-tight font-semibold tracking-tight text-paper md:text-5xl">{dept.name}</h2>
-        <p className="mt-4 text-lg leading-relaxed text-pretty text-paper/85">{dept.description}</p>
+        <h2 className="mt-4 font-display text-4xl leading-tight font-extrabold tracking-tight text-ink md:text-5xl">{dept.name}</h2>
+        <p className="mt-4 text-lg leading-relaxed text-pretty text-ink-soft">{dept.description}</p>
 
-        <div className="mt-10 grid gap-4 md:grid-cols-2">
-          <InfoBlock icon={BookOpen} title="Bidang keahlian">
+        <div className="mt-8 grid gap-4 md:grid-cols-2">
+          <InfoBlock icon={BookOpen} title="Bidang keahlian" tint="bg-its-light">
             <ul className="flex flex-wrap gap-2">
               {dept.competencies.map((c, i) => (
-                <li key={i} className="rounded-full bg-paper/[0.06] px-3 py-1.5 text-sm text-paper/90 ring-1 ring-paper/10">
+                <li key={i} className="rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-ink ring-2 ring-ink/10">
                   {c}
                 </li>
               ))}
             </ul>
           </InfoBlock>
-          <InfoBlock icon={Briefcase} title="Prospek kerja">
-            <ul className="space-y-1.5">
+          <InfoBlock icon={Briefcase} title="Prospek kerja" tint="bg-mint-light">
+            <ul className="space-y-2">
               {dept.careers.map((c, i) => (
-                <li key={i} className="flex gap-2 text-sm text-paper/90">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: faculty.accent }} />
+                <li key={i} className="flex gap-2 text-sm font-semibold text-ink">
+                  <span aria-hidden="true">⭐</span>
                   {c}
                 </li>
               ))}
@@ -154,35 +153,37 @@ function DepartmentDetail({ faculty, dept, onBack }: { faculty: Faculty; dept: D
         </div>
 
         {dept.relatedSubjects.length > 0 && (
-          <div className="mt-4 rounded-3xl bg-paper/[0.03] p-5 ring-1 ring-paper/10">
-            <p className="eyebrow text-paper/50">Mapel pendukung</p>
-            <p className="mt-2 text-sm text-paper/90">
-              {dept.relatedSubjects.map((s) => s.charAt(0) + s.slice(1).toLowerCase()).join(" · ")}
-            </p>
+          <div className="mt-4 rounded-[1.5rem] bg-sun-light p-5 ring-2 ring-sun/60">
+            <p className="font-display text-lg font-extrabold text-ink">📘 Mapel pendukung</p>
+            <ul className="mt-3 flex flex-wrap gap-2">
+              {dept.relatedSubjects.map((s) => (
+                <li key={s} className="rounded-full bg-white px-3 py-1 text-sm font-bold text-ink">
+                  {s.charAt(0) + s.slice(1).toLowerCase()}
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 
-        <div className="mt-4 rounded-3xl bg-paper/[0.03] p-5 ring-1 ring-paper/10 md:p-6">
+        <div className="mt-4 rounded-[1.5rem] bg-white p-5 ring-2 ring-ink/10 md:p-6">
           <div className="flex items-center justify-between">
-            <p className="font-display text-xl font-semibold text-paper">Kuota mahasiswa</p>
-            <span className="eyebrow text-[0.62rem] text-mist">Tahun 2026</span>
+            <p className="font-display text-xl font-extrabold text-ink">🎟️ Kuota mahasiswa</p>
+            <span className="rounded-full bg-ink px-2.5 py-1 text-[0.68rem] font-bold text-white">2026</span>
           </div>
           <div className="mt-5 space-y-4">
             {quotas.map((q) => (
               <div key={q.label}>
                 <div className="mb-1.5 flex items-center justify-between text-sm">
-                  <span className="font-medium text-paper">{q.label}</span>
+                  <span className="font-bold text-ink">{q.label}</span>
                   <span className="flex items-center gap-2">
-                    <span className={cn("rounded-full px-2 py-0.5 text-[0.7rem] font-semibold ring-1", LEVEL[q.level])}>
-                      Keketatan {q.level.toLowerCase()}
-                    </span>
-                    <span className="w-10 text-right font-display text-lg font-semibold text-paper tabular-nums">{q.value}</span>
+                    <span className={cn("rounded-full px-2 py-0.5 text-[0.7rem] font-bold", LEVEL[q.level])}>Keketatan {q.level.toLowerCase()}</span>
+                    <span className="w-10 text-right font-display text-lg font-extrabold text-ink tabular-nums">{q.value}</span>
                   </span>
                 </div>
-                <div className="h-2.5 overflow-hidden rounded-full bg-paper/[0.07]">
+                <div className="h-3 overflow-hidden rounded-full bg-ink/[0.07]">
                   <motion.div
                     className="h-full rounded-full"
-                    style={{ background: `linear-gradient(90deg, ${faculty.accent}, #ffd76a)` }}
+                    style={{ background: faculty.accent }}
                     initial={{ width: 0 }}
                     animate={{ width: `${(q.value / max) * 100}%` }}
                     transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
@@ -197,27 +198,31 @@ function DepartmentDetail({ faculty, dept, onBack }: { faculty: Faculty; dept: D
           href={`https://www.instagram.com/${handle}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-4 flex items-center justify-between rounded-3xl bg-paper/[0.03] p-5 ring-1 ring-paper/10 transition hover:bg-paper/[0.07]"
+          className="mt-4 flex items-center justify-between rounded-[1.5rem] bg-gradient-to-r from-[#ffd36e] via-pink to-lilac p-[3px] transition hover:-translate-y-0.5"
         >
-          <span className="flex items-center gap-3">
-            <Instagram size={20} className="text-lantern" />
-            <span>
-              <span className="block text-xs text-mist">Instagram departemen</span>
-              <span className="font-medium text-paper">{dept.contact}</span>
+          <span className="flex w-full items-center justify-between rounded-[calc(1.5rem-3px)] bg-white p-4">
+            <span className="flex items-center gap-3">
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-pink-light text-pink">
+                <Instagram size={20} />
+              </span>
+              <span>
+                <span className="block text-xs font-semibold text-ink-soft">Kepoin Instagram departemennya</span>
+                <span className="font-bold text-ink">{dept.contact}</span>
+              </span>
             </span>
+            <ChevronRight size={18} className="text-ink-soft" />
           </span>
-          <ChevronRight size={18} className="text-mist" />
         </a>
       </div>
     </article>
   );
 }
 
-function InfoBlock({ icon: Icon, title, children }: { icon: typeof BookOpen; title: string; children: React.ReactNode }) {
+function InfoBlock({ icon: Icon, title, tint, children }: { icon: typeof BookOpen; title: string; tint: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-3xl bg-paper/[0.03] p-5 ring-1 ring-paper/10">
-      <p className="mb-4 flex items-center gap-2 font-display text-lg font-semibold text-paper">
-        <Icon size={18} className="text-[var(--accent)]" /> {title}
+    <div className={cn("rounded-[1.5rem] p-5", tint)}>
+      <p className="mb-4 flex items-center gap-2 font-display text-lg font-extrabold text-ink">
+        <Icon size={18} /> {title}
       </p>
       {children}
     </div>

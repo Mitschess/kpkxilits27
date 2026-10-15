@@ -1,5 +1,4 @@
 import { useRef } from "react";
-import { CalendarRange, GraduationCap, Layers, Users } from "lucide-react";
 import CountUp from "@/components/ui/CountUp";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { CABINET_DATA } from "@/data/cabinet";
@@ -7,9 +6,9 @@ import { FACULTIES } from "@/data/faculties";
 import { EVENTS } from "@/data/home";
 import { gsap, useGSAP } from "@/lib/motion";
 
-// Words wrapped in [] are highlighted once lit.
+// Words wrapped in [] are highlighted.
 const STORY =
-  "KPK (Kampus Pulang Kampung) merupakan salah satu event oleh [IMAGES ITS] yang bekerja sama dengan [Ini Lho ITS]. Bertujuan untuk memperkenalkan ITS dari segi akademis maupun non akademis serta lingkungan yang ada di dalamnya bagi siswa-siswi SMA/K sederajat di [Kabupaten Gresik].";
+  "KPK (Kampus Pulang Kampung) merupakan salah satu event oleh [IMAGES ITS] yang bekerja sama dengan [Ini Lho ITS!] Bertujuan untuk memperkenalkan ITS dari segi akademis maupun non akademis serta lingkungan yang ada di dalamnya bagi siswa-siswi SMA/K sederajat di [Kabupaten Gresik].";
 
 function storyWords() {
   const words: { text: string; mark: boolean }[] = [];
@@ -26,28 +25,35 @@ function storyWords() {
 }
 
 const STATS = [
-  { icon: CalendarRange, value: EVENTS.length, label: "Rangkaian acara" },
-  { icon: GraduationCap, value: FACULTIES.length, label: "Fakultas dikenalkan" },
-  { icon: Layers, value: FACULTIES.reduce((n, f) => n + f.departments.length, 0), label: "Departemen & prodi" },
-  { icon: Users, value: CABINET_DATA.reduce((n, d) => n + d.members.length, 0), label: "Panitia bergerak" },
+  { emoji: "🗓️", value: EVENTS.length, label: "Rangkaian acara seru", bg: "bg-sun-light", ring: "ring-sun" },
+  { emoji: "🏛️", value: FACULTIES.length, label: "Fakultas buat dikenalin", bg: "bg-pink-light", ring: "ring-pink" },
+  { emoji: "📚", value: FACULTIES.reduce((n, f) => n + f.departments.length, 0), label: "Departemen & prodi", bg: "bg-mint-light", ring: "ring-mint" },
+  { emoji: "🙌", value: CABINET_DATA.reduce((n, d) => n + d.members.length, 0), label: "Panitia siap nyambut", bg: "bg-its-light", ring: "ring-its" },
+];
+
+const FLOATERS = [
+  { emoji: "🎒", className: "top-[8%] left-[4%]", delay: "0s" },
+  { emoji: "🏠", className: "top-[18%] right-[2%]", delay: "-1.4s" },
+  { emoji: "🎓", className: "bottom-[16%] left-[0%]", delay: "-2.6s" },
+  { emoji: "⭐", className: "bottom-[6%] right-[10%]", delay: "-0.8s" },
 ];
 
 export default function AboutSection() {
   const root = useRef<HTMLElement>(null);
 
-  // Each word lights up as it passes through the middle of the screen
+  // each word darkens as it scrolls through the middle of the screen
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
         gsap.fromTo(
           "[data-word]",
-          { opacity: 0.16 },
+          { opacity: 0.18 },
           {
             opacity: 1,
             stagger: 0.12,
             ease: "none",
-            scrollTrigger: { trigger: "[data-story]", start: "top 78%", end: "bottom 50%", scrub: true },
+            scrollTrigger: { trigger: "[data-story]", start: "top 80%", end: "bottom 55%", scrub: true },
           },
         );
       });
@@ -56,48 +62,61 @@ export default function AboutSection() {
   );
 
   return (
-    <section ref={root} id="tentang" className="relative overflow-hidden bg-night-950 py-28 md:py-40">
-      <div
-        className="pointer-events-none absolute -top-40 right-0 h-[600px] w-[600px] rounded-full opacity-60"
-        style={{ background: "radial-gradient(circle, rgb(70 114 255 / 0.18), transparent 65%)" }}
-      />
-
-      <div className="relative mx-auto grid max-w-7xl gap-16 px-6 lg:grid-cols-12 lg:gap-12">
+    <section ref={root} id="tentang" className="dots relative overflow-hidden bg-cream py-24 md:py-32">
+      <div className="relative mx-auto grid max-w-7xl items-center gap-16 px-6 lg:grid-cols-12 lg:gap-12">
         <div className="lg:col-span-7">
-          <SectionHeading stop="01" label="Tentang KPK" title={<>Kampus yang <em>pulang</em> ke kampung halaman.</>} />
+          <SectionHeading stop="01" emoji="👀" label="Tentang KPK" title={<>Kampus yang <em>pulang</em> ke kampung halaman.</>} />
 
-          <p data-story className="mt-10 font-display text-2xl leading-[1.35] font-medium tracking-tight text-paper md:text-[2.1rem]">
+          <p data-story className="mt-10 font-display text-2xl leading-[1.4] font-semibold tracking-tight text-ink md:text-[2.05rem]">
             {storyWords().map((w, i) => (
-              <span key={i} data-word className={w.mark ? "text-gold" : undefined}>
+              <span key={i} data-word className={w.mark ? "marker [--hl:var(--color-sun-light)] text-its" : undefined}>
                 {w.text}{" "}
               </span>
             ))}
           </p>
         </div>
 
-        {/* doorway: the way home is always open */}
-        <div className="flex items-center justify-center lg:col-span-5">
+        {/* the door home is always open */}
+        <div className="relative flex items-center justify-center lg:col-span-5">
           <div data-reveal className="relative w-full max-w-sm">
-            <div
-              className="absolute -inset-10 rounded-full opacity-80 blur-2xl"
-              style={{ background: "radial-gradient(circle, rgb(255 178 63 / 0.35), transparent 65%)" }}
-            />
-            <div className="relative overflow-hidden rounded-t-[999px] rounded-b-3xl border border-paper/15 bg-gradient-to-b from-night-700 via-night-800 to-night-900 p-8 pt-16">
-              <div className="weave absolute inset-0" />
-              <img src="/images/pintu-kpk.webp" alt="Ilustrasi pintu pulang KPK" loading="lazy" className="relative mx-auto w-4/5 drop-shadow-[0_20px_40px_rgb(255_178_63/0.35)]" />
-              <p className="relative mt-6 text-center font-serif text-2xl text-gold italic">#SemangatPulangKampung</p>
+            <div className="relative aspect-[4/5] overflow-hidden rounded-[45%_55%_48%_52%/55%_45%_55%_45%] bg-sky-light ring-4 ring-white shadow-[0_10px_0_rgb(27_31_59/0.08)]">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_60%,#fff2c4_0%,transparent_60%)]" />
+              <img
+                src="/images/pintu-kpk.webp"
+                alt="Ilustrasi pintu pulang KPK"
+                loading="lazy"
+                className="absolute inset-x-[12%] bottom-[10%] w-[76%] drop-shadow-[0_14px_18px_rgb(27_31_59/0.2)]"
+              />
             </div>
+            {FLOATERS.map((f) => (
+              <span
+                key={f.emoji}
+                className={`absolute grid h-14 w-14 animate-bob place-items-center rounded-2xl bg-white text-2xl shadow-[0_4px_0_rgb(27_31_59/0.12)] ring-2 ring-ink/10 ${f.className}`}
+                style={{ animationDelay: f.delay }}
+                aria-hidden="true"
+              >
+                {f.emoji}
+              </span>
+            ))}
+            <p className="absolute -bottom-5 left-1/2 -translate-x-1/2 -rotate-3 rounded-full bg-pink px-5 py-2 font-hand text-2xl font-bold whitespace-nowrap text-white shadow-[0_4px_0_#db2b81]">
+              #SemangatPulangKampung
+            </p>
           </div>
         </div>
       </div>
 
-      <div className="relative mx-auto mt-20 grid max-w-7xl grid-cols-2 gap-3 px-6 md:mt-28 md:grid-cols-4 md:gap-4">
-        {STATS.map(({ icon: Icon, value, label }) => (
-          <div key={label} data-reveal className="glass group relative overflow-hidden rounded-3xl p-6 md:p-8">
-            <div className="absolute -right-6 -bottom-6 h-24 w-24 rounded-full bg-lantern/10 blur-2xl transition group-hover:bg-lantern/25" />
-            <Icon size={22} className="text-lantern" />
-            <CountUp value={value} className="mt-6 block font-display text-5xl font-semibold tracking-tight text-paper md:text-6xl" />
-            <p className="mt-2 text-sm text-mist">{label}</p>
+      <div className="relative mx-auto mt-20 grid max-w-7xl grid-cols-2 gap-3 px-6 md:mt-24 md:grid-cols-4 md:gap-5">
+        {STATS.map((s, i) => (
+          <div
+            key={s.label}
+            data-reveal
+            className={`group rounded-[1.75rem] p-6 ring-2 ring-ink/10 transition duration-300 ease-bounce hover:-translate-y-1.5 md:p-7 ${s.bg} ${i % 2 ? "md:rotate-1" : "md:-rotate-1"}`}
+          >
+            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-white text-2xl shadow-[0_3px_0_rgb(27_31_59/0.1)] transition group-hover:rotate-12" aria-hidden="true">
+              {s.emoji}
+            </span>
+            <CountUp value={s.value} className="mt-5 block font-display text-5xl font-extrabold tracking-tight text-ink md:text-6xl" />
+            <p className="mt-1 text-sm font-semibold text-ink-soft">{s.label}</p>
           </div>
         ))}
       </div>

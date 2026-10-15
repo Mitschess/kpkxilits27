@@ -16,19 +16,19 @@ export default function Sheet({ open, onOpenChange, title, children }: SheetProp
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="dialog-overlay fixed inset-0 z-[80] bg-night-950/75 backdrop-blur-sm" />
+        <Dialog.Overlay className="dialog-overlay fixed inset-0 z-[80] bg-ink/40 backdrop-blur-sm" />
         <Dialog.Content
           aria-describedby={undefined}
-          className="sheet-content fixed inset-y-0 right-0 z-[81] flex w-full max-w-2xl flex-col border-l border-paper/10 bg-night-900 shadow-[-40px_0_120px_-20px_rgb(0_0_0/0.7)] outline-none"
+          className="sheet-content fixed inset-y-0 right-0 z-[81] flex w-full max-w-2xl flex-col bg-cream shadow-[-30px_0_80px_-20px_rgb(27_31_59/0.45)] outline-none md:rounded-l-[2rem]"
         >
           <Dialog.Title className="sr-only">{title}</Dialog.Title>
           <Dialog.Close
-            className="absolute top-4 right-4 z-20 grid h-10 w-10 place-items-center rounded-full bg-night-950/70 text-paper ring-1 ring-paper/15 backdrop-blur transition hover:bg-night-700 hover:ring-paper/30"
+            className="absolute top-4 right-4 z-20 grid h-11 w-11 place-items-center rounded-full bg-white text-ink shadow-[0_4px_0_rgb(27_31_59/0.15)] ring-2 ring-ink/10 transition hover:rotate-90"
             aria-label="Tutup"
           >
             <X size={18} />
           </Dialog.Close>
-          <div data-lenis-prevent className="relative flex-1 overflow-y-auto overscroll-contain">
+          <div data-lenis-prevent className="relative flex-1 overflow-y-auto overscroll-contain md:rounded-l-[2rem]">
             {children}
           </div>
         </Dialog.Content>

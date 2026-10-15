@@ -1,48 +1,61 @@
 @import "tailwindcss";
 @import "@fontsource-variable/bricolage-grotesque";
 @import "@fontsource-variable/plus-jakarta-sans";
-@import "@fontsource/instrument-serif/latin-400.css";
-@import "@fontsource/instrument-serif/latin-400-italic.css";
+@import "@fontsource-variable/caveat";
 @import "lenis/dist/lenis.css";
 
 /*
- * Theme: "Damar Kurung" — a night festival of Gresik's paper lanterns,
- * lit along the route from home (Gresik) to campus (ITS).
+ * Theme: "Festival Pulang Kampung" — a sunny village festival with bunting,
+ * damar kurung lanterns and a little bus travelling from Gresik to ITS.
+ * Colours come from the KPK × ILITS logo plus ITS blue.
  */
 @theme {
-  --color-night-950: #050920;
-  --color-night-900: #0a1033;
-  --color-night-850: #0d1540;
-  --color-night-800: #121c4d;
-  --color-night-700: #1b2866;
-  --color-night-600: #2a3b88;
-  --color-its: #4672ff;
-  --color-its-deep: #204dc0;
-  --color-lantern: #ffb23f;
-  --color-gold: #ffd76a;
-  --color-ember: #f0592a;
-  --color-magenta: #ec3b92;
-  --color-teal: #22b89a;
-  --color-mint: #7be8c3;
-  --color-paper: #fff3dc;
-  --color-mist: #aab4dd;
-  --color-ink: #2a130b;
+  --color-cream: #fff8ec;
+  --color-cream-deep: #ffefd6;
+  --color-ink: #1b1f3b;
+  --color-ink-soft: #545b7e;
+  --color-its: #2f5bea;
+  --color-its-dark: #1d3fb5;
+  --color-its-light: #dfe7ff;
+  --color-sun: #ffc93c;
+  --color-sun-dark: #e5a500;
+  --color-sun-light: #fff2c4;
+  --color-orange: #ff8a3d;
+  --color-orange-light: #ffe4d1;
+  --color-pink: #ff4fa3;
+  --color-pink-dark: #db2b81;
+  --color-pink-light: #ffe1ef;
+  --color-mint: #1fbf9a;
+  --color-mint-dark: #0f9a7a;
+  --color-mint-light: #d3f7eb;
+  --color-sky: #6cc4ff;
+  --color-sky-light: #e2f3ff;
+  --color-lilac: #9b7bff;
+  --color-lilac-light: #ece6ff;
+  /* lantern frame */
+  --color-wood: #2a130b;
 
   --font-sans: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Bricolage Grotesque Variable", "Plus Jakarta Sans Variable", ui-sans-serif, sans-serif;
-  --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
+  --font-hand: "Caveat Variable", "Plus Jakarta Sans Variable", cursive;
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  --animate-bob: bob 7s ease-in-out infinite;
+  --animate-bob: bob 5s ease-in-out infinite;
   --animate-spin-y: spin-y 22s linear infinite;
+  --animate-spin-slow: spin 40s linear infinite;
   --animate-flicker: flicker 3.4s ease-in-out infinite;
   --animate-marquee: marquee 40s linear infinite;
-  --animate-rise: rise 22s linear infinite;
+  --animate-drift: drift 80s linear infinite;
+  --animate-sway: sway 3.2s ease-in-out infinite;
+  --animate-drive: drive 16s linear infinite;
+  --animate-bump: bump 0.5s ease-in-out infinite;
+  --animate-wiggle: wiggle 2.6s ease-in-out infinite;
   --animate-swing: swing 4s ease-in-out infinite;
   --animate-fade-in: fade-in 0.25s ease-out;
   --animate-fade-out: fade-out 0.2s ease-in;
-  --animate-sheet-in: sheet-in 0.45s var(--ease-out-expo);
+  --animate-sheet-in: sheet-in 0.5s var(--ease-out-expo);
   --animate-sheet-out: sheet-out 0.25s ease-in;
 
   @keyframes bob {
@@ -51,7 +64,7 @@
       translate: 0 0;
     }
     50% {
-      translate: 0 -14px;
+      translate: 0 -12px;
     }
   }
   @keyframes spin-y {
@@ -67,14 +80,11 @@
     100% {
       opacity: 0.9;
     }
-    30% {
-      opacity: 0.75;
-    }
-    55% {
-      opacity: 1;
+    40% {
+      opacity: 0.7;
     }
     70% {
-      opacity: 0.82;
+      opacity: 1;
     }
   }
   @keyframes marquee {
@@ -85,23 +95,47 @@
       transform: translateX(-50%);
     }
   }
-  @keyframes rise {
-    0% {
-      transform: translate3d(0, 0, 0) rotate(-4deg);
-      opacity: 0;
+  @keyframes drift {
+    from {
+      transform: translateX(-30vw);
     }
-    10% {
-      opacity: 1;
+    to {
+      transform: translateX(130vw);
+    }
+  }
+  @keyframes sway {
+    0%,
+    100% {
+      rotate: -7deg;
     }
     50% {
-      transform: translate3d(24px, -55vh, 0) rotate(4deg);
+      rotate: 7deg;
     }
-    90% {
-      opacity: 0.9;
+  }
+  @keyframes drive {
+    from {
+      transform: translateX(-20vw);
     }
+    to {
+      transform: translateX(110vw);
+    }
+  }
+  @keyframes bump {
+    0%,
     100% {
-      transform: translate3d(-12px, -110vh, 0) rotate(-3deg);
-      opacity: 0;
+      translate: 0 0;
+    }
+    50% {
+      translate: 0 -2px;
+    }
+  }
+  @keyframes wiggle {
+    0%,
+    100% {
+      rotate: -4deg;
+    }
+    50% {
+      rotate: 4deg;
     }
   }
   @keyframes swing {
@@ -138,14 +172,13 @@
 /* ---------- Base ---------- */
 
 html {
-  background: var(--color-night-950);
-  color-scheme: dark;
+  background: var(--color-cream);
   scroll-padding-top: 6rem;
 }
 
 body {
-  background: var(--color-night-950);
-  color: var(--color-paper);
+  background: var(--color-cream);
+  color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -153,49 +186,57 @@ body {
 }
 
 ::selection {
-  background: var(--color-lantern);
-  color: var(--color-night-950);
+  background: var(--color-sun);
+  color: var(--color-ink);
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-gold);
+  outline: 3px solid var(--color-its);
   outline-offset: 3px;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
 /* ---------- Reusable pieces ---------- */
 
-@utility glass {
-  background: color-mix(in oklab, var(--color-night-800) 62%, transparent);
-  border: 1px solid color-mix(in oklab, var(--color-paper) 9%, transparent);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-}
-
-@utility text-glow {
-  text-shadow:
-    0 0 18px rgb(255 178 63 / 0.55),
-    0 0 46px rgb(255 178 63 / 0.25);
-}
-
 @utility eyebrow {
   font-family: var(--font-sans);
   font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.22em;
+  font-weight: 800;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
-/* Film grain over everything for a warmer, printed feel */
-@utility grain {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+/* white card that sits up off the page */
+@utility card {
+  background: #fff;
+  border-radius: 1.75rem;
+  box-shadow:
+    0 2px 0 rgb(27 31 59 / 0.05),
+    0 22px 44px -24px rgb(27 31 59 / 0.35);
 }
 
-/* Diagonal "batik-ish" weave used behind cards */
-@utility weave {
-  background-image:
-    repeating-linear-gradient(45deg, rgb(255 243 220 / 0.035) 0 1px, transparent 1px 14px),
-    repeating-linear-gradient(-45deg, rgb(255 243 220 / 0.035) 0 1px, transparent 1px 14px);
+/* confetti dots */
+@utility dots {
+  background-image: radial-gradient(rgb(27 31 59 / 0.09) 1.6px, transparent 1.8px);
+  background-size: 26px 26px;
+}
+
+@utility dots-light {
+  background-image: radial-gradient(rgb(255 255 255 / 0.16) 1.6px, transparent 1.8px);
+  background-size: 26px 26px;
+}
+
+/* highlighter swipe behind a word; colour via --hl */
+@utility marker {
+  background-image: linear-gradient(
+    transparent 58%,
+    var(--hl, var(--color-sun)) 58%,
+    var(--hl, var(--color-sun)) 92%,
+    transparent 92%
+  );
+  padding-inline: 0.08em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 
 /* ---------- Damar Kurung lantern (3D paper box) ---------- */
@@ -220,9 +261,9 @@ body {
   position: absolute;
   inset: 0;
   backface-visibility: hidden;
-  border: 3px solid var(--color-ink);
-  background: radial-gradient(ellipse at 50% 52%, #fff7dd 0%, #ffd58f 42%, #f2a03c 82%, #d9731f 100%);
-  box-shadow: inset 0 0 18px rgb(120 40 0 / 0.45);
+  border: 3px solid var(--color-wood);
+  background: radial-gradient(ellipse at 50% 52%, #fff9e6 0%, #ffe0a3 45%, #ffbf5c 85%, #f5a03c 100%);
+  box-shadow: inset 0 0 14px rgb(160 70 0 / 0.3);
 }
 
 .lantern-face:nth-child(1) {
@@ -244,27 +285,27 @@ body {
   top: calc(50% - var(--w) / 2);
   width: var(--w);
   height: var(--w);
-  background: #3a1a0e;
-  border: 3px solid var(--color-ink);
+  background: #5a2a14;
+  border: 3px solid var(--color-wood);
 }
 .lantern-cap.top {
   transform: rotateX(90deg) translateZ(calc(var(--h) / 2));
 }
 .lantern-cap.bottom {
   transform: rotateX(-90deg) translateZ(calc(var(--h) / 2));
-  background: radial-gradient(circle, #ffcf7a 0%, #b4561a 70%);
+  background: radial-gradient(circle, #ffd27a 0%, #c8661f 70%);
 }
 
 .lantern.unlit .lantern-face {
-  background: radial-gradient(ellipse at 50% 52%, #9aa3c7 0%, #6b739a 60%, #4a5178 100%);
-  box-shadow: inset 0 0 18px rgb(0 0 0 / 0.5);
+  background: radial-gradient(ellipse at 50% 52%, #f3f4f8 0%, #d9dce7 60%, #bfc3d4 100%);
+  box-shadow: inset 0 0 14px rgb(0 0 0 / 0.12);
 }
 .lantern.unlit .lantern-face svg {
   opacity: 0.55;
   filter: grayscale(1);
 }
 .lantern.unlit .lantern-cap.bottom {
-  background: #3a3f5c;
+  background: #9aa0b8;
 }
 
 /* ---------- Radix dialog animations ---------- */
@@ -282,13 +323,11 @@ body {
   animation: var(--animate-sheet-out);
 }
 
-/* ---------- Radix slider ---------- */
-
 .slider-root {
   position: relative;
   display: flex;
   align-items: center;
-  height: 28px;
+  height: 30px;
   touch-action: none;
   user-select: none;
 }

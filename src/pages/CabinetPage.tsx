@@ -5,7 +5,6 @@ import { CABINET_DATA, type CabinetDivision, type CabinetMember } from "@/data/c
 import { useReveal } from "@/hooks/useReveal";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { scrollToElement } from "@/lib/motion";
-import { cn } from "@/lib/utils";
 
 const TOTAL = CABINET_DATA.reduce((n, d) => n + d.members.length, 0);
 
@@ -28,46 +27,52 @@ export default function CabinetPage() {
   }, []);
 
   return (
-    <div ref={root} className="bg-night-950">
+    <div ref={root} className="bg-cream">
       <PageHero
+        emoji="🙌"
         eyebrow="Struktur Kabinet KPK 2026"
-        title={<>Orang-orang di balik <em>cahaya</em> KPK.</>}
+        title={<>Kenalan sama <em>panitia</em> KPK!</>}
         description="Orang-orang hebat di balik layar yang siap menggebrak masa depan!"
       >
-        <p data-reveal className="mt-8 flex gap-6 text-sm text-paper/80">
-          <span>
-            <span className="font-display text-2xl font-semibold text-paper">{TOTAL}</span> panitia
+        <div data-reveal className="mt-8 flex flex-wrap gap-3">
+          <span className="rounded-2xl bg-white px-4 py-2.5 font-bold text-ink ring-2 ring-ink/10">
+            <span className="font-display text-2xl font-extrabold text-its">{TOTAL}</span> panitia
           </span>
-          <span>
-            <span className="font-display text-2xl font-semibold text-paper">{CABINET_DATA.length}</span> divisi
+          <span className="rounded-2xl bg-white px-4 py-2.5 font-bold text-ink ring-2 ring-ink/10">
+            <span className="font-display text-2xl font-extrabold text-pink">{CABINET_DATA.length}</span> divisi
           </span>
-        </p>
+        </div>
       </PageHero>
 
       {/* division jump bar */}
-      <nav aria-label="Divisi" className="sticky top-0 z-30 border-y border-paper/10 bg-night-950/85 backdrop-blur-xl">
-        <div className="scrollbar-none mx-auto flex max-w-7xl gap-2 overflow-x-auto px-6 py-3 [scrollbar-width:none]">
-          {CABINET_DATA.map((d) => (
-            <button
-              key={d.id}
-              type="button"
-              onClick={() => {
-                const el = document.getElementById(`divisi-${d.id}`);
-                if (el) scrollToElement(el);
-              }}
-              className={cn(
-                "shrink-0 rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap ring-1 transition",
-                active === d.id ? "text-night-950 ring-transparent" : "text-paper/75 ring-paper/15 hover:text-paper hover:ring-paper/30",
-              )}
-              style={active === d.id ? { background: DIVISION_COLOR[d.color] } : undefined}
-            >
-              {d.name}
-            </button>
-          ))}
+      <nav aria-label="Divisi" className="sticky top-0 z-30 border-y-2 border-ink/10 bg-cream/90 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-6 py-3 [scrollbar-width:none]">
+          {CABINET_DATA.map((d) => {
+            const c = DIVISION_COLOR[d.color];
+            const on = active === d.id;
+            return (
+              <button
+                key={d.id}
+                type="button"
+                onClick={() => {
+                  const el = document.getElementById(`divisi-${d.id}`);
+                  if (el) scrollToElement(el);
+                }}
+                className={`shrink-0 rounded-full px-4 py-2 text-sm font-bold whitespace-nowrap ring-2 transition duration-200 ease-bounce ${on ? "ring-transparent" : "ring-ink/10"}`}
+                style={
+                  on
+                    ? { background: c.solid, color: d.color === "yellow" || d.color === "orange" ? "#1b1f3b" : "#fff", boxShadow: `0 3px 0 ${c.shadow}` }
+                    : { background: "#fff" }
+                }
+              >
+                <span className={on ? "" : "text-ink/75"}>{d.name}</span>
+              </button>
+            );
+          })}
         </div>
       </nav>
 
-      <div className="mx-auto max-w-7xl space-y-28 px-6 py-20 md:py-28">
+      <div className="mx-auto max-w-7xl space-y-24 px-6 py-16 md:py-24">
         {CABINET_DATA.map((d, i) => (
           <Division key={d.id} division={d} index={i} />
         ))}
@@ -86,18 +91,21 @@ function Division({ division, index }: { division: CabinetDivision; index: numbe
 
   return (
     <section id={`divisi-${division.id}`} className="scroll-mt-40">
-      <div data-reveal className="mb-10 flex flex-wrap items-end justify-between gap-4 border-b border-paper/10 pb-6">
+      <div data-reveal className="mb-8 flex flex-wrap items-center gap-4">
+        <span
+          className="grid h-14 w-14 place-items-center rounded-2xl font-display text-xl font-extrabold text-ink"
+          style={{ background: color.solid, boxShadow: `0 4px 0 ${color.shadow}` }}
+        >
+          {String(index + 1).padStart(2, "0")}
+        </span>
         <div>
-          <p className="eyebrow" style={{ color }}>
-            Divisi {String(index + 1).padStart(2, "0")}
-          </p>
-          <h2 className="mt-2 font-display text-4xl font-semibold tracking-tight text-paper md:text-5xl">{division.name}</h2>
+          <h2 className="font-display text-4xl leading-none font-extrabold tracking-tight text-ink md:text-5xl">{division.name}</h2>
+          <p className="mt-1 text-sm font-semibold text-ink-soft">{division.members.length} orang</p>
         </div>
-        <p className="text-sm text-mist">{division.members.length} orang</p>
       </div>
 
       {core.length > 0 && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {core.map((m) => (
             <MemberCard key={m.id} member={m} color={color} featured={groups.size > 0} />
           ))}
@@ -105,13 +113,12 @@ function Division({ division, index }: { division: CabinetDivision; index: numbe
       )}
 
       {[...groups].map(([name, members]) => (
-        <div key={name} className="mt-12">
-          <p data-reveal className="mb-5 flex items-center gap-3 text-sm font-medium text-paper/80">
-            <span className="h-2 w-2 rounded-full" style={{ background: color, boxShadow: `0 0 10px ${color}` }} />
+        <div key={name} className="mt-10">
+          <p data-reveal className="mb-5 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-bold text-ink" style={{ background: color.light }}>
             {name}
-            <span className="text-mist">· {members.length}</span>
+            <span className="rounded-full bg-white px-2 py-0.5 text-xs">{members.length}</span>
           </p>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-5">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             {members.map((m) => (
               <MemberCard key={m.id} member={m} color={color} />
             ))}

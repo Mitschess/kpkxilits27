@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Award, Instagram, Medal, Search, Trophy } from "lucide-react";
-import Lantern, { SCENE_SETS } from "@/components/lantern/Lantern";
+import { Instagram, Search } from "lucide-react";
+import Bus from "@/components/deco/Bus";
 import PageHero from "@/components/ui/PageHero";
 import { buttonClass } from "@/components/ui/button";
 import { INSTAGRAM_URL } from "@/data/home";
@@ -13,9 +13,9 @@ import { cn } from "@/lib/utils";
 const SHOW_RANKING = false;
 
 const PODIUM = [
-  { icon: Trophy, color: "#ffd76a", label: "Juara 1" },
-  { icon: Medal, color: "#cfd6f5", label: "Juara 2" },
-  { icon: Award, color: "#f0a36b", label: "Juara 3" },
+  { medal: "🥇", bg: "bg-sun-light", ring: "ring-sun" },
+  { medal: "🥈", bg: "bg-its-light", ring: "ring-sky" },
+  { medal: "🥉", bg: "bg-orange-light", ring: "ring-orange" },
 ];
 
 export default function RankingPage() {
@@ -24,31 +24,38 @@ export default function RankingPage() {
   useReveal(root);
 
   return (
-    <div ref={root} className="bg-night-950">
+    <div ref={root} className="bg-cream">
       <PageHero
+        emoji="🏆"
         eyebrow="Pengumuman Ranking"
-        title={<>Ranking <em>TOSN</em> 2026.</>}
+        title={<>Ranking <em>TOSN</em> 2026</>}
         description="Selamat untuk para peserta TOSN terbaik! Berikut adalah daftar ranking peserta."
       />
-      <div className="mx-auto max-w-5xl px-6 pb-28">{SHOW_RANKING ? <RankingBoard /> : <ComingSoon />}</div>
+      <div className="mx-auto max-w-5xl px-6 pb-24">{SHOW_RANKING ? <RankingBoard /> : <ComingSoon />}</div>
     </div>
   );
 }
 
 function ComingSoon() {
   return (
-    <div data-reveal className="glass relative overflow-hidden rounded-[2rem] p-8 text-center md:p-14">
-      <div className="mx-auto mt-10 w-fit">
-        <Lantern size={84} faces={SCENE_SETS[0]} lit={false} spinDuration={30} />
+    <div data-reveal className="card relative overflow-hidden p-8 text-center md:p-14">
+      <div className="dots absolute inset-0 opacity-60" />
+      <div className="relative mx-auto h-24 w-full max-w-sm overflow-hidden rounded-2xl bg-sky-light">
+        <div className="absolute inset-x-0 bottom-0 h-6 border-t-[3px] border-ink bg-[#4a5070]">
+          <div className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 animate-marquee bg-[repeating-linear-gradient(90deg,#fff_0_18px,transparent_18px_36px)] [width:200%]" />
+        </div>
+        <div className="absolute bottom-3 left-1/2 w-24 -translate-x-1/2">
+          <Bus className="w-full" />
+        </div>
       </div>
-      <p className="eyebrow mt-20 text-lantern">Segera hadir</p>
-      <h2 className="mt-3 font-display text-4xl font-semibold tracking-tight text-paper md:text-5xl">
-        Lampionnya belum <em className="font-serif font-normal text-gold italic">dinyalakan</em>.
-      </h2>
-      <p className="mx-auto mt-4 max-w-md text-mist">
-        Data ranking sedang dalam proses rekapitulasi. Pantengin Instagram KPK yaaa! 🔥
+      <p className="relative mt-8 inline-block -rotate-2 rounded-full bg-sun px-4 py-1.5 font-hand text-xl font-bold text-ink shadow-[0_3px_0_#e5a500]">
+        Segera hadir!
       </p>
-      <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className={buttonClass("lantern", "mt-8")}>
+      <h2 className="relative mt-4 font-display text-4xl font-extrabold tracking-tight text-ink md:text-5xl">
+        Rankingnya masih <span className="marker">otw</span> 🚌
+      </h2>
+      <p className="relative mx-auto mt-4 max-w-md text-ink-soft">Data ranking sedang dalam proses rekapitulasi. Pantengin Instagram KPK yaaa! 🔥</p>
+      <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className={buttonClass("pink", "relative mt-8")}>
         <Instagram size={18} /> Pantau di Instagram
       </a>
     </div>
@@ -89,15 +96,15 @@ function RankingBoard() {
   if (loading)
     return (
       <div className="flex justify-center py-20">
-        <div className="h-12 w-12 animate-spin rounded-full border-2 border-lantern border-t-transparent" />
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-its border-t-transparent" />
       </div>
     );
 
   if (error)
     return (
-      <div className="glass rounded-3xl p-8 text-center">
-        <p className="text-[#ff8cc0]">{error}</p>
-        <button type="button" onClick={() => void load()} className={buttonClass("ghost", "mt-6")}>
+      <div className="card p-8 text-center">
+        <p className="font-semibold text-pink-dark">{error}</p>
+        <button type="button" onClick={() => void load()} className={buttonClass("white", "mt-6")}>
           Coba lagi
         </button>
       </div>
@@ -106,63 +113,57 @@ function RankingBoard() {
   return (
     <div className="space-y-8">
       <div className="relative">
-        <Search size={18} className="pointer-events-none absolute top-1/2 left-5 -translate-y-1/2 text-mist" />
+        <Search size={18} className="pointer-events-none absolute top-1/2 left-5 -translate-y-1/2 text-ink-soft" />
         <input
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Cari nama atau asal sekolah…"
           aria-label="Cari peserta"
-          className="w-full rounded-full bg-night-800/70 py-4 pr-5 pl-12 text-paper ring-1 ring-paper/15 outline-none placeholder:text-mist/70 focus:ring-2 focus:ring-lantern"
+          className="w-full rounded-full bg-white py-4 pr-5 pl-12 font-medium text-ink ring-2 ring-ink/10 outline-none placeholder:text-ink-soft/70 focus:ring-its"
         />
       </div>
 
       {!q && rows.length >= 3 && (
-        <div className="grid gap-3 md:grid-cols-3">
-          {rows.slice(0, 3).map((p, i) => {
-            const { icon: Icon, color, label } = PODIUM[i];
-            return (
-              <div key={p.id} className="relative overflow-hidden rounded-3xl bg-night-800 p-6 ring-1 ring-paper/10">
-                <div className="absolute -top-16 -right-16 h-40 w-40 rounded-full opacity-30 blur-3xl" style={{ background: color }} />
-                <Icon size={28} style={{ color }} aria-label={label} />
-                <p className="mt-6 font-display text-xl font-semibold text-paper">{p.nama}</p>
-                <p className="mt-1 text-sm text-mist">{p.asal_sekolah}</p>
-                <p className="mt-4 font-display text-3xl font-semibold" style={{ color }}>
-                  {p.skor}
-                </p>
-              </div>
-            );
-          })}
+        <div className="grid gap-4 md:grid-cols-3">
+          {rows.slice(0, 3).map((p, i) => (
+            <div key={p.id} className={cn("rounded-[1.75rem] p-6 ring-2", PODIUM[i].bg, PODIUM[i].ring)}>
+              <p className="text-4xl" aria-label={`Juara ${i + 1}`}>
+                {PODIUM[i].medal}
+              </p>
+              <p className="mt-4 font-display text-xl font-extrabold text-ink">{p.nama}</p>
+              <p className="mt-1 text-sm font-medium text-ink-soft">{p.asal_sekolah}</p>
+              <p className="mt-4 font-display text-3xl font-extrabold text-its">{p.skor}</p>
+            </div>
+          ))}
         </div>
       )}
 
       {rows.length === 0 ? (
-        <p className="glass rounded-3xl p-8 text-center text-mist">
-          {q ? `Tidak ada peserta ditemukan untuk “${search}”` : "Belum ada data ranking peserta"}
-        </p>
+        <p className="card p-8 text-center text-ink-soft">{q ? `Tidak ada peserta ditemukan untuk “${search}”` : "Belum ada data ranking peserta"}</p>
       ) : (
-        <div className="glass overflow-hidden rounded-3xl">
+        <div className="card overflow-hidden">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-paper/10 text-mist">
+            <thead className="bg-its text-white">
               <tr>
-                <th className="px-5 py-4 font-medium">Rank</th>
-                <th className="px-5 py-4 font-medium">Nama</th>
-                <th className="hidden px-5 py-4 font-medium sm:table-cell">Asal sekolah</th>
-                <th className="px-5 py-4 text-right font-medium">Skor</th>
+                <th className="px-5 py-4 font-bold">Rank</th>
+                <th className="px-5 py-4 font-bold">Nama</th>
+                <th className="hidden px-5 py-4 font-bold sm:table-cell">Asal sekolah</th>
+                <th className="px-5 py-4 text-right font-bold">Skor</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-paper/5">
+            <tbody className="divide-y-2 divide-ink/5">
               {rows.map((p) => (
-                <tr key={p.id} className="transition hover:bg-paper/[0.03]">
-                  <td className={cn("px-5 py-4 font-display font-semibold tabular-nums", p.ranking <= 3 ? "text-gold" : "text-paper/70")}>
-                    #{p.ranking}
+                <tr key={p.id} className="transition hover:bg-cream">
+                  <td className="px-5 py-4 font-display font-extrabold text-ink tabular-nums">
+                    {p.ranking <= 3 ? PODIUM[p.ranking - 1].medal : `#${p.ranking}`}
                   </td>
-                  <td className="px-5 py-4 text-paper">
+                  <td className="px-5 py-4 font-semibold text-ink">
                     {p.nama}
-                    <span className="block text-xs text-mist sm:hidden">{p.asal_sekolah}</span>
+                    <span className="block text-xs font-medium text-ink-soft sm:hidden">{p.asal_sekolah}</span>
                   </td>
-                  <td className="hidden px-5 py-4 text-mist sm:table-cell">{p.asal_sekolah}</td>
-                  <td className="px-5 py-4 text-right font-display font-semibold text-paper tabular-nums">{p.skor}</td>
+                  <td className="hidden px-5 py-4 text-ink-soft sm:table-cell">{p.asal_sekolah}</td>
+                  <td className="px-5 py-4 text-right font-display font-extrabold text-its tabular-nums">{p.skor}</td>
                 </tr>
               ))}
             </tbody>

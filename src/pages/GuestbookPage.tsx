@@ -4,7 +4,7 @@ import { Send } from "lucide-react";
 import PageHero from "@/components/ui/PageHero";
 import { buttonClass } from "@/components/ui/button";
 import { supabase, type GuestbookMessage } from "@/lib/supabase";
-import { safeStorage, cn } from "@/lib/utils";
+import { safeStorage } from "@/lib/utils";
 import { useReveal } from "@/hooks/useReveal";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
@@ -13,14 +13,14 @@ const COUNT_KEY = "kpk_gb_count";
 const MAX_MESSAGES = 2;
 const COLORS = ["yellow", "pink", "blue", "green", "orange", "purple"];
 
-// stored color name → lantern light
-const GLOW: Record<string, string> = {
-  yellow: "#ffd76a",
-  pink: "#ec3b92",
-  blue: "#6f8fff",
-  green: "#22b89a",
-  orange: "#ffb23f",
-  purple: "#a78bfa",
+// stored colour name → bubble colours
+const BUBBLE: Record<string, { bg: string; dot: string }> = {
+  yellow: { bg: "#fff2c4", dot: "#ffc93c" },
+  pink: { bg: "#ffe1ef", dot: "#ff4fa3" },
+  blue: { bg: "#dfe7ff", dot: "#2f5bea" },
+  green: { bg: "#d3f7eb", dot: "#1fbf9a" },
+  orange: { bg: "#ffe4d1", dot: "#ff8a3d" },
+  purple: { bg: "#ece6ff", dot: "#9b7bff" },
 };
 
 function getDeviceId() {
@@ -102,31 +102,32 @@ export default function GuestbookPage() {
   }
 
   return (
-    <div ref={root} className="bg-night-950">
+    <div ref={root} className="bg-cream">
       <PageHero
+        emoji="💌"
         eyebrow="Buku Tamu"
-        title={<>Tinggalkan <em>jejak</em> cahayamu.</>}
+        title={<>Tinggalkan <em>jejakmu</em> di sini!</>}
         description="Hai! Seneng kamu mampir ke sini ✨ Yuk tinggalin pesan buat kenang-kenangan~"
       />
 
-      <div className="mx-auto grid max-w-7xl items-start gap-8 px-6 pb-28 lg:grid-cols-[400px_1fr]">
+      <div className="mx-auto grid max-w-7xl items-start gap-8 px-6 pb-24 lg:grid-cols-[400px_1fr]">
         {/* form */}
-        <div data-reveal className="glass rounded-[2rem] p-6 md:p-8 lg:sticky lg:top-28">
+        <div data-reveal className="card p-6 md:p-8 lg:sticky lg:top-28">
           <div className="flex items-center justify-between">
-            <h2 className="font-display text-2xl font-semibold text-paper">Tulis pesan</h2>
-            {remaining > 0 && <span className="rounded-full bg-paper/[0.08] px-3 py-1 text-xs text-mist">Sisa kuota: {remaining}</span>}
+            <h2 className="font-display text-2xl font-extrabold text-ink">✍️ Tulis pesan</h2>
+            {remaining > 0 && <span className="rounded-full bg-sun-light px-3 py-1 text-xs font-bold text-ink ring-2 ring-sun">Sisa kuota: {remaining}</span>}
           </div>
 
           {remaining <= 0 ? (
-            <div className="mt-6 rounded-2xl bg-paper/[0.04] px-6 py-10 text-center ring-1 ring-paper/10">
+            <div className="mt-6 rounded-[1.5rem] bg-mint-light px-6 py-10 text-center">
               <p className="text-4xl">🙌</p>
-              <p className="mt-3 font-display text-lg font-semibold text-paper">Makasih udah nulis!</p>
-              <p className="mt-1 text-sm text-mist">Kuota nulismu sudah habis.</p>
+              <p className="mt-3 font-display text-lg font-extrabold text-ink">Makasih udah nulis!</p>
+              <p className="mt-1 text-sm text-ink-soft">Kuota nulismu sudah habis.</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="mt-6 space-y-5">
               <div>
-                <label htmlFor="gb-name" className="eyebrow text-paper/60">
+                <label htmlFor="gb-name" className="text-sm font-bold text-ink">
                   Namamu
                 </label>
                 <input
@@ -137,11 +138,11 @@ export default function GuestbookPage() {
                   placeholder="Nama panggilan…"
                   maxLength={20}
                   disabled={sending}
-                  className="mt-2 w-full rounded-2xl bg-night-950/60 px-4 py-3.5 text-paper ring-1 ring-paper/15 outline-none placeholder:text-mist/60 focus:ring-2 focus:ring-lantern"
+                  className="mt-2 w-full rounded-2xl bg-cream px-4 py-3.5 font-medium text-ink ring-2 ring-ink/10 outline-none placeholder:text-ink-soft/60 focus:ring-its"
                 />
               </div>
               <div>
-                <label htmlFor="gb-message" className="eyebrow text-paper/60">
+                <label htmlFor="gb-message" className="text-sm font-bold text-ink">
                   Pesanmu
                 </label>
                 <textarea
@@ -152,24 +153,26 @@ export default function GuestbookPage() {
                   maxLength={200}
                   rows={5}
                   disabled={sending}
-                  className="mt-2 w-full resize-none rounded-2xl bg-night-950/60 px-4 py-3.5 text-paper ring-1 ring-paper/15 outline-none placeholder:text-mist/60 focus:ring-2 focus:ring-lantern"
+                  className="mt-2 w-full resize-none rounded-2xl bg-cream px-4 py-3.5 font-medium text-ink ring-2 ring-ink/10 outline-none placeholder:text-ink-soft/60 focus:ring-its"
                 />
-                <p className="mt-1 text-right text-xs text-mist">{text.length}/200</p>
+                <p className="mt-1 text-right text-xs font-semibold text-ink-soft">{text.length}/200</p>
               </div>
 
               {error && (
-                <p role="alert" className="rounded-xl bg-magenta/10 px-4 py-3 text-sm text-[#ff8cc0] ring-1 ring-magenta/30">
+                <p role="alert" className="rounded-2xl bg-pink-light px-4 py-3 text-sm font-semibold text-pink-dark">
                   {error}
                 </p>
               )}
               {success && (
-                <p role="status" className="rounded-xl bg-teal/10 px-4 py-3 text-sm text-mint ring-1 ring-teal/30">
-                  Pesan berhasil dikirim! ✨
+                <p role="status" className="rounded-2xl bg-mint-light px-4 py-3 text-sm font-semibold text-mint-dark">
+                  Pesan berhasil dikirim! 🎉
                 </p>
               )}
 
-              <button type="submit" disabled={sending || !supabase} className={buttonClass("lantern", "w-full")}>
-                {sending ? "Mengirim…" : (
+              <button type="submit" disabled={sending || !supabase} className={buttonClass("blue", "w-full")}>
+                {sending ? (
+                  "Mengirim…"
+                ) : (
                   <>
                     Kirim pesan <Send size={16} />
                   </>
@@ -182,27 +185,28 @@ export default function GuestbookPage() {
         {/* messages */}
         <div>
           <div className="mb-6 flex items-center justify-between">
-            <h2 className="font-display text-2xl font-semibold text-paper">Pesan masuk</h2>
-            <span className="text-sm text-mist">{messages.length} pesan</span>
+            <h2 className="font-display text-2xl font-extrabold text-ink">💬 Pesan masuk</h2>
+            <span className="rounded-full bg-white px-3 py-1 text-sm font-bold text-ink ring-2 ring-ink/10">{messages.length} pesan</span>
           </div>
 
           {loading ? (
             <div className="grid gap-4 sm:grid-cols-2">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-36 animate-pulse rounded-3xl bg-paper/[0.04]" />
+                <div key={i} className="h-32 animate-pulse rounded-[1.5rem] bg-white" />
               ))}
             </div>
           ) : messages.length === 0 ? (
-            <div className="rounded-[2rem] border border-dashed border-paper/15 px-6 py-16 text-center">
-              <p className="font-display text-xl font-semibold text-paper">Belum ada pesan nih.</p>
-              <p className="mt-2 text-mist">Jadilah yang pertama menyalakan lampion di sini!</p>
+            <div className="rounded-[1.75rem] border-4 border-dashed border-ink/10 bg-white/60 px-6 py-16 text-center">
+              <p className="text-4xl">📭</p>
+              <p className="mt-3 font-display text-xl font-extrabold text-ink">Belum ada pesan nih.</p>
+              <p className="mt-1 text-ink-soft">Jadilah yang pertama nulis!</p>
             </div>
           ) : (
             <div className="columns-1 gap-4 sm:columns-2">
               <AnimatePresence initial={false}>
                 {messages.map((m) => (
-                  <motion.div key={m.id} layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-4 break-inside-avoid">
-                    <MessageCard message={m} />
+                  <motion.div key={m.id} layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="mb-4 break-inside-avoid">
+                    <MessageBubble message={m} />
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -214,23 +218,27 @@ export default function GuestbookPage() {
   );
 }
 
-function MessageCard({ message }: { message: GuestbookMessage }) {
-  const glow = GLOW[message.color] ?? GLOW.yellow;
+function MessageBubble({ message }: { message: GuestbookMessage }) {
+  const c = BUBBLE[message.color] ?? BUBBLE.yellow;
   const date = new Date(message.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
   return (
-    <article className={cn("relative overflow-hidden rounded-3xl bg-night-800/80 p-6 ring-1 ring-paper/10")}>
-      <div className="absolute -top-12 -left-12 h-32 w-32 rounded-full opacity-35 blur-2xl" style={{ background: glow }} />
-      <div className="absolute inset-x-6 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${glow}, transparent)` }} />
-      <p className="relative text-[1.05rem] leading-relaxed break-words text-paper/90">“{message.message}”</p>
-      <footer className="relative mt-5 flex items-center justify-between gap-3 text-sm">
-        <span className="flex items-center gap-2 font-medium text-paper">
-          <span className="h-2 w-2 rounded-full" style={{ background: glow, boxShadow: `0 0 10px ${glow}` }} />
-          {message.name}
-        </span>
-        <time dateTime={message.created_at} className="text-xs text-mist">
-          {date}
-        </time>
-      </footer>
+    <article className="flex gap-3">
+      <span
+        className="grid h-10 w-10 shrink-0 place-items-center rounded-full border-[3px] border-white font-display font-extrabold text-white shadow-[0_3px_0_rgb(27_31_59/0.12)]"
+        style={{ background: c.dot }}
+        aria-hidden="true"
+      >
+        {message.name.trim().charAt(0).toUpperCase()}
+      </span>
+      <div className="min-w-0 flex-1 rounded-[1.4rem] rounded-tl-md p-4" style={{ background: c.bg }}>
+        <p className="flex items-baseline justify-between gap-3">
+          <span className="truncate font-bold text-ink">{message.name}</span>
+          <time dateTime={message.created_at} className="shrink-0 text-xs font-semibold text-ink-soft">
+            {date}
+          </time>
+        </p>
+        <p className="mt-1.5 leading-relaxed break-words text-ink">{message.message}</p>
+      </div>
     </article>
   );
 }
