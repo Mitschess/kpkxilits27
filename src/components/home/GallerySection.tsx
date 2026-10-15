@@ -26,7 +26,7 @@ export default function GallerySection() {
     <section id="galeri" className="relative bg-cream py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeading
-          stop="07"
+          stop="06"
           emoji="📸"
           label="Galeri"
           title={<>Keseruan dari <em>tahun lalu</em>!</>}

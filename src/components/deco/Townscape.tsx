@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const INK = "#1b1f3b";
@@ -46,16 +47,129 @@ function Palm({ x }: { x: number }) {
   );
 }
 
+
+// Beyond the main scene: the Java Sea with fishing boats on the left,
+// more of the city on the right. Only visible when the strip is wider than 1440:200.
+const BOATS = [
+  { x: -140, sail: "#ff4fa3" },
+  { x: -470, sail: "#ffc93c" },
+  { x: -820, sail: "#1fbf9a" },
+  { x: -1180, sail: "#9b7bff" },
+];
+
+const CITY = [
+  { x: 1452, w: 64, h: 66, fill: "#dfe7ff" },
+  { x: 1526, w: 48, h: 104, fill: "#6cc4ff" },
+  { x: 1586, w: 78, h: 58, fill: "#fff2c4" },
+  { x: 1716, w: 58, h: 122, fill: "#2f5bea" },
+  { x: 1786, w: 86, h: 76, fill: "#ffe1ef" },
+  { x: 1934, w: 68, h: 108, fill: "#d3f7eb" },
+  { x: 2014, w: 58, h: 66, fill: "#ece6ff" },
+  { x: 2122, w: 80, h: 132, fill: "#dfe7ff" },
+  { x: 2214, w: 60, h: 86, fill: "#ffe4d1" },
+  { x: 2330, w: 70, h: 112, fill: "#6cc4ff" },
+  { x: 2412, w: 84, h: 62, fill: "#fff2c4" },
+  { x: 2560, w: 60, h: 124, fill: "#2f5bea" },
+  { x: 2632, w: 76, h: 80, fill: "#d3f7eb" },
+  { x: 2780, w: 66, h: 100, fill: "#ffe1ef" },
+  { x: 2858, w: 80, h: 70, fill: "#dfe7ff" },
+];
+
+function Boat({ x, sail }: { x: number; sail: string }) {
+  const y = 176;
+  return (
+    <g>
+      <path d={`M${x - 34} ${y} H${x + 34} L${x + 24} ${y + 12} H${x - 24} Z`} fill="#ff8a3d" {...S} />
+      <line x1={x} y1={y} x2={x} y2={y - 46} stroke={INK} strokeWidth="2.5" />
+      <path d={`M${x + 2} ${y - 44} L${x + 30} ${y - 6} H${x + 2} Z`} fill={sail} {...S} />
+      <path d={`M${x - 2} ${y - 34} L${x - 22} ${y - 6} H${x - 2} Z`} fill="#fff" {...S} />
+    </g>
+  );
+}
+
+function Building({ x, w, h, fill }: (typeof CITY)[number]) {
+  const top = BASE - h;
+  const dark = fill === "#2f5bea" || fill === "#6cc4ff";
+  const cols = Math.max(2, Math.floor((w - 12) / 18));
+  const rows = Math.max(2, Math.floor((h - 18) / 20));
+  return (
+    <g>
+      <rect x={x} y={top} width={w} height={h} rx="4" fill={fill} {...S} />
+      {Array.from({ length: rows }, (_, r) =>
+        Array.from({ length: cols }, (_, c) => (
+          <rect
+            key={`${r}-${c}`}
+            x={x + 8 + c * ((w - 16) / cols)}
+            y={top + 10 + r * 20}
+            width={(w - 16) / cols - 6}
+            height="10"
+            rx="2"
+            fill={(r + c) % 3 === 0 ? "#ffc93c" : dark ? "#dfe7ff" : "#ffffff"}
+          />
+        )),
+      )}
+    </g>
+  );
+}
+
 /**
  * Cartoon Gresik from the harbour to the kampung, ending at the ITS campus:
  * cranes and a container ship, the cement plant, Masjid Jami', colourful houses.
  */
 export default function Townscape({ className }: { className?: string }) {
+  const ref = useRef<SVGSVGElement>(null);
+  // Never crop the top of the scene: on strips wider than the drawing, scale to the
+  // height and let the extra sea/city fill the sides; on narrow ones, crop the sides.
+  const [fit, setFit] = useState<"meet" | "slice">("slice");
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      setFit(height > 0 && width / height > 1440 / 200 ? "meet" : "slice");
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   return (
-    <svg viewBox="0 0 1440 200" preserveAspectRatio="xMidYMax slice" className={cn("pointer-events-none block w-full", className)} aria-hidden="true">
+    <svg
+      ref={ref}
+      viewBox="0 0 1440 200"
+      preserveAspectRatio={`xMidYMax ${fit}`}
+      className={cn("pointer-events-none block w-full", className)}
+      aria-hidden="true"
+    >
       {/* hills */}
+      <path d="M-1700 200 Q -1300 110 -900 150 T -100 130 T 40 150 V 200 Z" fill="#bfeeb8" />
+      <path d="M1400 200 Q 1800 100 2200 150 T 3000 120 T 3200 140 V 200 Z" fill="#bfeeb8" />
       <path d="M-20 200 Q 220 70 520 150 T 1000 130 T 1460 120 V 200 Z" fill="#bfeeb8" />
       <path d="M-20 200 Q 300 120 640 170 T 1460 150 V 200 Z" fill="#9be38f" />
+      <path d="M1400 200 Q 1900 140 2400 170 T 3200 160 V 200 Z" fill="#9be38f" />
+
+      {/* sea with fishing boats (left of the harbour) */}
+      <rect x="-1700" y="166" width="1740" height="26" fill="#6cc4ff" {...S} />
+      <path
+        d={`M-1690 178 ${Array.from({ length: 58 }, () => "q 7.5 -6 15 0 q 7.5 6 15 0").join(" ")}`}
+        stroke="#fff"
+        strokeWidth="2.5"
+        fill="none"
+        opacity="0.8"
+      />
+      {BOATS.map((b) => (
+        <Boat key={b.x} {...b} />
+      ))}
+
+      {/* more of the city (right of the campus) */}
+      <Tree x={1694} r={18} />
+      <Palm x={1906} />
+      <Tree x={2104} r={16} color="#2bb673" />
+      <Tree x={2306} r={20} />
+      <Palm x={2530} />
+      <Tree x={2756} r={18} color="#2bb673" />
+      {CITY.map((b) => (
+        <Building key={b.x} {...b} />
+      ))}
 
       {/* harbour crane */}
       <rect x="62" y="52" width="12" height="140" fill="#ff8a3d" {...S} />
@@ -133,7 +247,7 @@ export default function Townscape({ className }: { className?: string }) {
       <Palm x={1400} />
 
       {/* ground */}
-      <rect x="-10" y={BASE} width="1460" height="20" fill="#7fd47a" {...S} />
+      <rect x="-1700" y={BASE} width="4900" height="20" fill="#7fd47a" {...S} />
     </svg>
   );
 }

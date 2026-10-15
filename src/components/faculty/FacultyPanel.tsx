@@ -19,8 +19,8 @@ const slide = {
 };
 
 /** Contents of the faculty sheet: department list ⇄ department detail. */
-export default function FacultyPanel({ faculty }: { faculty: Faculty }) {
-  const [dept, setDept] = useState<Department | null>(null);
+export default function FacultyPanel({ faculty, initialDept = null }: { faculty: Faculty; initialDept?: Department | null }) {
+  const [dept, setDept] = useState<Department | null>(initialDept);
   const top = useRef<HTMLDivElement>(null);
 
   const open = (d: Department | null) => {

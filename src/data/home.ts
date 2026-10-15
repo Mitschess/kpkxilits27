@@ -8,7 +8,6 @@ export const ROUTE_STOPS = [
   { id: "tentang", label: "Tentang" },
   { id: "filosofi", label: "Filosofi" },
   { id: "acara", label: "Acara" },
-  { id: "fakultas", label: "Fakultas" },
   { id: "kalkulator", label: "Ngekos/Laju" },
   { id: "mitos", label: "Mitos" },
   { id: "galeri", label: "Galeri" },

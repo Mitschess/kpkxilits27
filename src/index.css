@@ -69,10 +69,10 @@
   }
   @keyframes spin-y {
     from {
-      transform: rotateX(-12deg) rotateY(0deg);
+      transform: rotateY(0deg);
     }
     to {
-      transform: rotateX(-12deg) rotateY(360deg);
+      transform: rotateY(360deg);
     }
   }
   @keyframes flicker {
@@ -250,11 +250,20 @@ body {
   perspective: 900px;
 }
 
+/* looking slightly down onto the lantern */
+.lantern-tilt {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(-12deg);
+}
+
+/* only ever turns around the vertical axis */
 .lantern-cube {
   position: absolute;
   inset: 0;
   transform-style: preserve-3d;
-  transform: rotateX(-12deg) rotateY(var(--ry, -28deg));
+  transform: rotateY(var(--ry, -28deg));
 }
 
 .lantern-face {
@@ -288,8 +297,13 @@ body {
   background: #5a2a14;
   border: 3px solid var(--color-wood);
 }
+/* open top: you look into the lit box, with the cross brace the cord is tied to */
 .lantern-cap.top {
   transform: rotateX(90deg) translateZ(calc(var(--h) / 2));
+  background:
+    linear-gradient(var(--color-wood), var(--color-wood)) center / 100% 4px no-repeat,
+    linear-gradient(var(--color-wood), var(--color-wood)) center / 4px 100% no-repeat,
+    radial-gradient(circle, #fff6d2 0%, #ffd27a 50%, #e8912f 100%);
 }
 .lantern-cap.bottom {
   transform: rotateX(-90deg) translateZ(calc(var(--h) / 2));
@@ -304,7 +318,8 @@ body {
   opacity: 0.55;
   filter: grayscale(1);
 }
-.lantern.unlit .lantern-cap.bottom {
+.lantern.unlit .lantern-cap.bottom,
+.lantern.unlit .lantern-cap.top {
   background: #9aa0b8;
 }
 
@@ -330,6 +345,37 @@ body {
   height: 30px;
   touch-action: none;
   user-select: none;
+}
+
+/* Cartoon cursors, mouse/trackpad only (touch screens never show one). Kept outside
+   the Tailwind layers so they win over utilities like `cursor-pointer`. */
+@media (hover: hover) and (pointer: fine) {
+  html {
+    cursor: url("./assets/cursors/arrow.svg") 4 3, auto;
+  }
+  a[href],
+  button:not(:disabled),
+  summary,
+  select,
+  label[for],
+  [role="button"],
+  [role="option"],
+  [role="tab"],
+  [role="slider"],
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="range"],
+  .cursor-pointer {
+    cursor: url("./assets/cursors/pointer.svg") 12 3, pointer;
+  }
+  :disabled {
+    cursor: url("./assets/cursors/arrow.svg") 4 3, default;
+  }
+  input:not([type="checkbox"], [type="radio"], [type="range"], [type="button"], [type="submit"]),
+  textarea,
+  [contenteditable="true"] {
+    cursor: text;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

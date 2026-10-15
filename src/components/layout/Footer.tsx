@@ -12,11 +12,11 @@ const EXPLORE = [
   { label: "Tentang KPK", to: "/#tentang" },
   { label: "Filosofi Logo", to: "/#filosofi" },
   { label: "Rangkaian Acara", to: "/#acara" },
-  { label: "Fakultas", to: "/#fakultas" },
   { label: "Ngekos vs Laju", to: "/#kalkulator" },
 ];
 
 const PAGES = [
+  { label: "Fakultas & Departemen", to: "/fakultas" },
   { label: "Struktur Kabinet", to: "/kabinet" },
   { label: "Pengumuman Ranking", to: "/ranking" },
   { label: "Buku Tamu", to: "/guestbook" },

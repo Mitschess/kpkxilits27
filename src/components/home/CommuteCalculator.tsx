@@ -1,7 +1,8 @@
 import { useState } from "react";
 import * as Slider from "@radix-ui/react-slider";
-import { Bike, Bus as BusIcon, Car, ChevronDown, Home, MapPin, type LucideIcon } from "lucide-react";
+import { Bike, Bus as BusIcon, Car, Home, type LucideIcon } from "lucide-react";
 import Bus from "@/components/deco/Bus";
+import DistrictPicker from "./DistrictPicker";
 import AnimatedNumber from "@/components/ui/AnimatedNumber";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { GRESIK_DISTRICTS } from "@/data/home";
@@ -45,7 +46,7 @@ export default function CommuteCalculator() {
     <section id="kalkulator" className="dots relative overflow-hidden bg-mint-light py-24 md:py-32">
       <div className="relative mx-auto max-w-7xl px-6">
         <SectionHeading
-          stop="05"
+          stop="04"
           emoji="🧮"
           label="Ngekos vs Laju"
           highlight="#ffffff"
@@ -56,27 +57,7 @@ export default function CommuteCalculator() {
         <div className="mt-12 grid gap-5 lg:grid-cols-[1fr_1.15fr]">
           {/* inputs */}
           <div data-reveal className="card p-6 md:p-8">
-            <label htmlFor="district" className="flex items-center gap-2 font-display text-lg font-extrabold text-ink">
-              <span className="grid h-8 w-8 place-items-center rounded-xl bg-pink-light text-pink">
-                <MapPin size={16} />
-              </span>
-              Rumahmu di kecamatan mana?
-            </label>
-            <div className="relative mt-3">
-              <select
-                id="district"
-                value={district.name}
-                onChange={(e) => setDistrict(GRESIK_DISTRICTS.find((d) => d.name === e.target.value) ?? GRESIK_DISTRICTS[0])}
-                className="w-full cursor-pointer appearance-none rounded-2xl bg-cream py-4 pr-12 pl-5 font-semibold text-ink ring-2 ring-ink/10 transition outline-none hover:ring-ink/25 focus:ring-its"
-              >
-                {GRESIK_DISTRICTS.map((d) => (
-                  <option key={d.name} value={d.name}>
-                    {d.name} ({d.km} km)
-                  </option>
-                ))}
-              </select>
-              <ChevronDown size={18} className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-ink-soft" />
-            </div>
+            <DistrictPicker value={district} onChange={setDistrict} />
 
             <fieldset className="mt-8">
               <legend className="flex items-center gap-2 font-display text-lg font-extrabold text-ink">

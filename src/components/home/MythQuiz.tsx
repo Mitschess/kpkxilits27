@@ -67,7 +67,7 @@ export default function MythQuiz() {
       <div className="relative mx-auto max-w-7xl px-6">
         <SectionHeading
           align="center"
-          stop="06"
+          stop="05"
           emoji="🤔"
           label="Mitos vs Fakta"
           highlight="#ffffff"

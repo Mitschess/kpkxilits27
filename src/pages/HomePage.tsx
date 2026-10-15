@@ -8,7 +8,7 @@ import CommuteCalculator from "@/components/home/CommuteCalculator";
 import MythQuiz from "@/components/home/MythQuiz";
 import GallerySection from "@/components/home/GallerySection";
 import RouteRail from "@/components/home/RouteRail";
-import FacultySection from "@/components/faculty/FacultySection";
+import FacultyTeaser from "@/components/home/FacultyTeaser";
 import { useReveal } from "@/hooks/useReveal";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
@@ -25,7 +25,7 @@ export default function HomePage() {
       <AboutSection />
       <PhilosophySection />
       <EventsSection />
-      <FacultySection />
+      <FacultyTeaser />
       <CommuteCalculator />
       <MythQuiz />
       <GallerySection />

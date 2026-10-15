@@ -4,6 +4,7 @@ import { MotionConfig } from "framer-motion";
 import RootLayout from "@/components/layout/RootLayout";
 import HomePage from "@/pages/HomePage";
 
+const FacultiesPage = lazy(() => import("@/pages/FacultiesPage"));
 const CabinetPage = lazy(() => import("@/pages/CabinetPage"));
 const RankingPage = lazy(() => import("@/pages/RankingPage"));
 const GuestbookPage = lazy(() => import("@/pages/GuestbookPage"));
@@ -17,6 +18,7 @@ export default function App() {
         <Routes>
           <Route element={<RootLayout />}>
             <Route index element={<HomePage />} />
+            <Route path="fakultas" element={<FacultiesPage />} />
             <Route path="kabinet" element={<CabinetPage />} />
             <Route path="ranking" element={<RankingPage />} />
             <Route path="guestbook" element={<GuestbookPage />} />

@@ -2,6 +2,7 @@ import { Suspense, useEffect, useRef } from "react";
 import { Outlet, useLocation } from "react-router";
 import { motion } from "framer-motion";
 import { ScrollTrigger, startSmoothScroll } from "@/lib/motion";
+import ClickBurst from "./ClickBurst";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import LoadingScreen from "./LoadingScreen";
@@ -43,6 +44,7 @@ export default function RootLayout() {
   return (
     <>
       <ScrollManager />
+      <ClickBurst />
       <LoadingScreen />
       <Navbar />
       <main ref={mainRef} className="relative">

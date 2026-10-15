@@ -9,13 +9,6 @@ export default function Road({ className }: { className?: string }) {
       <div className="absolute bottom-[38%] left-0 w-24 animate-drive md:w-32">
         <Bus className="w-full drop-shadow-[0_6px_0_rgb(27_31_59/0.25)]" />
       </div>
-      {/* road signs */}
-      <span className="absolute bottom-full left-4 mb-2 rounded-lg border-[3px] border-ink bg-mint px-2.5 py-1 text-xs font-extrabold text-white md:left-8 md:text-sm">
-        Gresik
-      </span>
-      <span className="absolute right-4 bottom-full mb-2 rounded-lg border-[3px] border-ink bg-its px-2.5 py-1 text-xs font-extrabold text-white md:right-8 md:text-sm">
-        ITS Surabaya →
-      </span>
     </div>
   );
 }

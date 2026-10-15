@@ -43,7 +43,8 @@ export default function PhilosophySection() {
           },
         });
         // a slight angle keeps two faces in view, so it reads as a box
-        tl.fromTo(cube.current, { rotateX: -12, rotateY: -22 }, { rotateY: -22 - 90 * (STEPS - 1), ease: "none" });
+        // (the tilt is on a wrapper inside <Lantern>; only spin the vertical axis here)
+        tl.fromTo(cube.current, { rotateY: -22 }, { rotateY: -22 - 90 * (STEPS - 1), ease: "none" });
         trigger.current = tl.scrollTrigger ?? null;
         return () => {
           setPinned(false);

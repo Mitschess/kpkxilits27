@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import { ArrowLeft } from "lucide-react";
-import Lantern, { SCENE_SETS } from "@/components/lantern/Lantern";
+import { SCENE_SETS } from "@/components/lantern/Lantern";
 import Bunting from "@/components/deco/Bunting";
 import Clouds from "@/components/deco/Clouds";
 import { cn } from "@/lib/utils";
@@ -20,18 +20,15 @@ export default function PageHero({ emoji, eyebrow, title, description, children,
   return (
     <header className={cn("relative isolate overflow-hidden bg-gradient-to-b from-[#bfe6ff] via-[#e6f5ff] to-cream pt-28 pb-16 md:pt-32 md:pb-24", className)}>
       <Clouds className="-z-10" count={3} />
-      <Bunting className="absolute inset-x-0 top-[72px] -z-10 opacity-90 md:top-[78px]" flags={22} sag={30} />
-
-      <div className="pointer-events-none absolute top-0 right-[7%] hidden lg:block" aria-hidden="true">
-        <div className="mt-36 animate-bob">
-          <Lantern size={86} faces={SCENE_SETS[1]} />
-        </div>
-      </div>
-      <div className="pointer-events-none absolute top-0 right-[22%] hidden lg:block" aria-hidden="true">
-        <div className="mt-28 animate-bob" style={{ animationDelay: "-2s" }}>
-          <Lantern size={54} faces={SCENE_SETS[2]} spinDuration={16} />
-        </div>
-      </div>
+      <Bunting
+        className="absolute inset-x-0 top-[72px] md:top-[78px]"
+        flags={30}
+        sag={26}
+        lanterns={[
+          { at: 0.74, size: 50, faces: SCENE_SETS[2], className: "hidden lg:block" },
+          { at: 0.9, size: 72, faces: SCENE_SETS[1], className: "hidden lg:block" },
+        ]}
+      />
 
       <div className="relative mx-auto max-w-7xl px-6 pt-10">
         <Link
