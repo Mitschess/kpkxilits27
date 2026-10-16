@@ -145,11 +145,12 @@ export default function CommuteCalculator() {
                 <AnimatedNumber value={r.monthlyKm} format={(n) => `${Math.round(n).toLocaleString("id-ID")} km/bulan`} className="text-ink" />
               </p>
             </div>
-            <div className="relative mt-4 h-16 lg:mt-2 lg:h-[clamp(2.75rem,7.5vh,4rem)]">
+            {/* the road bleeds out of the padding, edge to edge of the rounded box */}
+            <div className="relative -mx-5 mt-4 h-16 lg:-mx-4 lg:mt-2 lg:h-[clamp(2.75rem,7.5vh,4rem)]">
               <div className="absolute inset-x-0 bottom-0 h-6 border-t-[3px] border-ink bg-[#4a5070]">
                 <div className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 bg-[repeating-linear-gradient(90deg,#fff_0_18px,transparent_18px_36px)]" />
               </div>
-              <div className="absolute bottom-3 left-0 w-20 animate-drive [animation-duration:7s]">
+              <div className="absolute bottom-3 w-20 animate-drive-across">
                 <Bus className="w-full" />
               </div>
             </div>

@@ -50,6 +50,7 @@
   --animate-drift: drift 80s linear infinite;
   --animate-sway: sway 3.2s ease-in-out infinite;
   --animate-drive: drive 16s linear infinite;
+  --animate-drive-across: drive-across 6s linear infinite;
   --animate-bump: bump 0.5s ease-in-out infinite;
   --animate-wiggle: wiggle 2.6s ease-in-out infinite;
   --animate-swing: swing 4s ease-in-out infinite;
@@ -57,6 +58,7 @@
   --animate-fade-out: fade-out 0.2s ease-in;
   --animate-sheet-in: sheet-in 0.5s var(--ease-out-expo);
   --animate-sheet-out: sheet-out 0.25s ease-in;
+  --animate-twinkle: twinkle 2.6s ease-in-out infinite;
 
   @keyframes bob {
     0%,
@@ -120,6 +122,17 @@
       transform: translateX(110vw);
     }
   }
+  /* across its own box (not the whole screen), entering and leaving at the edges */
+  @keyframes drive-across {
+    from {
+      left: 0;
+      transform: translateX(-100%);
+    }
+    to {
+      left: 100%;
+      transform: translateX(0);
+    }
+  }
   @keyframes bump {
     0%,
     100% {
@@ -165,6 +178,17 @@
   @keyframes sheet-out {
     to {
       transform: translateX(100%);
+    }
+  }
+  @keyframes twinkle {
+    0%,
+    100% {
+      opacity: 0.25;
+      transform: scale(0.8);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.15);
     }
   }
 }
@@ -398,6 +422,16 @@ body {
   [contenteditable="true"] {
     cursor: text;
   }
+}
+
+/* Intro: an illustration redrawn as glowing gold line art. The intro tweens
+   stroke-dashoffset to 0 so every shape draws itself in. */
+.lineart * {
+  fill: none !important;
+  stroke: #ffd75e !important;
+  stroke-width: 1.4 !important;
+  stroke-dasharray: 1400;
+  stroke-dashoffset: 1400;
 }
 
 @media (prefers-reduced-motion: reduce) {

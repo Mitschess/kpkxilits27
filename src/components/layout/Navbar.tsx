@@ -122,7 +122,7 @@ export default function Navbar() {
                 <li key={l.label}>
                   <Link
                     to={l.to}
-                    onClick={(e) => toTop(e)}
+                    onClick={l.to === "/" ? (e) => toTop(e) : undefined}
                     className={linkClass(active)}
                     aria-current={active ? "page" : undefined}
                   >
@@ -177,7 +177,7 @@ export default function Navbar() {
                     to={l.to}
                     onClick={(e) => {
                       setOpen(false);
-                      toTop(e, 80);
+                      if (l.to === "/") toTop(e, 80);
                     }}
                     className="flex items-center gap-4 border-b-2 border-dashed border-ink/10 py-3 font-display text-3xl font-extrabold tracking-tight text-ink"
                   >

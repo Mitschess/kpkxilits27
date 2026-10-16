@@ -1,34 +1,103 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router";
 import { ArrowRight } from "lucide-react";
+import confetti from "canvas-confetti";
 import { SCENE_SETS } from "@/components/lantern/Lantern";
 import Bunting from "@/components/deco/Bunting";
 import Clouds from "@/components/deco/Clouds";
 import Road from "@/components/deco/Road";
 import Townscape from "@/components/deco/Townscape";
 import { buttonClass } from "@/components/ui/button";
-import { gsap, useGSAP } from "@/lib/motion";
+import { gsap, prefersReducedMotion, useGSAP } from "@/lib/motion";
 import { onIntroDone } from "@/lib/intro";
 
 
 
+const FIREWORK_COLORS = ["#ffc93c", "#ff4fa3", "#1fbf9a", "#2f5bea", "#ff8a3d", "#9b7bff", "#ffffff"];
+
 export default function Hero() {
   const root = useRef<HTMLElement>(null);
+  const badgeRef = useRef<HTMLDivElement>(null);
+  const fireworksRef = useRef<HTMLCanvasElement>(null);
+
+  // Fireworks from behind the logo while the pointer is on it (a tap gives a short show).
+  useEffect(() => {
+    const badge = badgeRef.current;
+    const canvas = fireworksRef.current;
+    if (!badge || !canvas || prefersReducedMotion()) return;
+    const fire = confetti.create(canvas, { resize: true, useWorker: false });
+    let timer = 0;
+    let tapTimer = 0;
+    // The canvas is 1.8x the badge, so the white disc is about 0.24 of it from the centre:
+    // shells burst just outside it and the sparks fall back behind the logo.
+    const burst = () => {
+      const angle = Math.random() * Math.PI * 2;
+      const r = 0.27 + Math.random() * 0.1;
+      fire({
+        origin: { x: 0.5 + Math.cos(angle) * r, y: 0.5 + Math.sin(angle) * r * 0.85 },
+        // a tight ring of sparks that opens fast, hangs, then drifts down
+        particleCount: 55,
+        spread: 360,
+        startVelocity: 20 + Math.random() * 8,
+        gravity: 0.45,
+        decay: 0.89,
+        ticks: 85,
+        scalar: 1.05,
+        shapes: ["star", "circle"],
+        colors: FIREWORK_COLORS,
+      });
+    };
+    const start = () => {
+      if (timer) return;
+      burst();
+      window.setTimeout(burst, 160);
+      timer = window.setInterval(burst, 480);
+    };
+    const stop = () => {
+      window.clearInterval(timer);
+      timer = 0;
+    };
+    const onEnter = (e: PointerEvent) => e.pointerType === "mouse" && start();
+    const onLeave = (e: PointerEvent) => e.pointerType === "mouse" && stop();
+    const onTap = (e: PointerEvent) => {
+      if (e.pointerType === "mouse") return;
+      start();
+      window.clearTimeout(tapTimer);
+      tapTimer = window.setTimeout(stop, 1600);
+    };
+    badge.addEventListener("pointerenter", onEnter);
+    badge.addEventListener("pointerleave", onLeave);
+    badge.addEventListener("pointerdown", onTap);
+    return () => {
+      stop();
+      window.clearTimeout(tapTimer);
+      fire.reset();
+      badge.removeEventListener("pointerenter", onEnter);
+      badge.removeEventListener("pointerleave", onLeave);
+      badge.removeEventListener("pointerdown", onTap);
+    };
+  }, []);
 
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.set("[data-hero-word]", { yPercent: 120, rotate: 6 });
-        gsap.set("[data-hero-fade]", { opacity: 0, y: 24 });
-        gsap.set("[data-hero-badge]", { scale: 0.4, rotate: -25, opacity: 0 });
+        // Grab the elements now: `play` runs later from the intro, whose own GSAP
+        // scope would otherwise be used to resolve selector strings.
+        const q = gsap.utils.selector(root);
+        const words = q("[data-hero-word]");
+        const fades = q("[data-hero-fade]");
+        const badge = q("[data-hero-badge]");
+        gsap.set(words, { yPercent: 120, rotate: 6 });
+        gsap.set(fades, { opacity: 0, y: 24 });
+        gsap.set(badge, { scale: 0.4, rotate: -25, opacity: 0 });
 
         const play = () => {
           gsap
             .timeline({ defaults: { ease: "back.out(1.7)" } })
-            .to("[data-hero-word]", { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.09 }, 0)
-            .to("[data-hero-badge]", { scale: 1, rotate: 0, opacity: 1, duration: 1.1, ease: "elastic.out(1, 0.6)" }, 0.15)
-            .to("[data-hero-fade]", { opacity: 1, y: 0, duration: 0.8, stagger: 0.08, ease: "power3.out" }, 0.45);
+            .to(words, { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.09 }, 0)
+            .to(badge, { scale: 1, rotate: 0, opacity: 1, duration: 1.1, ease: "elastic.out(1, 0.6)" }, 0.15)
+            .to(fades, { opacity: 1, y: 0, duration: 0.8, stagger: 0.08, ease: "power3.out" }, 0.45);
         };
         return onIntroDone(play);
       });
@@ -110,44 +179,22 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* logo badge */}
-        <div className="relative mx-auto" style={{ width: "min(100%, 30rem, 52vh)" }}>
+        {/* logo badge; fireworks go off behind it while you point at it */}
+        <div ref={badgeRef} className="relative mx-auto" style={{ width: "min(100%, 30rem, 52vh)" }}>
+          {/* outside the 3D wrapper so it can sit behind the badge (perspective makes a stacking context) */}
+          <canvas ref={fireworksRef} className="pointer-events-none absolute -inset-[40%] -z-10 h-[180%] w-[180%]" aria-hidden="true" />
           <div className="[perspective:1000px]">
             <div data-hero-badge>
               <div data-tilt className="relative aspect-square">
-                {/* A still badge: one phrase arched over the top, one under the bottom, both
-                    reading upright (the bottom arc runs left to right through the bottom). */}
-                <svg viewBox="0 0 400 400" className="absolute inset-0 h-full w-full" aria-hidden="true">
-                  <defs>
-                    <path id="badge-top" d="M 24,200 A 176,176 0 0 1 376,200" />
-                    <path id="badge-bottom" d="M 9,200 A 191,191 0 0 0 391,200" />
-                  </defs>
-                  <g fontFamily="Bricolage Grotesque Variable, sans-serif" fontWeight="800" fontSize="21" fill="#1b1f3b" letterSpacing="3">
-                    <text textAnchor="middle">
-                      <textPath href="#badge-top" startOffset="50%">
-                        KAMPUS PULANG KAMPUNG
-                      </textPath>
-                    </text>
-                    <text textAnchor="middle">
-                      <textPath href="#badge-bottom" startOffset="50%">
-                        AYO KENALAN SAMA ITS!
-                      </textPath>
-                    </text>
-                  </g>
-                  <g fill="#ff4fa3" fontSize="22" textAnchor="middle" dominantBaseline="central">
-                    <text x="17" y="200">✦</text>
-                    <text x="383" y="200">✦</text>
-                  </g>
-                </svg>
-                <div className="absolute inset-[13%] rounded-full bg-white shadow-[0_10px_0_rgb(27_31_59/0.1),0_30px_60px_-20px_rgb(47_91_234/0.45)] ring-4 ring-white" />
-                <div className="absolute inset-[13%] rounded-full bg-[conic-gradient(from_0deg,#fff2c4,#ffe1ef,#d3f7eb,#e2f3ff,#fff2c4)] opacity-70" />
+                <div className="absolute inset-[7%] rounded-full bg-white shadow-[0_10px_0_rgb(27_31_59/0.1),0_30px_60px_-20px_rgb(47_91_234/0.45)] ring-4 ring-white" />
+                <div className="absolute inset-[7%] rounded-full bg-[conic-gradient(from_0deg,#fff2c4,#ffe1ef,#d3f7eb,#e2f3ff,#fff2c4)] opacity-70" />
                 <img
                   src="/images/logo/hero.webp"
                   alt="Logo KPK × Ini Lho ITS! 2026"
                   width={810}
                   height={810}
                   fetchPriority="high"
-                  className="absolute inset-[11%] h-[78%] w-[78%] scale-110 object-contain drop-shadow-[0_10px_14px_rgb(27_31_59/0.18)]"
+                  className="absolute inset-[4%] h-[92%] w-[92%] scale-110 object-contain drop-shadow-[0_10px_14px_rgb(27_31_59/0.18)]"
                 />
               </div>
             </div>
