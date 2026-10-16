@@ -69,7 +69,7 @@ function FacultyKeys() {
           return (
             <li key={f.id}>
               <Link
-                to="/fakultas"
+                to={`/fakultas?f=${f.id}`}
                 aria-label={`${f.name} (${abbr})`}
                 onMouseEnter={() => setActive(f)}
                 onFocus={() => setActive(f)}

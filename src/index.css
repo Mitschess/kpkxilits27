@@ -59,6 +59,7 @@
   --animate-sheet-in: sheet-in 0.5s var(--ease-out-expo);
   --animate-sheet-out: sheet-out 0.25s ease-in;
   --animate-twinkle: twinkle 2.6s ease-in-out infinite;
+  --animate-blink: blink 0.6s steps(2, jump-none) infinite;
 
   @keyframes bob {
     0%,
@@ -178,6 +179,11 @@
   @keyframes sheet-out {
     to {
       transform: translateX(100%);
+    }
+  }
+  @keyframes blink {
+    50% {
+      opacity: 0.35;
     }
   }
   @keyframes twinkle {

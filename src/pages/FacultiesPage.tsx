@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useSearchParams } from "react-router";
 import { ChevronRight, Landmark, Search, Sparkles, X } from "lucide-react";
 import FacultyCards from "@/components/faculty/FacultyCards";
 import FacultyPanel from "@/components/faculty/FacultyPanel";
@@ -55,6 +56,22 @@ export default function FacultiesPage() {
     setFaculty(f);
     setDept(d);
     setOpen(true);
+  };
+
+  // `/fakultas?f=fteic` (from the home page's faculty keys) opens that faculty straight away
+  const [params] = useSearchParams();
+  const requested = params.get("f");
+  const [handled, setHandled] = useState<string | null>(null);
+  if (requested !== handled) {
+    setHandled(requested);
+    const f = FACULTIES.find((x) => x.id === requested);
+    if (f) show(f);
+  }
+  const onSheetChange = (next: boolean) => {
+    setOpen(next);
+    // Drop ?f= quietly once it's closed, so a refresh doesn't reopen it. Not through the
+    // router: a navigation would also scroll the page back to the top.
+    if (!next && requested) window.history.replaceState(window.history.state, "", window.location.pathname);
   };
 
   return (
@@ -157,7 +174,7 @@ export default function FacultiesPage() {
         )}
       </section>
 
-      <Sheet open={open} onOpenChange={setOpen} title={dept?.name ?? faculty?.name ?? "Fakultas"}>
+      <Sheet open={open} onOpenChange={onSheetChange} title={dept?.name ?? faculty?.name ?? "Fakultas"}>
         {faculty && <FacultyPanel key={`${faculty.id}-${dept?.slug ?? ""}`} faculty={faculty} initialDept={dept} />}
       </Sheet>
     </div>
