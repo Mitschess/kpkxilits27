@@ -118,22 +118,25 @@ export const GALLERY: GalleryPhoto[] = [
   { src: "/images/gallery/seru-banget.webp", caption: "Seru banget!" },
 ];
 
-/** Estimated average distance from each Gresik district to ITS (km, one way). */
+/**
+ * Road distance from each Gresik district's main town to ITS Sukolilo (km, one way):
+ * the shortest route on OpenStreetMap (OSRM), checked October 2026.
+ */
 export const GRESIK_DISTRICTS = [
-  { name: "Balongpanggang", km: 41 },
-  { name: "Benjeng", km: 35 },
+  { name: "Balongpanggang", km: 42 },
+  { name: "Benjeng", km: 39 },
   { name: "Bungah", km: 45 },
-  { name: "Cerme", km: 30 },
-  { name: "Driyorejo", km: 24 },
-  { name: "Duduk Sampeyan", km: 40 },
-  { name: "Dukun", km: 60 },
-  { name: "Gresik Kota", km: 30 },
-  { name: "Kebomas", km: 24 },
-  { name: "Kedamean", km: 45 },
-  { name: "Manyar", km: 34 },
-  { name: "Menganti", km: 26 },
-  { name: "Panceng", km: 66 },
-  { name: "Sidayu", km: 50 },
-  { name: "Ujung Pangkah", km: 60 },
-  { name: "Wringinanom", km: 40 },
+  { name: "Cerme", km: 33 },
+  { name: "Driyorejo", km: 30 },
+  { name: "Duduk Sampeyan", km: 42 },
+  { name: "Dukun", km: 55 },
+  { name: "Gresik Kota", km: 28 },
+  { name: "Kebomas", km: 30 },
+  { name: "Kedamean", km: 39 },
+  { name: "Manyar", km: 35 },
+  { name: "Menganti", km: 32 },
+  { name: "Panceng", km: 70 },
+  { name: "Sidayu", km: 53 },
+  { name: "Ujung Pangkah", km: 63 },
+  { name: "Wringinanom", km: 41 },
 ];

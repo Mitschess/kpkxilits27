@@ -1,6 +1,6 @@
 import { useState } from "react";
 import * as Slider from "@radix-ui/react-slider";
-import { Bike, Bus as BusIcon, Calculator, CalendarDays, Car, ChevronDown, GraduationCap, Home, House, MapPin, type LucideIcon } from "lucide-react";
+import { Bike, Bus as BusIcon, Calculator, CalendarDays, Car, ChevronDown, GraduationCap, Home, House, MapPin, Scale, type LucideIcon } from "lucide-react";
 import SectionFade from "@/components/deco/SectionFade";
 import Bus from "@/components/deco/Bus";
 import DistrictPicker from "./DistrictPicker";
@@ -17,22 +17,31 @@ const TRANSPORTS: { id: Transport; label: string; icon: LucideIcon }[] = [
   { id: "umum", label: "Umum", icon: BusIcon },
 ];
 
-// Rough monthly-cost assumptions (shown to the visitor below the form)
-const FUEL_PRICE = 10_000; // Rp / liter
+// Rough monthly-cost assumptions (listed in the fold under the result)
+const FUEL_PRICE = 10_000; // Rp / liter (Pertalite)
 const KM_PER_LITER = { motor: 40, mobil: 12 };
-const SERVICE_COST_PER_KM = 200;
-const PUBLIC_TRANSPORT_PER_DAY = 30_000;
+// Upkeep spread over the km it lasts: oil, periodic service, tyres, brakes (and the CVT belt on a scooter)
+const UPKEEP_PER_KM = { motor: 100, mobil: 300 };
+// Public transport: a fixed part (ojek/angkot to the bus line) plus a part that grows with distance
+const PUBLIC_TRANSPORT_BASE = 15_000; // Rp / day
+const PUBLIC_TRANSPORT_PER_KM = 250; // Rp / km travelled
+const WEEKS_PER_MONTH = 4;
 const KOS_AVG_COST = 850_000;
+// closer than this and we don't pick a side
+const TIE_MARGIN = 50_000;
 
 const rupiah = (n: number) => `Rp${Math.round(n).toLocaleString("id-ID")}`;
 
 function estimate(km: number, transport: Transport, daysPerWeek: number) {
-  const monthlyKm = km * 2 * daysPerWeek * 4;
+  const trips = daysPerWeek * WEEKS_PER_MONTH;
+  const monthlyKm = km * 2 * trips;
   const laju =
     transport === "umum"
-      ? PUBLIC_TRANSPORT_PER_DAY * daysPerWeek * 4
-      : (monthlyKm / KM_PER_LITER[transport]) * FUEL_PRICE + monthlyKm * SERVICE_COST_PER_KM;
-  return { laju: Math.round(laju), monthlyKm, ngekos: laju > KOS_AVG_COST, diff: Math.round(Math.abs(laju - KOS_AVG_COST)) };
+      ? (PUBLIC_TRANSPORT_BASE + km * 2 * PUBLIC_TRANSPORT_PER_KM) * trips
+      : (monthlyKm / KM_PER_LITER[transport]) * FUEL_PRICE + monthlyKm * UPKEEP_PER_KM[transport];
+  const diff = Math.round(Math.abs(laju - KOS_AVG_COST));
+  const verdict = diff < TIE_MARGIN ? "seimbang" : laju > KOS_AVG_COST ? "ngekos" : "laju";
+  return { laju: Math.round(laju), monthlyKm, verdict, diff };
 }
 
 export default function CommuteCalculator() {
@@ -151,7 +160,7 @@ export default function CommuteCalculator() {
             <CostRow
               icon={TRANSPORTS.find((t) => t.id === transport)!.icon}
               label="Biaya laju / bulan"
-              note={transport === "umum" ? "Ongkos angkutan umum" : "Bensin + servis"}
+              note={transport === "umum" ? "Ongkos angkutan umum" : "Bensin + perawatan"}
               value={r.laju}
               width={(r.laju / max) * 100}
               bar="bg-pink"
@@ -164,17 +173,38 @@ export default function CommuteCalculator() {
           <div
             className={cn(
               "mt-7 flex items-center gap-4 rounded-[1.5rem] p-5 transition-colors duration-500 lg:mt-[clamp(1rem,3vh,1.75rem)] lg:p-4",
-              r.ngekos ? "bg-pink text-white shadow-[0_5px_0_#db2b81]" : "bg-mint text-white shadow-[0_5px_0_#0f9a7a]",
+              r.verdict === "ngekos" && "bg-pink text-white shadow-[0_5px_0_#db2b81]",
+              r.verdict === "laju" && "bg-mint text-white shadow-[0_5px_0_#0f9a7a]",
+              r.verdict === "seimbang" && "bg-sun text-ink shadow-[0_5px_0_#e5a500]",
             )}
           >
             <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-white/25 lg:h-14 lg:w-14" aria-hidden="true">
-              {r.ngekos ? <House size={32} strokeWidth={2.25} /> : <TransportIcon size={32} strokeWidth={2.25} />}
+              {r.verdict === "ngekos" ? (
+                <House size={32} strokeWidth={2.25} />
+              ) : r.verdict === "laju" ? (
+                <TransportIcon size={32} strokeWidth={2.25} />
+              ) : (
+                <Scale size={32} strokeWidth={2.25} />
+              )}
             </span>
             <div>
-              <p className="eyebrow text-[0.68rem] text-white/80">Saran kami</p>
-              <p className="font-display text-4xl leading-none font-extrabold tracking-tight">Tim {r.ngekos ? "Ngekos" : "Laju"}!</p>
-              <p className="mt-1.5 text-sm font-medium text-white/95">
-                {r.ngekos ? (
+              <p className="eyebrow text-[0.68rem] opacity-80">Saran kami</p>
+              <p className="font-display text-4xl leading-none font-extrabold tracking-tight">
+                {r.verdict === "seimbang" ? "Seimbang!" : `Tim ${r.verdict === "ngekos" ? "Ngekos" : "Laju"}!`}
+              </p>
+              <p className="mt-1.5 text-sm font-medium opacity-95">
+                {r.verdict === "seimbang" ? (
+                  <>
+                    {r.diff === 0 ? (
+                      "Biayanya sama persis."
+                    ) : (
+                      <>
+                        Selisihnya cuma <AnimatedNumber value={r.diff} format={rupiah} className="font-extrabold" />/bulan.
+                      </>
+                    )}{" "}
+                    Pilih yang paling nyaman buatmu!
+                  </>
+                ) : r.verdict === "ngekos" ? (
                   <>
                     Laju lebih boros <AnimatedNumber value={r.diff} format={rupiah} className="font-extrabold" />/bulan. Mending ngekos, hemat waktu & tenaga!
                   </>
@@ -192,8 +222,10 @@ export default function CommuteCalculator() {
               <ChevronDown size={16} className="transition group-open:rotate-180" aria-hidden="true" />
             </summary>
             <p className="mt-2">
-              Bensin {rupiah(FUEL_PRICE)}/L · motor {KM_PER_LITER.motor} km/L · mobil {KM_PER_LITER.mobil} km/L · servis {rupiah(SERVICE_COST_PER_KM)}/km ·
-              angkutan umum {rupiah(PUBLIC_TRANSPORT_PER_DAY)}/hari · 4 minggu/bulan.
+              Bensin {rupiah(FUEL_PRICE)}/L · motor {KM_PER_LITER.motor} km/L · mobil {KM_PER_LITER.mobil} km/L · perawatan (oli, servis, ban,
+              rem) motor {rupiah(UPKEEP_PER_KM.motor)}/km, mobil {rupiah(UPKEEP_PER_KM.mobil)}/km · angkutan umum {rupiah(PUBLIC_TRANSPORT_BASE)}/hari +{" "}
+              {rupiah(PUBLIC_TRANSPORT_PER_KM)}/km · {WEEKS_PER_MONTH} minggu/bulan · jarak = rute jalan terpendek dari pusat kecamatan ke ITS
+              (OpenStreetMap). Mobil belum termasuk tol & parkir.
             </p>
             <p className="mt-1 font-hand text-base font-bold">Belum termasuk jajan cilok di jalan.</p>
           </details>
