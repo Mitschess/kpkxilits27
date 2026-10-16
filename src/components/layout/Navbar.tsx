@@ -1,60 +1,38 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpRight, House, Info, Instagram, Landmark, Menu, MessageSquareHeart, Trophy, Users, X, type LucideIcon } from "lucide-react";
+import { ArrowUpRight, House, Instagram, Landmark, Menu, MessageSquareHeart, Trophy, Users, X, type LucideIcon } from "lucide-react";
 import { buttonClass } from "@/components/ui/button";
 import { INSTAGRAM_URL } from "@/data/home";
 import { useScrollLock } from "@/hooks/useScrollLock";
+import { scrollToY } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
-// `section` links point into the home page and light up while that part is on screen.
-const LINKS: { label: string; to: string; icon: LucideIcon; section?: string }[] = [
-  { label: "Tentang", to: "/#tentang", icon: Info, section: "tentang" },
+const LINKS: { label: string; to: string; icon: LucideIcon }[] = [
+  { label: "Beranda", to: "/", icon: House },
   { label: "Fakultas", to: "/fakultas", icon: Landmark },
   { label: "Kabinet", to: "/kabinet", icon: Users },
   { label: "Ranking TOSN", to: "/ranking", icon: Trophy },
   { label: "Buku Tamu", to: "/guestbook", icon: MessageSquareHeart },
 ];
-const MOBILE_LINKS = [{ label: "Beranda", to: "/", icon: House }, ...LINKS];
 const MENU_COLORS = ["#ffc93c", "#2f5bea", "#ff4fa3", "#1fbf9a", "#ff8a3d", "#9b7bff"];
 
-// Which nav item a home-page section belongs to (others light nothing up)
-const SECTION_OWNER: Record<string, string> = { tentang: "tentang", filosofi: "tentang" };
-const WATCHED = ["beranda", "tentang", "filosofi", "acara", "kalkulator", "mitos", "galeri"];
-
-/** Scroll-spy for the home page: which nav section is in the middle of the screen. */
-function useActiveSection(enabled: boolean) {
-  const [active, setActive] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!enabled) return;
-    let io: IntersectionObserver | undefined;
-    // wait a frame so the page's sections are in the DOM
-    const frame = requestAnimationFrame(() => {
-      io = new IntersectionObserver(
-        (entries) => {
-          for (const e of entries) if (e.isIntersecting) setActive(SECTION_OWNER[e.target.id] ?? null);
-        },
-        { rootMargin: "-40% 0px -55% 0px" },
-      );
-      WATCHED.forEach((id) => {
-        const el = document.getElementById(id);
-        if (el) io!.observe(el);
-      });
-    });
-    return () => {
-      cancelAnimationFrame(frame);
-      io?.disconnect();
-      setActive(null);
-    };
-  }, [enabled]);
-
-  return active;
+/** Links to "/" while already on the home page glide back to the top instead of jumping. */
+function useHomeTop() {
+  const { pathname } = useLocation();
+  return (e: React.MouseEvent, delay = 0) => {
+    if (pathname !== "/") return;
+    e.preventDefault();
+    // the mobile menu unlocks scrolling as it closes; give it a moment first
+    if (delay) setTimeout(() => scrollToY(0), delay);
+    else scrollToY(0);
+  };
 }
 
 export function Logo({ className }: { className?: string }) {
+  const toTop = useHomeTop();
   return (
-    <Link to="/" className={cn("flex items-center gap-2.5", className)} aria-label="KPK × Ini Lho ITS! 2026 — Beranda">
+    <Link to="/" onClick={(e) => toTop(e)} className={cn("flex items-center gap-2.5", className)} aria-label="KPK × Ini Lho ITS! 2026 — Beranda">
       <span className="grid h-11 w-11 place-items-center overflow-hidden rounded-2xl bg-white ring-2 ring-ink/10">
         <img src="/images/logo/hero.webp" alt="" className="h-full w-full scale-[1.45] object-contain" />
       </span>
@@ -78,7 +56,8 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const { pathname } = useLocation();
-  const activeSection = useActiveSection(pathname === "/");
+  const toTop = useHomeTop();
+  const headerRef = useRef<HTMLElement>(null);
   useScrollLock(open);
 
   // glass after leaving the top; tuck away while scrolling down, return on scroll up
@@ -95,6 +74,19 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Tell sticky bars where the navbar ends (0 while it's tucked away) so they sit
+  // below it instead of being covered when it slides back in.
+  useEffect(() => {
+    const header = headerRef.current;
+    if (!header) return;
+    const root = document.documentElement;
+    const update = () => root.style.setProperty("--nav-offset", hidden && !open ? "0px" : `${header.offsetHeight}px`);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(header);
+    return () => ro.disconnect();
+  }, [hidden, open]);
+
   // close the mobile menu on navigation (render-time reset avoids an extra effect pass)
   const [lastPath, setLastPath] = useState(pathname);
   if (lastPath !== pathname) {
@@ -105,6 +97,7 @@ export default function Navbar() {
   return (
     <>
       <header
+        ref={headerRef}
         className={cn(
           "fixed inset-x-0 top-0 z-50 px-3 pt-3 transition-transform duration-500 ease-out-expo md:px-6 md:pt-4",
           hidden && !open && "-translate-y-[120%]",
@@ -124,10 +117,15 @@ export default function Navbar() {
 
           <ul className="hidden items-center gap-1 lg:flex">
             {LINKS.map((l) => {
-              const active = l.section ? activeSection === l.section : pathname === l.to;
+              const active = pathname === l.to;
               return (
                 <li key={l.label}>
-                  <Link to={l.to} className={linkClass(active)} aria-current={active ? (l.section ? "location" : "page") : undefined}>
+                  <Link
+                    to={l.to}
+                    onClick={(e) => toTop(e)}
+                    className={linkClass(active)}
+                    aria-current={active ? "page" : undefined}
+                  >
                     {l.label}
                   </Link>
                 </li>
@@ -168,7 +166,7 @@ export default function Navbar() {
             transition={{ duration: 0.25 }}
           >
             <ul className="relative space-y-1">
-              {MOBILE_LINKS.map((l, i) => (
+              {LINKS.map((l, i) => (
                 <motion.li
                   key={l.label}
                   initial={{ opacity: 0, y: 24 }}
@@ -177,7 +175,10 @@ export default function Navbar() {
                 >
                   <Link
                     to={l.to}
-                    onClick={() => setOpen(false)}
+                    onClick={(e) => {
+                      setOpen(false);
+                      toTop(e, 80);
+                    }}
                     className="flex items-center gap-4 border-b-2 border-dashed border-ink/10 py-3 font-display text-3xl font-extrabold tracking-tight text-ink"
                   >
                     <span

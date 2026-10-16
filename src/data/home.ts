@@ -82,26 +82,96 @@ export const VALUES: { name: string; art: ArtVariant; text: string; color: strin
 ];
 
 export interface MythFact {
-  myth: string;
-  fact: string;
+  /** What people say ("Katanya…") */
+  claim: string;
+  answer: "mitos" | "fakta";
+  /** Shown after guessing */
+  explanation: string;
 }
 
+/** The deck for the myth-or-fact game; each round draws a few cards at random. */
 export const MYTHS: MythFact[] = [
+  // --- mitos ---
   {
-    myth: "Masuk ITS isinya cowok tok?",
-    fact: "Salah! Ceweknya banyak banget, apalagi di Desain, Manajemen Bisnis, dan Fakultas Sains. Ratio makin seimbang kok, tenang aja!",
+    claim: "Masuk ITS isinya cowok tok?",
+    answer: "mitos",
+    explanation: "Salah! Ceweknya banyak banget, apalagi di Desain, Manajemen Bisnis, dan Fakultas Sains. Ratio makin seimbang kok, tenang aja!",
   },
   {
-    myth: "Biaya kuliah ITS mahal buanget?",
-    fact: "Tenang! UKT di ITS itu berjenjang sesuai gaji orang tua. Beasiswa KIP-K & ikatan alumni juga bejibun buat bantu kamu.",
+    claim: "Biaya kuliah ITS mahal buanget?",
+    answer: "mitos",
+    explanation: "Tenang! UKT di ITS itu berjenjang sesuai gaji orang tua. Beasiswa KIP-K & ikatan alumni juga bejibun buat bantu kamu.",
   },
   {
-    myth: "Anak ITS nggak bisa tidur?",
-    fact: "Tergantung jurusan dan manajemen waktu! Banyak kok yang aktif organisasi, lomba, tapi tetep glowing & tidur cukup 8 jam.",
+    claim: "Anak ITS nggak bisa tidur?",
+    answer: "mitos",
+    explanation: "Tergantung jurusan dan manajemen waktu! Banyak kok yang aktif organisasi, lomba, tapi tetep glowing & tidur cukup 8 jam.",
   },
   {
-    myth: "ITS cuma soal Teknik?",
-    fact: "Big NO! Ada Desain Produk, Interior, Manajemen Bisnis, Aktuaria, Vokasi, sampai Kedokteran ada LHO!!! ITS itu institut teknologi LENGKAP.",
+    claim: "ITS cuma soal Teknik?",
+    answer: "mitos",
+    explanation: "Big NO! Ada Desain Produk, Interior, Manajemen Bisnis, Aktuaria, Vokasi, sampai Kedokteran ada LHO!!! ITS itu institut teknologi LENGKAP.",
+  },
+  {
+    claim: "Anak IPS nggak bisa kuliah di ITS?",
+    answer: "mitos",
+    explanation: "Sekarang tes UTBK-SNBT udah nggak dipisah IPA–IPS lagi. Lagian ITS punya Manajemen Bisnis, Studi Pembangunan, Bisnis Digital, sampai Sains Komunikasi.",
+  },
+  {
+    claim: "Mau masuk Informatika harus udah jago coding?",
+    answer: "mitos",
+    explanation: "Nggak harus! Ngoding diajarin dari dasar di semester awal. Yang penting logika jalan, rasa penasaran tinggi, dan mau rajin latihan.",
+  },
+  {
+    claim: "Lulusan SMK nggak bisa masuk ITS?",
+    answer: "mitos",
+    explanation: "Bisa banget! Lulusan SMK bisa ikut jalur seleksi masuk ITS, termasuk ke Fakultas Vokasi yang prodinya dekat sama dunia industri.",
+  },
+  {
+    claim: "Masuk ITS cuma bisa lewat ujian tulis?",
+    answer: "mitos",
+    explanation: "Ada tiga jalur: SNBP (nilai rapor & prestasi), SNBT (UTBK), dan Seleksi Mandiri ITS. Siapin dari sekarang, pilih yang paling cocok!",
+  },
+  {
+    claim: "Kuliah di ITS isinya belajar doang, nggak ada kegiatan seru?",
+    answer: "mitos",
+    explanation: "ITS punya puluhan UKM: paduan suara, tari tradisional, band, olahraga, sampai tim robot dan mobil hemat energi. Dijamin nggak bosen!",
+  },
+  // --- fakta ---
+  {
+    claim: "ITS punya jurusan Kedokteran?",
+    answer: "fakta",
+    explanation: "Betul! Ada Fakultas Kedokteran dan Kesehatan dengan prodi Kedokteran dan Teknologi Kedokteran.",
+  },
+  {
+    claim: "Di ITS bisa belajar bikin kapal?",
+    answer: "fakta",
+    explanation: "Bisa! Fakultas Teknologi Kelautan punya Teknik Perkapalan, Teknik Sistem Perkapalan, Teknik Kelautan, sampai Teknik Lepas Pantai.",
+  },
+  {
+    claim: "Nama ‘Sepuluh Nopember’ diambil dari Hari Pahlawan?",
+    answer: "fakta",
+    explanation: "Iya! Namanya mengenang 10 November 1945, Pertempuran Surabaya yang sekarang diperingati sebagai Hari Pahlawan.",
+  },
+  {
+    claim: "Mahasiswa ITS bikin mobil sendiri buat lomba internasional?",
+    answer: "fakta",
+    explanation: "Tim mobil hemat energi ITS seperti Sapuangin dan Nogogeni rutin turun di kompetisi tingkat Asia sampai dunia.",
+  },
+  {
+    claim: "Di ITS ada jurusan khusus belajar AI?",
+    answer: "fakta",
+    explanation: "Ada! Namanya Rekayasa Kecerdasan Artifisial, di Fakultas Teknologi Elektro dan Informatika Cerdas.",
+  },
+  {
+    claim: "Suka gambar & desain bisa kuliah di ITS?",
+    answer: "fakta",
+    explanation: "Bisa! Ada Desain Produk Industri, Desain Interior, dan Desain Komunikasi Visual di Fakultas Desain Kreatif dan Bisnis Digital.",
+  },
+  {
+    claim: "ITS punya jurusan Aktuaria?",
+    answer: "fakta",
+    explanation: "Ada! Aktuaria di Fakultas Sains dan Analitika Data, belajar matematika risiko buat dunia asuransi dan keuangan.",
   },
 ];
 

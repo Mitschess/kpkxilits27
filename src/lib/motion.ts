@@ -18,6 +18,8 @@ let lenis: Lenis | null = null;
 export function startSmoothScroll() {
   if (lenis || prefersReducedMotion()) return;
   lenis = new Lenis({ lerp: 0.11, wheelMultiplier: 1 });
+  // an overlay may have asked for a lock before smooth scrolling existed
+  if (locks > 0) lenis.stop();
   lenis.on("scroll", ScrollTrigger.update);
   gsap.ticker.add((time) => lenis?.raf(time * 1000));
   gsap.ticker.lagSmoothing(0);

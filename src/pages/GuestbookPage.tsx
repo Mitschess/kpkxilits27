@@ -112,7 +112,7 @@ export default function GuestbookPage() {
 
       <div className="mx-auto grid max-w-7xl items-start gap-8 px-6 pb-24 lg:grid-cols-[400px_1fr]">
         {/* form */}
-        <div data-reveal className="card p-6 md:p-8 lg:sticky lg:top-28">
+        <div data-reveal className="card p-6 md:p-8 lg:sticky lg:top-[calc(var(--nav-offset,0px)+1.5rem)] lg:transition-[top] lg:duration-500 lg:ease-out-expo">
           <div className="flex items-center justify-between">
             <h2 className="flex items-center gap-2 font-display text-2xl font-extrabold text-ink">
               <PenLine size={22} strokeWidth={2.5} aria-hidden="true" /> Tulis pesan

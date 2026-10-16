@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { ArrowUpRight, Flag, Heart, Instagram, MessageSquareHeart } from "lucide-react";
 import Bunting from "@/components/deco/Bunting";
 import Clouds from "@/components/deco/Clouds";
+import SectionFade from "@/components/deco/SectionFade";
 import Road from "@/components/deco/Road";
 import Townscape from "@/components/deco/Townscape";
 import { buttonClass } from "@/components/ui/button";
@@ -27,8 +28,11 @@ export default function Footer() {
     <footer id="kontak" className="relative overflow-hidden">
       {/* closing call to action: the bus has arrived */}
       <div className="relative isolate overflow-hidden bg-gradient-to-b from-sun-light via-[#ffe9a8] to-[#bfe6ff]">
-        <Bunting className="absolute inset-x-0 top-0 -z-10" flags={20} sag={36} />
+        {/* every page ends on cream, so the footer melts in from cream (behind the clouds and flags) */}
+        <SectionFade edge="top" color="var(--color-cream)" className="-z-20" />
+        {/* clouds first: same layer, so the bunting is drawn in front of the sky */}
         <Clouds className="-z-10" count={3} />
+        <Bunting className="absolute inset-x-0 top-0 -z-10" flags={20} sag={36} />
 
         <div className="mx-auto max-w-4xl px-6 pt-36 pb-16 text-center md:pt-44">
           <p className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-1.5 text-ink shadow-[0_3px_0_rgb(27_31_59/0.12)] ring-2 ring-ink/10">

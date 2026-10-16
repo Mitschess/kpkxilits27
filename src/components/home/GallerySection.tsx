@@ -4,7 +4,6 @@ import Captions from "yet-another-react-lightbox/plugins/captions";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/captions.css";
 import { Camera, Expand, Flame, Heart, Music, PartyPopper, Smile, type LucideIcon } from "lucide-react";
-import SectionFade from "@/components/deco/SectionFade";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { GALLERY } from "@/data/home";
 import { useScrollLock } from "@/hooks/useScrollLock";
@@ -27,7 +26,6 @@ export default function GallerySection() {
 
   return (
     <section id="galeri" className="screen-section relative isolate bg-cream">
-      <SectionFade edge="bottom" color="var(--color-sun-light)" />
       <div className="mx-auto w-full max-w-7xl px-6">
         <SectionHeading
           icon={Camera}

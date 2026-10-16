@@ -10,7 +10,6 @@ import { buttonClass } from "@/components/ui/button";
 import { gsap, useGSAP } from "@/lib/motion";
 import { onIntroDone } from "@/lib/intro";
 
-const RING_TEXT = "KAMPUS PULANG KAMPUNG ✦ KPK × INI LHO ITS! 2026 ✦ AYO KENALAN SAMA ITS ✦";
 
 
 export default function Hero() {
@@ -116,16 +115,29 @@ export default function Hero() {
           <div className="[perspective:1000px]">
             <div data-hero-badge>
               <div data-tilt className="relative aspect-square">
-                <svg viewBox="0 0 400 400" className="absolute inset-0 h-full w-full animate-spin-slow" aria-hidden="true">
+                {/* A still badge: one phrase arched over the top, one under the bottom, both
+                    reading upright (the bottom arc runs left to right through the bottom). */}
+                <svg viewBox="0 0 400 400" className="absolute inset-0 h-full w-full" aria-hidden="true">
                   <defs>
-                    <path id="ring" d="M200,200 m-176,0 a176,176 0 1,1 352,0 a176,176 0 1,1 -352,0" />
+                    <path id="badge-top" d="M 24,200 A 176,176 0 0 1 376,200" />
+                    <path id="badge-bottom" d="M 9,200 A 191,191 0 0 0 391,200" />
                   </defs>
-                  {/* textLength = circumference, so the phrase wraps the circle exactly once */}
-                  <text fontFamily="Bricolage Grotesque Variable, sans-serif" fontWeight="800" fontSize="21" fill="#1b1f3b">
-                    <textPath href="#ring" textLength={Math.floor(2 * Math.PI * 176) - 4} lengthAdjust="spacing">
-                      {RING_TEXT}
-                    </textPath>
-                  </text>
+                  <g fontFamily="Bricolage Grotesque Variable, sans-serif" fontWeight="800" fontSize="21" fill="#1b1f3b" letterSpacing="3">
+                    <text textAnchor="middle">
+                      <textPath href="#badge-top" startOffset="50%">
+                        KAMPUS PULANG KAMPUNG
+                      </textPath>
+                    </text>
+                    <text textAnchor="middle">
+                      <textPath href="#badge-bottom" startOffset="50%">
+                        AYO KENALAN SAMA ITS!
+                      </textPath>
+                    </text>
+                  </g>
+                  <g fill="#ff4fa3" fontSize="22" textAnchor="middle" dominantBaseline="central">
+                    <text x="17" y="200">✦</text>
+                    <text x="383" y="200">✦</text>
+                  </g>
                 </svg>
                 <div className="absolute inset-[13%] rounded-full bg-white shadow-[0_10px_0_rgb(27_31_59/0.1),0_30px_60px_-20px_rgb(47_91_234/0.45)] ring-4 ring-white" />
                 <div className="absolute inset-[13%] rounded-full bg-[conic-gradient(from_0deg,#fff2c4,#ffe1ef,#d3f7eb,#e2f3ff,#fff2c4)] opacity-70" />

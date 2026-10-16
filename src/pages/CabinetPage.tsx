@@ -46,7 +46,11 @@ export default function CabinetPage() {
       </PageHero>
 
       {/* division jump bar */}
-      <nav aria-label="Divisi" className="sticky top-0 z-30 border-y-2 border-ink/10 bg-cream/90 backdrop-blur-md">
+      {/* sticks right under the navbar, sliding with it as it hides and returns */}
+      <nav
+        aria-label="Divisi"
+        className="sticky top-[var(--nav-offset,0px)] z-30 border-y-2 border-ink/10 bg-cream/90 backdrop-blur-md transition-[top] duration-500 ease-out-expo"
+      >
         <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-6 py-3 [scrollbar-width:none]">
           {CABINET_DATA.map((d) => {
             const c = DIVISION_COLOR[d.color];

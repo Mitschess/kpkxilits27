@@ -11,6 +11,8 @@ export interface HangingLantern {
   faces: ArtVariant[];
   /** Cord length below the rope (px or CSS length); defaults to just below the flags */
   drop?: number | string;
+  /** Lit from inside (default) or still dark */
+  lit?: boolean;
   className?: string;
 }
 
@@ -21,6 +23,8 @@ interface BuntingProps {
   sag?: number;
   /** Damar kurung hung from the rope between the flags */
   lanterns?: HangingLantern[];
+  /** How many flags are up, from the left; the rest pop in as this grows (default: all) */
+  shown?: number;
 }
 
 /**
@@ -28,7 +32,7 @@ interface BuntingProps {
  * kampung festival and 17-an. Each flag sways a little on its own; damar
  * kurung can hang from the same rope.
  */
-export default function Bunting({ className, flags = 18, sag = 46, lanterns = [] }: BuntingProps) {
+export default function Bunting({ className, flags = 18, sag = 46, lanterns = [], shown = flags }: BuntingProps) {
   const W = 1000;
   // flags shrink as more of them share the rope
   const half = Math.min(19, (W / flags) * 0.42);
@@ -58,15 +62,25 @@ export default function Bunting({ className, flags = 18, sag = 46, lanterns = []
             const { x, y } = at(t);
             return (
               <g key={i} transform={`rotate(${slope(t)} ${x} ${y})`}>
-                <polygon
-                  points={`${x - half},${y} ${x + half},${y} ${x},${y + tall}`}
-                  fill={COLORS[i % COLORS.length]}
-                  stroke="#1b1f3b"
-                  strokeWidth="2"
-                  strokeLinejoin="round"
-                  className="animate-sway"
-                  style={{ transformBox: "fill-box", transformOrigin: "50% 0%", animationDelay: `-${(i * 0.37) % 3.2}s` }}
-                />
+                {/* outer group pops the flag in; the polygon keeps its own sway */}
+                <g
+                  style={{
+                    transformBox: "fill-box",
+                    transformOrigin: "50% 0%",
+                    transform: i < shown ? "scale(1)" : "scale(0)",
+                    transition: "transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                  }}
+                >
+                  <polygon
+                    points={`${x - half},${y} ${x + half},${y} ${x},${y + tall}`}
+                    fill={COLORS[i % COLORS.length]}
+                    stroke="#1b1f3b"
+                    strokeWidth="2"
+                    strokeLinejoin="round"
+                    className="animate-sway"
+                    style={{ transformBox: "fill-box", transformOrigin: "50% 0%", animationDelay: `-${(i * 0.37) % 3.2}s` }}
+                  />
+                </g>
               </g>
             );
           })}
@@ -88,7 +102,7 @@ export default function Bunting({ className, flags = 18, sag = 46, lanterns = []
                 className="-translate-x-1/2 animate-swing [transform-origin:50%_0%]"
                 style={{ paddingTop: drop, animationDelay: `-${i * 1.3}s` }}
               >
-                <Lantern size={l.size} faces={l.faces} cord={drop} spinDuration={16 + i * 4} />
+                <Lantern size={l.size} faces={l.faces} cord={drop} spinDuration={16 + i * 4} lit={l.lit} />
               </div>
             </div>
           );
