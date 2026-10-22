@@ -104,13 +104,14 @@ export default function MythQuiz() {
           <div className="absolute inset-x-3 -bottom-2 h-full -rotate-[1.5deg] rounded-[2rem] bg-mint ring-2 ring-ink/10" />
 
           <div className="card relative min-h-[420px] overflow-hidden p-7 md:p-12 lg:min-h-[clamp(20rem,54vh,26rem)] lg:p-[clamp(1.75rem,4.6vh,3rem)]">
-            <div className="flex items-center justify-between">
-              <div className="flex gap-1.5" aria-hidden="true">
+            <div className="flex items-center justify-between gap-4">
+              {/* the progress strips give way on narrow screens; the score never wraps */}
+              <div className="flex min-w-0 flex-1 gap-1.5" aria-hidden="true">
                 {deck.map((_, i) => (
-                  <span key={i} className={cn("h-2.5 w-9 rounded-full transition-colors", i < index || (i === index && guess) ? "bg-pink" : "bg-ink/10")} />
+                  <span key={i} className={cn("h-2.5 max-w-9 flex-1 rounded-full transition-colors", i < index || (i === index && guess) ? "bg-pink" : "bg-ink/10")} />
                 ))}
               </div>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-sun-light px-3 py-1 text-sm font-bold text-ink ring-2 ring-sun">
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-sun-light px-3 py-1 text-sm font-bold whitespace-nowrap text-ink ring-2 ring-sun">
                 <Star size={14} strokeWidth={2.5} className="fill-sun text-sun-dark" aria-hidden="true" />
                 Skor {score}/{deck.length}
               </span>

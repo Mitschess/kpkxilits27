@@ -255,17 +255,17 @@ function CostRow({
 }) {
   return (
     <div>
-      <div className="flex items-end justify-between gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
         <div className="flex items-center gap-3">
           <span className={cn("grid h-11 w-11 shrink-0 place-items-center rounded-2xl", chip)}>
             <Icon size={20} />
           </span>
           <div>
-            <p className="text-sm font-bold text-ink">{label}</p>
-            <p className="text-xs font-medium text-ink-soft">{note}</p>
+            <p className="text-sm font-bold whitespace-nowrap text-ink">{label}</p>
+            <p className="text-xs font-medium whitespace-nowrap text-ink-soft">{note}</p>
           </div>
         </div>
-        <AnimatedNumber value={value} format={rupiah} className="font-display text-2xl font-extrabold text-ink tabular-nums md:text-3xl" />
+        <AnimatedNumber value={value} format={rupiah} className="ml-auto font-display text-2xl font-extrabold text-ink tabular-nums md:text-3xl" />
       </div>
       <div className="mt-3 h-3 overflow-hidden rounded-full bg-ink/[0.07]">
         <div className={cn("h-full rounded-full transition-[width] duration-700 ease-out-expo", bar)} style={{ width: `${width}%` }} />

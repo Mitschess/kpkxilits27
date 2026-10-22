@@ -12,7 +12,7 @@ export const DIVISION_COLOR: Record<CabinetDivision["color"], { solid: string; l
 interface MemberCardProps {
   member: CabinetMember;
   color: (typeof DIVISION_COLOR)[CabinetDivision["color"]];
-  /** Head of the division: gets a ribbon */
+  /** Head of the division: gets a "Kepala" badge in the bottom-left corner of the photo */
   featured?: boolean;
 }
 
@@ -35,9 +35,10 @@ export default function MemberCard({ member, color, featured }: MemberCardProps)
           decoding="async"
           className="absolute inset-0 h-full w-full origin-bottom object-cover object-bottom transition duration-500 ease-out-expo group-hover:scale-[1.05]"
         />
+        {/* bottom-left: the top corner would land on the head on narrow cards */}
         {featured && (
           <span
-            className="absolute top-3 left-3 inline-flex -rotate-3 items-center gap-1 rounded-full px-2.5 py-1 text-[0.68rem] font-extrabold text-ink uppercase"
+            className="absolute bottom-2.5 left-2.5 inline-flex -rotate-3 items-center gap-1 rounded-full px-2.5 py-1 text-[0.68rem] font-extrabold text-ink uppercase"
             style={{ background: "#ffc93c", boxShadow: "0 3px 0 #e5a500" }}
           >
             <Star size={11} strokeWidth={3} className="fill-ink" aria-hidden="true" /> Kepala

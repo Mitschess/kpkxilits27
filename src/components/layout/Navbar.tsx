@@ -99,18 +99,19 @@ export default function Navbar() {
       <header
         ref={headerRef}
         className={cn(
-          "fixed inset-x-0 top-0 z-50 px-3 pt-3 transition-transform duration-500 ease-out-expo md:px-6 md:pt-4",
+          "fixed inset-x-0 top-0 z-50 transition-transform duration-500 ease-out-expo md:px-6 md:pt-4",
           hidden && !open && "-translate-y-[120%]",
         )}
       >
         <nav
           aria-label="Navigasi utama"
           className={cn(
-            "mx-auto flex max-w-7xl items-center justify-between gap-4 rounded-full py-2 pr-2 pl-4 transition-all duration-500",
+            // phones: a full-width bar flush with the top (nothing peeks around it); from md up: a floating pill
+            "mx-auto flex max-w-7xl items-center justify-between gap-4 py-1.5 pr-3 pl-4 transition-all duration-500 md:rounded-full md:py-2 md:pr-2",
             // blends into the page at the very top, becomes a white pill once you scroll
             scrolled || open
-              ? "bg-white/90 shadow-[0_4px_0_rgb(27_31_59/0.08),0_18px_40px_-20px_rgb(27_31_59/0.35)] ring-2 ring-ink/10 backdrop-blur-md"
-              : "ring-2 ring-transparent",
+              ? "border-b-2 border-ink/10 bg-white/95 shadow-[0_10px_24px_-18px_rgb(27_31_59/0.45)] backdrop-blur-md md:border-b-0 md:bg-white/90 md:shadow-[0_4px_0_rgb(27_31_59/0.08),0_18px_40px_-20px_rgb(27_31_59/0.35)] md:ring-2 md:ring-ink/10"
+              : "border-b-2 border-transparent md:border-b-0 md:ring-2 md:ring-transparent",
           )}
         >
           <Logo />
