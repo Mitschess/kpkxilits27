@@ -264,6 +264,12 @@ body {
     0 22px 44px -24px rgb(27 31 59 / 0.35);
 }
 
+/* receipt paper: a torn zigzag along the bottom edge (shadow it with a drop-shadow on a parent) */
+@utility receipt-edge {
+  --tooth: 14px;
+  mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / var(--tooth) 100%;
+}
+
 /* confetti dots */
 @utility dots {
   background-image: radial-gradient(rgb(27 31 59 / 0.09) 1.6px, transparent 1.8px);
