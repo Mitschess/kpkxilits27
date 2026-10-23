@@ -4,7 +4,7 @@ import Clouds from "@/components/deco/Clouds";
 import Townscape from "@/components/deco/Townscape";
 import { GRESIK_DISTRICTS } from "@/data/home";
 import { gsap } from "@/lib/motion";
-import { HERO_LOGO, IntroBar, SkipButton, useIntro, type IntroProps } from "./shared";
+import { HERO_LOGO, IntroBar, useIntro, type IntroProps } from "./shared";
 
 const KM = GRESIK_DISTRICTS.find((d) => d.name === "Gresik Kota")?.km ?? 28;
 // the town drawing's width in viewBox units (see Townscape)
@@ -18,7 +18,7 @@ const SCENE_WIDTH = 1660;
 export default function IntroBus({ onDone }: IntroProps) {
   const root = useRef<HTMLDivElement>(null);
 
-  const skip = useIntro(root, onDone, () => ({
+  useIntro(root, onDone, () => ({
     holdAt: 4.5,
     build: (t, q) => {
       const vw = window.innerWidth;
@@ -121,7 +121,6 @@ export default function IntroBus({ onDone }: IntroProps) {
         </div>
       </div>
 
-      <SkipButton onClick={skip} light className="top-6 bottom-auto md:top-8 md:bottom-auto" />
       <IntroBar light />
     </div>
   );

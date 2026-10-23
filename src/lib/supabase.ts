@@ -17,11 +17,11 @@ export type Participant = {
   skor: number;
 };
 
+/** A guestbook entry as the site reads it (device_id is never sent back). */
 export type GuestbookMessage = {
   id: number;
   name: string;
   message: string;
-  device_id: string;
   color: string;
   created_at: string;
 };

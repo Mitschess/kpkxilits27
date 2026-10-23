@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { gsap } from "@/lib/motion";
-import { HERO_LOGO, IntroBar, SkipButton, useIntro, type IntroProps } from "./shared";
+import { HERO_LOGO, IntroBar, useIntro, type IntroProps } from "./shared";
 
 const BANDS = [
   { word: "Kampus", bg: "#ffc93c", fg: "#1b1f3b" },
@@ -17,7 +17,7 @@ const BANDS = [
 export default function IntroKinetik({ onDone }: IntroProps) {
   const root = useRef<HTMLDivElement>(null);
 
-  const skip = useIntro(root, onDone, () => ({
+  useIntro(root, onDone, () => ({
     holdAt: 3.2,
     build: (t, q) => {
       const bands = q("[data-band]");
@@ -78,7 +78,6 @@ export default function IntroKinetik({ onDone }: IntroProps) {
         </span>
       </div>
 
-      <SkipButton onClick={skip} />
       <IntroBar />
     </div>
   );

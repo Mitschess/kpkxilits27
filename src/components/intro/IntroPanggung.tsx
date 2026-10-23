@@ -3,7 +3,7 @@ import confetti from "canvas-confetti";
 import Bunting from "@/components/deco/Bunting";
 import { gsap } from "@/lib/motion";
 import { cn } from "@/lib/utils";
-import { HERO_LOGO, IntroBar, SkipButton, useIntro, type IntroProps } from "./shared";
+import { HERO_LOGO, IntroBar, useIntro, type IntroProps } from "./shared";
 
 const FLAGS = 24;
 const CONFETTI_COLORS = ["#ffc93c", "#ff4fa3", "#1fbf9a", "#2f5bea", "#ff8a3d", "#9b7bff"];
@@ -40,7 +40,7 @@ export default function IntroPanggung({ onDone }: IntroProps) {
   const [flags, setFlags] = useState(0);
   const [party, setParty] = useState(false);
 
-  const skip = useIntro(root, onDone, () => ({
+  useIntro(root, onDone, () => ({
     holdAt: 4.3,
     build: (t, q) => {
       const p = { v: 0 };
@@ -141,7 +141,6 @@ export default function IntroPanggung({ onDone }: IntroProps) {
         </div>
       </div>
 
-      <SkipButton onClick={skip} />
       <IntroBar />
     </div>
   );

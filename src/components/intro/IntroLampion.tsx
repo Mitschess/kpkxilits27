@@ -3,7 +3,7 @@ import Bunting from "@/components/deco/Bunting";
 import Townscape from "@/components/deco/Townscape";
 import Lantern, { SCENE_SETS } from "@/components/lantern/Lantern";
 import { gsap } from "@/lib/motion";
-import { HERO_LOGO, IntroBar, SkipButton, useIntro, type IntroProps } from "./shared";
+import { HERO_LOGO, IntroBar, useIntro, type IntroProps } from "./shared";
 
 // same counts as the hero bunting
 const FLAGS = 32;
@@ -31,7 +31,7 @@ export default function IntroLampion({ onDone }: IntroProps) {
   const [lit, setLit] = useState(false);
   const [flagsUp, setFlagsUp] = useState(0);
 
-  const skip = useIntro(root, onDone, () => ({
+  useIntro(root, onDone, () => ({
     holdAt: 4.5,
     build: (t, q) => {
       const flags = { up: 0 };
@@ -156,7 +156,6 @@ export default function IntroLampion({ onDone }: IntroProps) {
         <div className="h-14 border-t-2 border-sun/70 md:h-16" />
       </div>
 
-      <SkipButton onClick={skip} className="bottom-[4.75rem] md:bottom-[5.5rem]" />
       <IntroBar />
     </div>
   );

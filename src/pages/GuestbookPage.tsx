@@ -9,8 +9,9 @@ import { useReveal } from "@/hooks/useReveal";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 const DEVICE_KEY = "kpk_gb_device";
-const COUNT_KEY = "kpk_gb_count";
-const MAX_MESSAGES = 2;
+const QUOTA_KEY = "kpk_gb_quota"; // {"day":"2026-10-22","sent":1}
+// messages per device per day; the database enforces the same (supabase/schema.sql)
+const MAX_PER_DAY = 2;
 const COLORS = ["yellow", "pink", "blue", "green", "orange", "purple"];
 
 // stored colour name → bubble colours
@@ -32,7 +33,18 @@ function getDeviceId() {
   return id;
 }
 
-const sentCount = () => parseInt(safeStorage.get("local", COUNT_KEY) ?? "0", 10) || 0;
+// a "day" is a calendar day in WIB, the same as the database's rule
+const todayWIB = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date());
+
+function sentToday() {
+  try {
+    const q = JSON.parse(safeStorage.get("local", QUOTA_KEY) ?? "null") as { day?: string; sent?: number } | null;
+    return q?.day === todayWIB() ? Number(q.sent) || 0 : 0;
+  } catch {
+    return 0;
+  }
+}
+const saveSentToday = (sent: number) => safeStorage.set("local", QUOTA_KEY, JSON.stringify({ day: todayWIB(), sent }));
 
 export default function GuestbookPage() {
   usePageTitle("Buku Tamu");
@@ -46,7 +58,7 @@ export default function GuestbookPage() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const [remaining, setRemaining] = useState(() => Math.max(0, MAX_MESSAGES - sentCount()));
+  const [remaining, setRemaining] = useState(() => Math.max(0, MAX_PER_DAY - sentToday()));
 
   const loadMessages = useCallback(async () => {
     if (!supabase) {
@@ -54,7 +66,11 @@ export default function GuestbookPage() {
       setLoading(false);
       return;
     }
-    const { data, error } = await supabase.from("guestbook").select("*").order("created_at", { ascending: false });
+    // only what's shown: device_id stays private (see supabase/schema.sql)
+    const { data, error } = await supabase
+      .from("guestbook")
+      .select("id, name, message, color, created_at")
+      .order("created_at", { ascending: false });
     if (error) setError("Gagal memuat pesan.");
     else setMessages(data ?? []);
     setLoading(false);
@@ -90,10 +106,16 @@ export default function GuestbookPage() {
     ]);
     setSending(false);
     if (error) {
-      setError("Gagal kirim, coba lagi ya!");
+      // the database's own limits come back as readable messages (P0001)
+      setError(error.code === "P0001" ? error.message : "Gagal kirim, coba lagi ya!");
+      // the database says today's quota is used up (e.g. sent from this browser before): close the form
+      if (error.hint === "daily_quota") {
+        saveSentToday(MAX_PER_DAY);
+        setRemaining(0);
+      }
       return;
     }
-    safeStorage.set("local", COUNT_KEY, String(sentCount() + 1));
+    saveSentToday(sentToday() + 1);
     setRemaining((r) => r - 1);
     setSuccess(true);
     setName("");
@@ -117,7 +139,7 @@ export default function GuestbookPage() {
             <h2 className="flex items-center gap-2 font-display text-2xl font-extrabold text-ink">
               <PenLine size={22} strokeWidth={2.5} aria-hidden="true" /> Tulis pesan
             </h2>
-            {remaining > 0 && <span className="rounded-full bg-sun-light px-3 py-1 text-xs font-bold text-ink ring-2 ring-sun">Sisa kuota: {remaining}</span>}
+            {remaining > 0 && <span className="rounded-full bg-sun-light px-3 py-1 text-xs font-bold text-ink ring-2 ring-sun">Sisa kuota hari ini: {remaining}</span>}
           </div>
 
           {remaining <= 0 ? (
@@ -126,7 +148,7 @@ export default function GuestbookPage() {
                 <Heart size={28} strokeWidth={2.25} />
               </span>
               <p className="mt-3 font-display text-lg font-extrabold text-ink">Makasih udah nulis!</p>
-              <p className="mt-1 text-sm text-ink-soft">Kuota nulismu sudah habis.</p>
+              <p className="mt-1 text-sm text-ink-soft">Kuota nulismu hari ini sudah habis. Balik lagi besok ya!</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="mt-6 space-y-5">
