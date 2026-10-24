@@ -147,6 +147,7 @@ export default function LinkHubPage() {
                     color="#1b1f3b"
                     icon={Music2}
                     src={TIKTOK_EMBED_URL}
+                    miniaturize={false}
                   />
                   <a
                     href={TIKTOK_URL}
@@ -173,6 +174,7 @@ export default function LinkHubPage() {
                     color="#ff4fa3"
                     icon={Instagram}
                     src={INSTAGRAM_EMBED_URL}
+                    miniaturize={false}
                   />
                   <a
                     href={INSTAGRAM_URL}
