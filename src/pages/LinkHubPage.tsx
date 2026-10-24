@@ -227,7 +227,7 @@ function HologramPreview({
     <AnimatePresence>
       {open && (
         <div
-          className="pointer-events-none absolute bottom-full left-1/2 z-40 w-[22.5rem] max-w-[calc(100vw-3rem)] -translate-x-1/2 pb-3"
+          className="pointer-events-none absolute bottom-full left-1/2 z-40 w-[20rem] max-w-[calc(100vw-3rem)] -translate-x-1/2 pb-3"
           style={{ perspective: 900 }}
           aria-hidden="true"
         >
