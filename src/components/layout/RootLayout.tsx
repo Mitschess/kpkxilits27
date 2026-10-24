@@ -11,6 +11,7 @@ import ScrollManager from "./ScrollManager";
 
 export default function RootLayout() {
   const { pathname } = useLocation();
+  const isLinkHub = pathname === "/linkhub";
   const mainRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -48,7 +49,7 @@ export default function RootLayout() {
       <ClickBurst />
       <KiteTail />
       <LoadingScreen />
-      <Navbar />
+      {!isLinkHub && <Navbar />}
       <main ref={mainRef} className="relative">
         {/* Opacity only: a transform here would break pinned (position: fixed) sections */}
         <motion.div key={pathname} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
@@ -57,7 +58,7 @@ export default function RootLayout() {
           </Suspense>
         </motion.div>
       </main>
-      <Footer />
+      {!isLinkHub && <Footer />}
     </>
   );
 }

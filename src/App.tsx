@@ -8,6 +8,8 @@ const FacultiesPage = lazy(() => import("@/pages/FacultiesPage"));
 const CabinetPage = lazy(() => import("@/pages/CabinetPage"));
 const RankingPage = lazy(() => import("@/pages/RankingPage"));
 const GuestbookPage = lazy(() => import("@/pages/GuestbookPage"));
+const LinkHubPage = lazy(() => import("@/pages/LinkHubPage"));
+const MerchPage = lazy(() => import("@/pages/MerchPage"));
 const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"));
 
 export default function App() {
@@ -22,6 +24,8 @@ export default function App() {
             <Route path="kabinet" element={<CabinetPage />} />
             <Route path="ranking" element={<RankingPage />} />
             <Route path="guestbook" element={<GuestbookPage />} />
+            <Route path="linkhub" element={<LinkHubPage />} />
+            <Route path="merch" element={<MerchPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>

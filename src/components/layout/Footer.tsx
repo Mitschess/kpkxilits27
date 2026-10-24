@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { ArrowUpRight, Flag, Heart, Instagram, MessageSquareHeart } from "lucide-react";
+import { ArrowUpRight, Flag, Heart, Instagram, MessageSquareHeart, Music2 } from "lucide-react";
 import Bunting from "@/components/deco/Bunting";
 import Clouds from "@/components/deco/Clouds";
 import SectionFade from "@/components/deco/SectionFade";
@@ -21,6 +21,7 @@ const PAGES = [
   { label: "Struktur Kabinet", to: "/kabinet" },
   { label: "Pengumuman Ranking", to: "/ranking" },
   { label: "Buku Tamu", to: "/guestbook" },
+  { label: "Link Hub", to: "/linkhub" },
 ];
 
 export default function Footer() {
@@ -74,14 +75,24 @@ export default function Footer() {
           <FooterLinks title="Halaman" links={PAGES} className="md:col-span-2" />
           <div className="md:col-span-2">
             <p className="eyebrow mb-4 text-sun">Kontak</p>
-            <a
-              href={INSTAGRAM_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group inline-flex items-center gap-1.5 text-sm font-medium text-white/85 transition hover:text-sun"
-            >
-              Instagram <ArrowUpRight size={14} className="transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-            </a>
+            <div className="flex flex-col items-start gap-3">
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex items-center gap-1.5 text-sm font-medium text-white/85 transition hover:text-sun"
+              >
+                <Instagram size={14} aria-hidden="true" /> Instagram <ArrowUpRight size={14} className="transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </a>
+              <a
+                href="https://www.tiktok.com/@kpk.2026"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex items-center gap-1.5 text-sm font-medium text-white/85 transition hover:text-sun"
+              >
+                <Music2 size={14} aria-hidden="true" /> TikTok <ArrowUpRight size={14} className="transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </a>
+            </div>
           </div>
         </div>
         <div className="border-t border-white/15">
