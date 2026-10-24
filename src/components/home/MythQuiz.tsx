@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useRef, useState } from "react";
+import { AnimatePresence, motion, useMotionValue, useTransform } from "framer-motion";
 import confetti from "canvas-confetti";
 import { ArrowRight, Check, CircleHelp, PartyPopper, RotateCcw, Star, Trophy, X } from "lucide-react";
 import SectionFade from "@/components/deco/SectionFade";
@@ -13,6 +13,19 @@ type Guess = MythFact["answer"];
 
 const ROUND_SIZE = 5;
 const CONFETTI_COLORS = ["#ffc93c", "#ff4fa3", "#1fbf9a", "#2f5bea", "#ff8a3d"];
+const ticketVariants = {
+  enter: (direction: number) => ({
+    opacity: direction === 0 ? 0 : 1,
+    x: direction === 0 ? 28 : -direction * 110,
+    scale: 0.98,
+  }),
+  center: { opacity: 1, x: 0, scale: 1 },
+  exit: (direction: number) => ({
+    opacity: 0,
+    x: direction === 0 ? 0 : direction * (typeof window === "undefined" ? 900 : window.innerWidth + 900),
+    scale: 0.94,
+  }),
+};
 
 function celebrate(from: HTMLElement) {
   if (prefersReducedMotion()) return;
@@ -50,24 +63,31 @@ export default function MythQuiz() {
   const [index, setIndex] = useState(0);
   const [guess, setGuess] = useState<Guess | null>(null);
   const [score, setScore] = useState(0);
+  const [swipeDirection, setSwipeDirection] = useState<-1 | 0 | 1>(0);
+  const swipeCardRef = useRef<HTMLDivElement>(null);
+  const swipeX = useMotionValue(0);
+  const swipeTilt = useTransform(swipeX, [-48, 0, 48], [-5, 0, 5]);
   const done = index >= deck.length;
   const card = deck[index];
   const correct = guess !== null && guess === card?.answer;
 
-  const answer = (g: Guess, e: React.MouseEvent<HTMLButtonElement>) => {
+  const answer = (g: Guess, source: HTMLElement, direction: -1 | 0 | 1 = 0) => {
+    setSwipeDirection(direction);
     setGuess(g);
     if (g === card.answer) {
       setScore((s) => s + 1);
-      celebrate(e.currentTarget);
+      celebrate(source);
     }
   };
-  const next = () => {
+  const next = (direction: -1 | 0 | 1 = 0) => {
+    setSwipeDirection(direction);
     setGuess(null);
     setIndex((i) => i + 1);
   };
   // every replay deals a new set of cards
   const restart = () => {
     setDeck(drawRound());
+    setSwipeDirection(0);
     setGuess(null);
     setIndex(0);
     setScore(0);
@@ -103,28 +123,30 @@ export default function MythQuiz() {
           <div className="absolute inset-x-6 -bottom-4 h-full rotate-[2deg] rounded-[2rem] bg-sun ring-2 ring-ink/10" />
           <div className="absolute inset-x-3 -bottom-2 h-full -rotate-[1.5deg] rounded-[2rem] bg-mint ring-2 ring-ink/10" />
 
-          <div className="card relative min-h-[420px] overflow-hidden p-7 md:p-12 lg:min-h-[clamp(20rem,54vh,26rem)] lg:p-[clamp(1.75rem,4.6vh,3rem)]">
-            <div className="flex items-center justify-between gap-4">
-              {/* the progress strips give way on narrow screens; the score never wraps */}
-              <div className="flex min-w-0 flex-1 gap-1.5" aria-hidden="true">
-                {deck.map((_, i) => (
-                  <span key={i} className={cn("h-2.5 max-w-9 flex-1 rounded-full transition-colors", i < index || (i === index && guess) ? "bg-pink" : "bg-ink/10")} />
-                ))}
-              </div>
-              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-sun-light px-3 py-1 text-sm font-bold whitespace-nowrap text-ink ring-2 ring-sun">
-                <Star size={14} strokeWidth={2.5} className="fill-sun text-sun-dark" aria-hidden="true" />
-                Skor {score}/{deck.length}
-              </span>
-            </div>
-
-            <AnimatePresence mode="wait">
-              {done ? (
-                <motion.div
-                  key="done"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="flex min-h-[300px] flex-col items-center justify-center text-center"
-                >
+          <AnimatePresence mode="wait" initial={false} custom={swipeDirection}>
+            {done ? (
+              <motion.div
+                key="done"
+                custom={0}
+                variants={ticketVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ type: "spring", stiffness: 260, damping: 24 }}
+                className="card relative min-h-[420px] overflow-hidden p-7 md:p-12 lg:min-h-[clamp(20rem,54vh,26rem)] lg:p-[clamp(1.75rem,4.6vh,3rem)]"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex min-w-0 flex-1 gap-1.5" aria-hidden="true">
+                    {deck.map((_, i) => (
+                      <span key={i} className={cn("h-2.5 max-w-9 flex-1 rounded-full transition-colors", i < index ? "bg-pink" : "bg-ink/10")} />
+                    ))}
+                  </div>
+                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-sun-light px-3 py-1 text-sm font-bold whitespace-nowrap text-ink ring-2 ring-sun">
+                    <Star size={14} strokeWidth={2.5} className="fill-sun text-sun-dark" aria-hidden="true" />
+                    Skor {score}/{deck.length}
+                  </span>
+                </div>
+                <motion.div className="flex min-h-[300px] flex-col items-center justify-center text-center">
                   <span className="grid h-20 w-20 place-items-center rounded-full bg-sun-light text-ink ring-4 ring-sun" aria-hidden="true">
                     {score === deck.length ? <Trophy size={38} strokeWidth={2.25} /> : <PartyPopper size={38} strokeWidth={2.25} />}
                   </span>
@@ -140,31 +162,69 @@ export default function MythQuiz() {
                     <RotateCcw size={16} /> Main lagi, kartu baru
                   </button>
                 </motion.div>
-              ) : (
-                <motion.div
-                  key={`${card.claim}-${index}`}
-                  initial={{ opacity: 0, x: 60, rotate: 2 }}
-                  animate={{ opacity: 1, x: 0, rotate: 0 }}
-                  exit={{ opacity: 0, x: -60, rotate: -2 }}
-                  transition={{ type: "spring", stiffness: 260, damping: 24 }}
-                  className="pt-10 lg:pt-[clamp(1.25rem,4vh,2.5rem)]"
-                >
+              </motion.div>
+            ) : (
+              <motion.div
+                key={`card-${index}-${guess ?? "question"}`}
+                ref={swipeCardRef}
+                custom={swipeDirection}
+                variants={ticketVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ type: "spring", stiffness: 260, damping: 24, opacity: { duration: 0.18 } }}
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.6}
+                dragMomentum={false}
+                whileDrag={{ scale: 0.99 }}
+                onDragEnd={(_, info) => {
+                  if (Math.abs(info.offset.x) < 72 || !swipeCardRef.current) return;
+                  const direction: -1 | 1 = info.offset.x > 0 ? 1 : -1;
+                  if (guess !== null) {
+                    next(direction);
+                    return;
+                  }
+                  answer(direction > 0 ? "mitos" : "fakta", swipeCardRef.current, direction);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "ArrowLeft") {
+                    event.preventDefault();
+                    if (guess !== null) next(-1);
+                    else answer("fakta", event.currentTarget, -1);
+                  } else if (event.key === "ArrowRight") {
+                    event.preventDefault();
+                    if (guess !== null) next(1);
+                    else answer("mitos", event.currentTarget, 1);
+                  }
+                }}
+                role="group"
+                aria-label="Kartu Mitos atau Fakta. Geser kiri untuk Fakta, geser kanan untuk Mitos."
+                tabIndex={0}
+                style={{ x: swipeX, rotate: swipeTilt, touchAction: "pan-y" }}
+                className="card relative min-h-[420px] cursor-grab overflow-hidden p-7 active:cursor-grabbing focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-its/30 md:p-12 lg:min-h-[clamp(20rem,54vh,26rem)] lg:p-[clamp(1.75rem,4.6vh,3rem)]"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  {/* the progress strips give way on narrow screens; the score never wraps */}
+                  <div className="flex min-w-0 flex-1 gap-1.5" aria-hidden="true">
+                    {deck.map((_, i) => (
+                      <span key={i} className={cn("h-2.5 max-w-9 flex-1 rounded-full transition-colors", i < index || (i === index && guess) ? "bg-pink" : "bg-ink/10")} />
+                    ))}
+                  </div>
+                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-sun-light px-3 py-1 text-sm font-bold whitespace-nowrap text-ink ring-2 ring-sun">
+                    <Star size={14} strokeWidth={2.5} className="fill-sun text-sun-dark" aria-hidden="true" />
+                    Skor {score}/{deck.length}
+                  </span>
+                </div>
+
+                <div className="pt-10 lg:pt-[clamp(1.25rem,4vh,2.5rem)]">
                   <p className="font-hand text-2xl font-bold text-pink">Katanya…</p>
                   <p className="mt-2 font-display text-4xl leading-tight font-extrabold tracking-tight text-balance text-ink md:text-5xl lg:text-[clamp(1.85rem,5vh,3rem)]">
                     “{card.claim}”
                   </p>
 
-                  <AnimatePresence mode="wait">
-                    {!guess ? (
-                      <motion.div key="ask" exit={{ opacity: 0, y: -8 }} className="mt-10 grid grid-cols-2 gap-4 sm:max-w-md lg:mt-[clamp(1.5rem,5vh,2.5rem)]">
-                        <button type="button" onClick={(e) => answer("fakta", e)} className={buttonClass("white", "py-4 text-base")}>
-                          <Check size={18} strokeWidth={3} aria-hidden="true" /> Fakta
-                        </button>
-                        <button type="button" onClick={(e) => answer("mitos", e)} className={buttonClass("pink", "py-4 text-base")}>
-                          <X size={18} strokeWidth={3} aria-hidden="true" /> Mitos
-                        </button>
-                      </motion.div>
-                    ) : (
+                  {guess && (
+                    <AnimatePresence mode="wait">
                       <motion.div key="reveal" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mt-8 lg:mt-[clamp(1rem,3.4vh,2rem)]">
                         <div className="flex flex-wrap items-center gap-4">
                           <motion.span
@@ -183,17 +243,41 @@ export default function MythQuiz() {
                           </span>
                         </div>
                         <p className="mt-5 max-w-2xl rounded-2xl bg-cream p-5 text-lg leading-relaxed text-pretty text-ink lg:mt-[clamp(0.75rem,2.4vh,1.25rem)] lg:p-4 lg:text-[clamp(0.95rem,2.4vh,1.125rem)]">{card.explanation}</p>
-                        <button type="button" onClick={next} className={buttonClass("blue", "mt-7 lg:mt-[clamp(1rem,3.4vh,1.75rem)]")}>
+                        <button type="button" onClick={() => next()} className={buttonClass("blue", "mt-7 lg:mt-[clamp(1rem,3.4vh,1.75rem)]")}>
                           {index === deck.length - 1 ? "Lihat skor" : "Kartu berikutnya"}
                           <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
                         </button>
+                        <p className="mt-3 text-sm font-semibold text-ink-soft">Atau geser kartu ke kiri/kanan untuk lanjut.</p>
                       </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+                    </AnimatePresence>
+                  )}
+                </div>
+                {!guess && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-x-7 bottom-6 flex items-end justify-between"
+                  >
+                    <span className="inline-flex flex-col items-start gap-1.5 text-ink">
+                      <span className="inline-flex items-center gap-3 text-xl leading-none font-extrabold tracking-wide sm:text-2xl">
+                        <Check size={28} strokeWidth={3} aria-hidden="true" className="shrink-0 text-its" />
+                        Fakta
+                      </span>
+                      <span className="pl-[40px] text-[11px] leading-none font-bold tracking-[0.16em] text-ink-soft uppercase sm:text-xs">Geser kiri</span>
+                    </span>
+                    <span className="inline-flex flex-col items-end gap-1.5 text-pink">
+                      <span className="inline-flex items-center gap-3 text-xl leading-none font-extrabold tracking-wide sm:text-2xl">
+                        Mitos
+                        <X size={28} strokeWidth={3} aria-hidden="true" className="shrink-0 text-pink" />
+                      </span>
+                      <span className="pr-[40px] text-[11px] leading-none font-bold tracking-[0.16em] text-ink-soft uppercase sm:text-xs">Geser kanan</span>
+                    </span>
+                  </motion.div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </section>

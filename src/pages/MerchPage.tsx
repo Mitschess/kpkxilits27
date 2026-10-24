@@ -15,6 +15,13 @@ const FILTERS: { id: Category; label: string }[] = [
   { id: "bundle", label: "Bundle" },
 ];
 
+const TICKET_FRAME = "polygon(4% 0, 96% 0, 97.5% 0.3%, 99% 1%, 99.7% 2%, 100% 3.2%, 100% 54.5%, 99.7% 55.2%, 99% 55.8%, 98% 56.4%, 97.2% 57.2%, 96.7% 58.1%, 96.5% 58.8%, 96.7% 59.7%, 97.2% 60.6%, 98% 61.4%, 99% 62%, 99.7% 62.6%, 100% 63.3%, 100% 96.8%, 99.7% 98%, 99% 99%, 97.5% 99.7%, 96% 100%, 4% 100%, 2.5% 99.7%, 1% 99%, 0.3% 98%, 0 96.8%, 0 63.3%, 0.3% 62.6%, 1% 62%, 2% 61.4%, 2.8% 60.6%, 3.3% 59.7%, 3.5% 58.8%, 3.3% 58.1%, 2.8% 57.2%, 2% 56.4%, 1% 55.8%, 0.3% 55.2%, 0 54.5%, 0 3.2%, 0.3% 2%, 1% 1%, 2.5% 0.3%)";
+const FRAME_ACCENTS = [
+  "linear-gradient(135deg, #2f5bea, #6cc4ff 52%, #1d3fb5)",
+  "linear-gradient(135deg, #ff4fa3, #ffb6d8 52%, #db2b81)",
+  "linear-gradient(135deg, #ffc93c, #ffe9a0 52%, #e5a500)",
+  "linear-gradient(135deg, #1fbf9a, #a9ead7 52%, #0f9a7a)",
+];
 const rupiah = (price: number) => `Rp${price.toLocaleString("id-ID")}`;
 
 export default function MerchPage() {
@@ -94,25 +101,38 @@ export default function MerchPage() {
                   key={item.id}
                   type="button"
                   onClick={() => openDetails(item)}
-                  className="group flex min-h-[21rem] w-full max-w-[18rem] flex-col overflow-hidden rounded-[1.5rem] bg-white text-left shadow-[0_5px_0_rgb(27_31_59/0.08),0_18px_40px_-24px_rgb(27_31_59/0.3)] ring-2 ring-ink/10 transition duration-300 hover:-translate-y-1.5 hover:shadow-[0_8px_0_rgb(27_31_59/0.08),0_24px_44px_-24px_rgb(27_31_59/0.32)] focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-its sm:min-h-[22rem]"
+                  style={{ clipPath: TICKET_FRAME, background: FRAME_ACCENTS[index % FRAME_ACCENTS.length] }}
+                  className="group flex min-h-[21rem] w-full max-w-[18rem] flex-col p-[3px] text-left drop-shadow-[0_12px_10px_rgb(27_31_59/0.16)] transition duration-300 hover:-translate-y-1.5 hover:saturate-125 hover:drop-shadow-[0_18px_14px_rgb(27_31_59/0.2)] focus-visible:outline-none focus-visible:drop-shadow-[0_0_7px_#2f5bea] sm:min-h-[22rem]"
                 >
-                  <span className="relative block aspect-[4/3] w-full shrink-0 overflow-hidden bg-gradient-to-br from-[#fff8ec] via-white to-[#e2f3ff] p-3 sm:p-4">
-                    <span className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-sun/25 blur-2xl transition group-hover:bg-pink/20" aria-hidden="true" />
-                    <motion.img
-                      src={item.images[0]}
-                      alt={item.name}
-                      loading="lazy"
-                      animate={{ y: [0, -5, 0, 5, 0] }}
-                      transition={{ duration: 4 + (index % 4) * 0.35, delay: (index % 4) * 0.18, repeat: Infinity, ease: "easeInOut" }}
-                      whileHover={{ scale: 1.06 }}
-                      className="relative h-full w-full object-contain"
+                  <span className="relative flex w-full flex-1 flex-col overflow-hidden bg-white" style={{ clipPath: TICKET_FRAME }}>
+                    <span className="relative block aspect-[4/3] w-full shrink-0 overflow-hidden bg-gradient-to-br from-[#fff8ec] via-white to-[#e2f3ff] p-3 sm:p-4">
+                      <span className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-sun/25 blur-2xl transition group-hover:bg-pink/20" aria-hidden="true" />
+                      <motion.img
+                        src={item.images[0]}
+                        alt={item.name}
+                        loading="lazy"
+                        animate={{ y: [0, -5, 0, 5, 0] }}
+                        transition={{ duration: 4 + (index % 4) * 0.35, delay: (index % 4) * 0.18, repeat: Infinity, ease: "easeInOut" }}
+                        whileHover={{ scale: 1.06 }}
+                        className="relative h-full w-full object-contain"
+                      />
+                    </span>
+                    <span
+                      className="h-3 w-full shrink-0"
+                      style={{
+                        backgroundImage: "radial-gradient(circle, rgba(27, 31, 59, 0.42) 1px, transparent 1.2px)",
+                        backgroundPosition: "center",
+                        backgroundRepeat: "repeat-x",
+                        backgroundSize: "9px 3px",
+                      }}
+                      aria-hidden="true"
                     />
-                  </span>
-                  <span className="flex min-h-40 w-full flex-1 flex-col p-4 sm:p-4">
-                    <span className="w-fit rounded-full bg-its-light px-3 py-1 text-[0.7rem] font-extrabold uppercase tracking-[0.1em] text-its-dark">{item.category}</span>
-                    <span className="mt-2 line-clamp-2 min-h-11 font-display text-[0.95rem] font-extrabold leading-snug text-ink sm:text-base">{item.name}</span>
-                    <span className="mt-2 font-display text-lg font-extrabold text-pink-dark sm:text-xl">{rupiah(item.price)}</span>
-                    <span className="mt-auto inline-flex items-center gap-1.5 pt-4 text-sm font-bold text-its-dark transition group-hover:gap-2.5">Lihat detail <ExternalLink size={14} aria-hidden="true" /></span>
+                    <span className="flex min-h-40 w-full flex-1 flex-col p-4 sm:p-4">
+                      <span className="w-fit rounded-full bg-its-light px-3 py-1 text-[0.7rem] font-extrabold uppercase tracking-[0.1em] text-its-dark">{item.category}</span>
+                      <span className="mt-2 line-clamp-2 min-h-11 font-display text-[0.95rem] font-extrabold leading-snug text-ink sm:text-base">{item.name}</span>
+                      <span className="mt-2 font-display text-lg font-extrabold text-pink-dark sm:text-xl">{rupiah(item.price)}</span>
+                      <span className="mt-auto inline-flex items-center gap-1.5 pt-4 text-sm font-bold text-its-dark transition group-hover:gap-2.5">Lihat detail <ExternalLink size={14} aria-hidden="true" /></span>
+                    </span>
                   </span>
                 </button>
               ))}
