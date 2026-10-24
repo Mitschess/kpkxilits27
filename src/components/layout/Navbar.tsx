@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpRight, House, Instagram, Landmark, Menu, MessageSquareHeart, Trophy, Users, X, type LucideIcon } from "lucide-react";
+import { ArrowUpRight, House, Instagram, Landmark, Menu, MessageSquareHeart, ShoppingBag, Trophy, Users, X, type LucideIcon } from "lucide-react";
 import { buttonClass } from "@/components/ui/button";
 import { INSTAGRAM_URL } from "@/data/home";
 import { useScrollLock } from "@/hooks/useScrollLock";
@@ -13,6 +13,7 @@ const LINKS: { label: string; to: string; icon: LucideIcon }[] = [
   { label: "Fakultas", to: "/fakultas", icon: Landmark },
   { label: "Kabinet", to: "/kabinet", icon: Users },
   { label: "Ranking TOSN", to: "/ranking", icon: Trophy },
+  { label: "Merch", to: "/merch", icon: ShoppingBag },
   { label: "Buku Tamu", to: "/guestbook", icon: MessageSquareHeart },
 ];
 const MENU_COLORS = ["#ffc93c", "#2f5bea", "#ff4fa3", "#1fbf9a", "#ff8a3d", "#9b7bff"];

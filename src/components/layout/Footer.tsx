@@ -24,13 +24,13 @@ const PAGES = [
   { label: "Link Hub", to: "/linkhub" },
 ];
 
-export default function Footer() {
+export default function Footer({ topBlendColor = "var(--color-cream)" }: { topBlendColor?: string }) {
   return (
     <footer id="kontak" className="relative overflow-hidden">
       {/* closing call to action: the bus has arrived */}
       <div className="relative isolate overflow-hidden bg-gradient-to-b from-sun-light via-[#ffe9a8] to-[#bfe6ff]">
-        {/* every page ends on cream, so the footer melts in from cream (behind the clouds and flags) */}
-        <SectionFade edge="top" color="var(--color-cream)" className="-z-20" />
+        {/* Match the preceding section's edge colour so the footer fades in without a hard seam. */}
+        <SectionFade edge="top" color={topBlendColor} className="-z-20" />
         {/* clouds first: same layer, so the bunting is drawn in front of the sky */}
         <Clouds className="-z-10" count={3} />
         <Bunting className="absolute inset-x-0 top-0 -z-10" flags={20} sag={36} />

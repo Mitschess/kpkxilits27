@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, type Variants } from "framer-motion";
 import { Instagram, Landmark, Music2, ShoppingBag, Trophy, Users, type LucideIcon } from "lucide-react";
 import { Link } from "react-router";
 import Clouds from "@/components/deco/Clouds";
@@ -7,11 +7,18 @@ import Road from "@/components/deco/Road";
 import Townscape from "@/components/deco/Townscape";
 import { INSTAGRAM_URL } from "@/data/home";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { useReveal } from "@/hooks/useReveal";
 
 const TIKTOK_URL = "https://www.tiktok.com/@kpk.2026";
 const TIKTOK_EMBED_URL = "https://www.tiktok.com/embed/@kpk.2026";
 const INSTAGRAM_EMBED_URL = `${INSTAGRAM_URL}/embed/`;
+const shortcutListVariants: Variants = {
+  hidden: {},
+  visible: { transition: { delayChildren: 0.08, staggerChildren: 0.14 } },
+};
+const shortcutItemVariants: Variants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.42, ease: "easeOut" } },
+};
 
 const SHORTCUTS: { title: string; to: string; icon: LucideIcon; glow: string; tone: string }[] = [
   {
@@ -33,25 +40,23 @@ const SHORTCUTS: { title: string; to: string; icon: LucideIcon; glow: string; to
     to: "/ranking",
     icon: Trophy,
     glow: "#ffc93c",
-    tone: "border-sun-dark/40 bg-sun-light text-ink shadow-[0_4px_0_rgb(229_165_0/0.22)] hover:bg-[#ffe9a1]",
+    tone: "border-sun-dark/40 bg-sun-light text-[#956000] shadow-[0_4px_0_rgb(229_165_0/0.22)] hover:bg-[#ffe9a1]",
   },
   {
     title: "Merchandise",
     to: "/merch",
     icon: ShoppingBag,
     glow: "#ff8a3d",
-    tone: "border-orange/45 bg-orange-light text-ink shadow-[0_4px_0_rgb(255_138_61/0.22)] hover:bg-[#ffd0ad]",
+    tone: "border-orange/45 bg-orange-light text-[#b84813] shadow-[0_4px_0_rgb(255_138_61/0.22)] hover:bg-[#ffd0ad]",
   },
 ];
 
 export default function LinkHubPage() {
   usePageTitle("Link Hub");
-  const root = useRef<HTMLDivElement>(null);
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
-  useReveal(root);
 
   return (
-    <div ref={root}>
+    <div>
       <section
         aria-label="Tautan Kampus Pulang Kampung"
         className="relative isolate flex min-h-[100svh] items-center justify-center px-5 py-3 sm:px-6"
@@ -66,13 +71,17 @@ export default function LinkHubPage() {
 
         <div className="relative z-10 mx-auto w-full max-w-lg">
           <div
-            data-reveal
-            className="card relative flex flex-col rounded-[2rem] p-4 pb-6 ring-2 ring-ink/10 sm:p-6 sm:pb-8"
-            style={{ minHeight: "min(36rem, calc(100svh - 1.5rem))" }}
+            className="card relative flex flex-col rounded-[2rem] p-4 pb-6 ring-1 ring-white/60 sm:p-6 sm:pb-8"
+            style={{
+              minHeight: "min(36rem, calc(100svh - 1.5rem))",
+              backgroundColor: "rgba(255, 255, 255, 0.76)",
+              backdropFilter: "blur(12px) saturate(0.9)",
+              WebkitBackdropFilter: "blur(12px) saturate(0.9)",
+            }}
           >
             <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[2rem]" aria-hidden="true">
-              <div className="absolute -top-24 -right-16 h-64 w-64 rounded-full bg-sun-light blur-3xl" />
-              <div className="absolute -bottom-24 -left-20 h-64 w-64 rounded-full bg-sky-light blur-3xl" />
+              <div className="absolute -top-24 -right-16 h-64 w-64 rounded-full bg-sun-light/25 blur-3xl" />
+              <div className="absolute -bottom-24 -left-20 h-64 w-64 rounded-full bg-sky-light/25 blur-3xl" />
             </div>
 
             <div className="relative mb-8 flex flex-col items-center">
@@ -89,20 +98,22 @@ export default function LinkHubPage() {
               </span>
             </div>
 
-            <div
+            <motion.div
               className="relative grid grid-cols-1 gap-2.5"
+              variants={shortcutListVariants}
+              initial="hidden"
+              animate="visible"
               onPointerOver={(event) => {
                 const target = (event.target as HTMLElement).closest<HTMLElement>("[data-preview-key]");
                 setHoveredLink(target?.dataset.previewKey ?? null);
               }}
               onPointerLeave={() => setHoveredLink(null)}
             >
-              {SHORTCUTS.map(({ title, to, icon: Icon, glow, tone }, index) => (
-                <div
+              {SHORTCUTS.map(({ title, to, icon: Icon, glow, tone }) => (
+                <motion.div
                   key={to}
-                  data-reveal
-                  style={{ transitionDelay: `${index * 70}ms` }}
                   className="relative"
+                  variants={shortcutItemVariants}
                 >
                   <HologramPreview open={hoveredLink === to} label={title} detail={to} color={glow} icon={Icon} src={to} />
                   <Link
@@ -115,9 +126,9 @@ export default function LinkHubPage() {
                   >
                     {title}
                   </Link>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
 
             <div className="relative flex min-h-0 flex-1 flex-col">
               <div className="min-h-6 flex-1" aria-hidden="true" />

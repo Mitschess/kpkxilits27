@@ -12,6 +12,7 @@ import ScrollManager from "./ScrollManager";
 export default function RootLayout() {
   const { pathname } = useLocation();
   const isLinkHub = pathname === "/linkhub";
+  const isMerch = pathname === "/merch";
   const mainRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -58,7 +59,7 @@ export default function RootLayout() {
           </Suspense>
         </motion.div>
       </main>
-      {!isLinkHub && <Footer />}
+      {!isLinkHub && <Footer topBlendColor={isMerch ? "#ebf5f9" : undefined} />}
     </>
   );
 }

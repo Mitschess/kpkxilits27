@@ -12,8 +12,10 @@ const TOTAL = CABINET_DATA.reduce((n, d) => n + d.members.length, 0);
 export default function CabinetPage() {
   usePageTitle("Struktur Kabinet");
   const root = useRef<HTMLDivElement>(null);
+  const endRef = useRef<HTMLDivElement>(null);
   useReveal(root);
   const [active, setActive] = useState(CABINET_DATA[0].id);
+  const [atEnd, setAtEnd] = useState(false);
 
   useEffect(() => {
     const io = new IntersectionObserver(
@@ -25,6 +27,16 @@ export default function CabinetPage() {
       if (el) io.observe(el);
     });
     return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const end = endRef.current;
+    if (!end) return;
+    const observer = new IntersectionObserver(([entry]) => setAtEnd(entry.isIntersecting), {
+      rootMargin: "0px 0px -64px 0px",
+    });
+    observer.observe(end);
+    return () => observer.disconnect();
   }, []);
 
   return (
@@ -45,11 +57,10 @@ export default function CabinetPage() {
         </div>
       </PageHero>
 
-      {/* division jump bar */}
-      {/* sticks right under the navbar, sliding with it as it hides and returns */}
+      {/* Division picker sticks to the bottom edge of the viewport while scrolling. */}
       <nav
         aria-label="Divisi"
-        className="sticky top-[var(--nav-offset,0px)] z-30 border-y-2 border-ink/10 bg-cream/90 backdrop-blur-md transition-[top] duration-500 ease-out-expo"
+        className={`sticky top-[calc(100vh-4rem)] z-30 border-y-2 border-ink/10 bg-cream/90 backdrop-blur-md transition-[opacity,transform] duration-300 ${atEnd ? "pointer-events-none translate-y-full opacity-0" : "translate-y-0 opacity-100"}`}
       >
         <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-6 py-3 [scrollbar-width:none]">
           {CABINET_DATA.map((d) => {
@@ -82,6 +93,7 @@ export default function CabinetPage() {
           <Division key={d.id} division={d} index={i} />
         ))}
       </div>
+      <div ref={endRef} className="h-px" aria-hidden="true" />
     </div>
   );
 }

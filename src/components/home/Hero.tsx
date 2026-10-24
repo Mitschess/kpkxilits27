@@ -179,15 +179,13 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* logo badge; fireworks go off behind it while you point at it */}
+        {/* standalone logo; fireworks go off behind it while you point at it */}
         <div ref={badgeRef} className="relative mx-auto" style={{ width: "min(100%, 30rem, 52vh)" }}>
           {/* outside the 3D wrapper so it can sit behind the badge (perspective makes a stacking context) */}
           <canvas ref={fireworksRef} className="pointer-events-none absolute -inset-[40%] -z-10 h-[180%] w-[180%]" aria-hidden="true" />
           <div className="[perspective:1000px]">
             <div data-hero-badge>
               <div data-tilt className="relative aspect-square">
-                <div className="absolute inset-[7%] rounded-full bg-white shadow-[0_10px_0_rgb(27_31_59/0.1),0_30px_60px_-20px_rgb(47_91_234/0.45)] ring-4 ring-white" />
-                <div className="absolute inset-[7%] rounded-full bg-[conic-gradient(from_0deg,#fff2c4,#ffe1ef,#d3f7eb,#e2f3ff,#fff2c4)] opacity-70" />
                 <img
                   src="/images/logo/hero.webp"
                   alt="Logo KPK × Ini Lho ITS! 2026"

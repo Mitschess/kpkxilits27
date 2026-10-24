@@ -1,5 +1,4 @@
-import { Link } from "react-router";
-import { ArrowLeft, type LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { SCENE_SETS } from "@/components/lantern/Lantern";
 import Bunting from "@/components/deco/Bunting";
 import Clouds from "@/components/deco/Clouds";
@@ -32,13 +31,7 @@ export default function PageHero({ icon: Icon, eyebrow, title, description, chil
       />
 
       <div className="relative mx-auto max-w-7xl px-6 pt-10">
-        <Link
-          to="/"
-          className="group inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-sm font-semibold text-ink ring-2 ring-ink/10 transition hover:bg-white"
-        >
-          <ArrowLeft size={16} className="transition group-hover:-translate-x-1" /> Kembali ke beranda
-        </Link>
-        <p data-reveal className="mt-8 flex w-fit items-center gap-2 rounded-full bg-sun px-3.5 py-1.5 text-ink shadow-[0_3px_0_#e5a500]">
+        <p data-reveal className="flex w-fit items-center gap-2 rounded-full bg-sun px-3.5 py-1.5 text-ink shadow-[0_3px_0_#e5a500]">
           {Icon && <Icon size={15} strokeWidth={2.5} aria-hidden="true" />}
           <span className="eyebrow text-[0.7rem]">{eyebrow}</span>
         </p>
