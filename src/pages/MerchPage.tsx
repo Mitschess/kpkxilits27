@@ -44,7 +44,7 @@ function MerchCard({ item, index, onOpen }: { item: Merch; index: number; onOpen
       type="button"
       onClick={onOpen}
       style={{ clipPath: TICKET_FRAME, background: FRAME_ACCENTS[index % FRAME_ACCENTS.length] }}
-      className={`group flex min-h-[21rem] w-full max-w-[18rem] flex-col p-[3px] text-left drop-shadow-[0_12px_10px_rgb(27_31_59/0.16)] transition duration-300 ease-bounce hover:-translate-y-2 hover:rotate-0 hover:saturate-125 hover:drop-shadow-[0_18px_14px_rgb(27_31_59/0.2)] focus-visible:outline-none focus-visible:drop-shadow-[0_0_7px_#2f5bea] sm:min-h-[22rem] ${CARD_TILTS[index % CARD_TILTS.length]}`}
+      className={`group flex min-h-[21rem] w-full max-w-[22rem] flex-col p-[3px] text-left drop-shadow-[0_12px_10px_rgb(27_31_59/0.16)] transition duration-300 ease-bounce hover:-translate-y-2 hover:rotate-0 hover:saturate-125 hover:drop-shadow-[0_18px_14px_rgb(27_31_59/0.2)] focus-visible:outline-none focus-visible:drop-shadow-[0_0_7px_#2f5bea] sm:min-h-[22rem] sm:max-w-[18rem] ${CARD_TILTS[index % CARD_TILTS.length]}`}
     >
       <span className="relative flex w-full flex-1 flex-col overflow-hidden bg-white" style={{ clipPath: TICKET_FRAME }}>
         <span className="pointer-events-none absolute inset-x-0 top-0 bottom-[38%] z-0 bg-gradient-to-br from-[#fff8ec] via-white to-[#e2f3ff]" aria-hidden="true" />
@@ -59,7 +59,7 @@ function MerchCard({ item, index, onOpen }: { item: Merch; index: number; onOpen
           aria-hidden="true"
         />
         <span className="relative z-10 block w-full shrink-0 overflow-hidden">
-          <span className="relative block aspect-[5/4] w-full overflow-hidden p-3 sm:p-4">
+          <span className="relative block aspect-[16/10] w-full overflow-hidden p-3 sm:aspect-[5/4] sm:p-4">
             <motion.span
               className="absolute inset-3 block sm:inset-4"
               animate={{ y: [0, -11, 0, 11, 0], rotate: [0, 0.7, 0, -0.7, 0] }}
@@ -178,7 +178,7 @@ export default function MerchPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="grid grid-cols-2 justify-items-center gap-4 sm:gap-5 md:grid-cols-3 md:gap-7 lg:grid-cols-4 lg:gap-8"
+              className="grid grid-cols-1 justify-items-center gap-5 sm:grid-cols-2 sm:gap-5 md:grid-cols-3 md:gap-7 lg:grid-cols-4 lg:gap-8"
             >
               {products.map((item, index) => (
                 <MerchCard key={item.id} item={item} index={index} onOpen={() => openDetails(item)} />
