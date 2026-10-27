@@ -982,7 +982,7 @@ function exportReport() {
   const report = computeAnalytics(reportRange)
   const columns = ['Tanggal', 'Omzet', 'Unit terjual', 'Unit masuk']
   const rows = report.daily.map((day) => [day.label, day.revenue, day.units, day.restock])
-  const csv = '\uFEFF' + [columns, ...rows].map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(';')).join('\r\n')
+  const csv = '\uFEFF' + [columns, ...rows].map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(',')).join('\r\n')
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }))
   const link = document.createElement('a'); link.href = url; link.download = `analitik-stokly-${reportRange}hari.csv`; link.click()
   setTimeout(() => URL.revokeObjectURL(url), 1000)
@@ -1015,7 +1015,7 @@ function showStockAlerts() {
 function exportProducts() {
   const columns = ['Nama barang', 'SKU / barcode', 'Kategori', 'Harga jual', 'Stok', 'Batas minimum', 'Status']
   const rows = state.products.map((p) => [p.name, p.sku, p.category, p.price, p.stock, p.minStock, stockStatus(p)])
-  const csv = '\uFEFF' + [columns, ...rows].map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(';')).join('\r\n')
+  const csv = '\uFEFF' + [columns, ...rows].map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(',')).join('\r\n')
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }))
   const link = document.createElement('a'); link.href = url; link.download = 'inventori-stokly.csv'; link.click()
   setTimeout(() => URL.revokeObjectURL(url), 1000)
