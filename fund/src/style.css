@@ -1,0 +1,54 @@
+/* ═══════════════════════════════════════════════════════════════
+   KPK × Ini Lho ITS! — Fund / Dana Usaha Base Resets
+   ═══════════════════════════════════════════════════════════════ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+body {
+  min-width: 320px;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: #ffc93c;
+  color: #1b1f3b;
+}
+
+:focus-visible {
+  outline: 3px solid #2f5bea;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+img, svg, video {
+  display: block;
+  max-width: 100%;
+}

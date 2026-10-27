@@ -28,12 +28,22 @@ canvas-confetti · lucide-react. Supabase opsional untuk ranking & buku tamu.
 
 ## Menjalankan
 
+### 1. Website Utama (KPK x Ini Lho ITS!)
 ```bash
 npm install
+npm run fund:install # sekali saat menyiapkan checkout baru
 npm run dev        # http://localhost:5173
 npm run build      # hasil di dist/
 npm run preview    # cek hasil build
 ```
+Fund sekarang ikut dilayani website utama di `http://localhost:5173/fund/`.
+
+### 2. Website Stokly / Dana Usaha (`fund/`)
+```bash
+npm run fund:dev   # menjalankan dev server Stokly
+npm run fund:build # build produksi Stokly
+```
+Perintah `fund:dev` hanya diperlukan jika ingin menjalankan Fund sebagai server terpisah.
 
 ### Supabase (opsional)
 

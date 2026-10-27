@@ -1,3 +1,7 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "redirects": [{ "source": "/fund", "destination": "/fund/", "permanent": false }],
+  "rewrites": [
+    { "source": "/fund/", "destination": "/fund/index.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
