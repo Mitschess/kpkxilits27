@@ -1,7 +1,15 @@
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+
+type InventoryApiModule = typeof import("./fund/server/inventory-api.js");
+
+function loadInventoryApi() {
+  const modulePath = path.resolve(import.meta.dirname, "fund/server/inventory-api.js");
+  return import(pathToFileURL(modulePath).href) as Promise<InventoryApiModule>;
+}
 
 const fundApp = {
   name: "fund-app",
@@ -15,11 +23,11 @@ const fundApp = {
       }
       next();
     });
-    const { inventoryApi } = await import("./fund/server/inventory-api.js");
+    const { inventoryApi } = await loadInventoryApi();
     server.middlewares.use("/api", inventoryApi());
   },
   async configurePreviewServer(server: import("vite").PreviewServer) {
-    const { inventoryApi } = await import("./fund/server/inventory-api.js");
+    const { inventoryApi } = await loadInventoryApi();
     server.middlewares.use("/api", inventoryApi());
   },
 };
