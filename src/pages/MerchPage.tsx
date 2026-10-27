@@ -59,7 +59,7 @@ function MerchCard({ item, index, onOpen }: { item: Merch; index: number; onOpen
           aria-hidden="true"
         />
         <span className="relative z-10 block w-full shrink-0 overflow-hidden">
-          <span className="relative block aspect-[16/10] w-full overflow-hidden p-3 sm:aspect-[5/4] sm:p-4">
+          <span className="relative block aspect-[5/4] w-full overflow-hidden p-3 sm:p-4">
             <motion.span
               className="absolute inset-3 block sm:inset-4"
               animate={{ y: [0, -11, 0, 11, 0], rotate: [0, 0.7, 0, -0.7, 0] }}
@@ -178,7 +178,7 @@ export default function MerchPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="grid grid-cols-1 justify-items-center gap-5 sm:grid-cols-2 sm:gap-5 md:grid-cols-3 md:gap-7 lg:grid-cols-4 lg:gap-8"
+              className="grid grid-cols-2 justify-items-center gap-4 sm:gap-5 md:grid-cols-3 md:gap-7 lg:grid-cols-4 lg:gap-8"
             >
               {products.map((item, index) => (
                 <MerchCard key={item.id} item={item} index={index} onOpen={() => openDetails(item)} />
