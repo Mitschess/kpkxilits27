@@ -48,6 +48,12 @@ a {
   color: inherit;
 }
 
+/* theme.css sets display with !important on many blocks (and loads later);
+   the extra `html` gives `hidden` enough specificity to still win */
+html [hidden] {
+  display: none !important;
+}
+
 img, svg, video {
   display: block;
   max-width: 100%;

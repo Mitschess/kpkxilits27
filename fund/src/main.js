@@ -24,14 +24,19 @@ const icons = {
   more: '<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>',
   close: '<svg viewBox="0 0 24 24"><path d="m18 6-12 12M6 6l12 12"/></svg>',
   logout: '<svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg>',
+  calendar: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+  help: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.6 2.6 0 0 1 5 .9c0 1.8-2.5 2.2-2.5 3.9M12 17.2v.1"/></svg>',
+  trash: '<svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
 }
 const icon = (name) => `<span class="icon">${icons[name]}</span>`
-const money = (value) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value)
+const moneyFormat = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 })
+const money = (value) => moneyFormat.format(value)
 const timeLabel = (date) => new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit' }).format(new Date(date))
-const today = new Date()
-const dayName = new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(today)
+// Read the clock on every render: booth laptops stay open past midnight.
+const dayLabel = (date) => new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(date)
+const emptyState = (dataMode = 'custom') => ({ products: [], movements: [], dataMode })
 
-let state = { products: [], movements: [], dataMode: 'loading' }
+let state = emptyState('loading')
 let isDemo = false
 let serverProblem = 'Menghubungkan ke server inventori…'
 let eventSource
@@ -202,11 +207,17 @@ function subscribeSupabaseInventory() {
 }
 
 let inventoryRefreshPending = false
+let inventoryRefreshQueued = false
 async function refreshSupabaseInventory() {
-  if (inventoryRefreshPending || !authUser || useLocalMode) return
+  if (!authUser || useLocalMode) return
+  // A change that lands while a refresh is in flight must trigger one more read, not be dropped.
+  if (inventoryRefreshPending) { inventoryRefreshQueued = true; return }
   inventoryRefreshPending = true
   try {
-    applyState(await getSupabaseInventoryState())
+    do {
+      inventoryRefreshQueued = false
+      applyState(await getSupabaseInventoryState())
+    } while (inventoryRefreshQueued)
     render()
   } catch (error) {
     serverProblem = `Tidak dapat memuat stok dari Supabase. ${error.message}`
@@ -248,7 +259,7 @@ function deltaLabel(current, previous) {
   return { text: `${change > 0 ? '+' : ''}${change}%`, cls: change > 0 ? 'up' : 'down' }
 }
 function computeAnalytics(days) {
-  const start = startOfDay(today)
+  const start = startOfDay(new Date())
   start.setDate(start.getDate() - (days - 1))
   const prevStart = new Date(start)
   prevStart.setDate(prevStart.getDate() - days)
@@ -332,6 +343,7 @@ function renderAuth() {
   const isSignup = authView === 'signup'
   const isReset = authView === 'reset'
   const isPasswordUpdate = authView === 'update-password'
+  closeModal()
   const title = isSignup ? 'Buat akun dana' : isReset ? 'Atur ulang password' : isPasswordUpdate ? 'Buat password baru' : 'Selamat datang kembali'
   const description = isSignup ? 'Siapkan akun untuk mengelola stok merchandise & kas dana usaha.' : isReset ? 'Kami kirim tautan untuk mengatur ulang password.' : isPasswordUpdate ? 'Gunakan password baru untuk akun pengelola dana.' : 'Masuk untuk mengelola stok festival dan aktivitas dana usaha.'
   const emailField = !isPasswordUpdate ? `<label class="auth-field"><span>Email</span><input name="email" type="email" autocomplete="email" placeholder="nama@email.com" required></label>` : ''
@@ -342,7 +354,7 @@ function renderAuth() {
   const switchAction = isReset ? '<button type="button" class="auth-link" data-auth-switch="login">Kembali ke login</button>' : isPasswordUpdate ? '' : isSignup ? '<p>Sudah punya akun? <button type="button" class="auth-link" data-auth-switch="login">Masuk</button></p>' : '<p>Belum punya akun? <button type="button" class="auth-link" data-auth-switch="signup">Buat akun</button></p>'
   const configNotice = !supabaseConfigured ? `<aside class="auth-config-note"><b>Supabase belum terhubung</b><p>Isi URL dan publishable key di <code>.env.local</code>, lalu jalankan schema Supabase yang sesuai.</p></aside>` : ''
   const localAction = import.meta.env.DEV && !supabaseConfigured ? '<button type="button" class="auth-local-button" data-local-mode>Buka inventori mode lokal</button>' : ''
-  document.querySelector('#app').innerHTML = `<main class="auth-screen"><section class="auth-story"><a class="auth-brand" href="#"><span class="brand-logo-img"><img src="${fundAssetPrefix}/images/logo/hero.webp" alt="KPK" /></span><span class="brand-text"><span class="brand-title">KPK</span><span class="brand-subtitle">× Ini Lho ITS! · Dana</span></span></a><p class="auth-kicker">FESTIVAL PULANG KAMPUNG 2026</p><h1>Catat stok festival.<br><em>Pantau dananya.</em></h1><p class="auth-story-copy">Sistem inventori merchandise, penjualan booth festival, dan analitik kas dana usaha Kampus Pulang Kampung 2026.</p></section><section class="auth-card"><p class="auth-eyebrow">AKUN PENGELOLA DANA</p><h2>${title}</h2><p class="auth-description">${description}</p><form data-auth-form>${storeField}${emailField}${passwordField}${isReset ? '' : '<button type="button" class="auth-forgot" data-auth-forgot>Lupa password?</button>'}<button type="submit" class="primary-button auth-submit" data-label="${submitLabel}">${submitLabel}<span aria-hidden="true">→</span></button></form><p class="auth-feedback${authMessageIsError ? ' is-error' : ''}" data-auth-feedback role="status" ${authMessage ? '' : 'hidden'}>${escapeHtml(authMessage)}</p>${switchAction}${configNotice}${localAction}<p class="auth-privacy">Data inventori & kas aman dan dipisahkan per akun toko.</p></section></main>`
+  document.querySelector('#app').innerHTML = `<main class="auth-screen"><section class="auth-story"><a class="auth-brand" href="#"><span class="brand-logo-img"><img src="${fundAssetPrefix}/images/logo/hero.webp" alt="KPK" /></span><span class="brand-text"><span class="brand-title">KPK</span><span class="brand-subtitle">× Ini Lho ITS! · Dana</span></span></a><p class="auth-kicker">FESTIVAL PULANG KAMPUNG 2026</p><h1>Catat stok festival.<br><em>Pantau dananya.</em></h1><p class="auth-story-copy">Sistem inventori merchandise, penjualan booth festival, dan analitik kas dana usaha Kampus Pulang Kampung 2026.</p><ul class="auth-highlights"><li>${icon('scan')}Pindai barcode dari HP</li><li>${icon('receipt')}Sinkron antar perangkat</li><li>${icon('chart')}Laporan omzet harian</li></ul></section><section class="auth-card"><p class="auth-eyebrow">AKUN PENGELOLA DANA</p><h2>${title}</h2><p class="auth-description">${description}</p><form data-auth-form>${storeField}${emailField}${passwordField}${isReset ? '' : '<button type="button" class="auth-forgot" data-auth-forgot>Lupa password?</button>'}<button type="submit" class="primary-button auth-submit" data-label="${submitLabel}">${submitLabel}<span aria-hidden="true">→</span></button></form><p class="auth-feedback${authMessageIsError ? ' is-error' : ''}" data-auth-feedback role="status" ${authMessage ? '' : 'hidden'}>${escapeHtml(authMessage)}</p>${switchAction}${configNotice}${localAction}<p class="auth-privacy">Data inventori & kas aman dan dipisahkan per akun toko.</p></section></main>`
 
   document.querySelector('[data-auth-form]').addEventListener('submit', submitAuthForm)
   document.querySelectorAll('[data-auth-switch]').forEach((button) => button.addEventListener('click', () => {
@@ -387,6 +399,7 @@ async function submitAuthForm(event) {
   const password = String(formData.get('password') || '')
   button.disabled = true
   button.textContent = 'Memproses…'
+  setAuthFeedback('')
   try {
     if (!supabase) throw new Error('Supabase belum dikonfigurasi. Isi VITE_SUPABASE_URL dan VITE_SUPABASE_PUBLISHABLE_KEY di .env.local.')
     if (authView === 'signup') {
@@ -399,7 +412,7 @@ async function submitAuthForm(event) {
       else {
         authView = 'login'
         renderAuth()
-        setAuthFeedback('Akun berhasil dibuat. Cek email untuk konfirmasi, lalu masuk ke Stokly.')
+        setAuthFeedback('Akun berhasil dibuat. Cek email untuk konfirmasi, lalu masuk.')
       }
       return
     }
@@ -424,18 +437,21 @@ async function submitAuthForm(event) {
   } catch (error) {
     if (button.isConnected) {
       button.disabled = false
-      button.textContent = button.dataset.label || 'Lanjutkan'
+      button.innerHTML = `${escapeHtml(button.dataset.label || 'Lanjutkan')}<span aria-hidden="true">→</span>`
     }
     setAuthFeedback(authErrorMessage(error), true)
   }
 }
 
 function enterSupabaseApp(user) {
+  // Sign-in reaches here twice (the form and the SIGNED_IN event); load once.
+  if (authUser?.id === user.id && !useLocalMode) return
   authUser = user
   useLocalMode = false
   authMessage = ''
   authMessageIsError = false
   serverProblem = ''
+  state = emptyState('loading')
   render()
   loadInventory()
 }
@@ -444,6 +460,7 @@ function enterLocalMode() {
   useLocalMode = true
   authUser = undefined
   authMessage = ''
+  state = emptyState('loading')
   render()
   loadInventory()
 }
@@ -457,22 +474,30 @@ async function startApplication() {
     activeNav = next
     render()
   })
+  document.addEventListener('keydown', handleGlobalKeydown)
   if (!supabase) { renderAuth(); return }
-  supabase.auth.onAuthStateChange((event) => {
+  supabase.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_OUT') {
       authUser = undefined
       useLocalMode = false
-      state = { products: [], movements: [], dataMode: 'custom' }
+      state = emptyState()
       void stopInventoryRealtime()
       renderAuth()
     } else if (event === 'PASSWORD_RECOVERY') {
+      // The recovery link also signs the user in; keep them on the new-password form until they save it.
+      authUser = undefined
+      void stopInventoryRealtime()
       authView = 'update-password'
       authMessage = 'Masukkan password baru untuk menyelesaikan pemulihan akun.'
       authMessageIsError = false
       renderAuth()
+    } else if (event === 'SIGNED_IN' && session?.user && authView !== 'update-password') {
+      // Defer: calling Supabase from inside this callback can deadlock the auth client.
+      setTimeout(() => enterSupabaseApp(session.user), 0)
     }
   })
   const { data: { session }, error } = await supabase.auth.getSession()
+  if (authView === 'update-password') return
   if (error) {
     authMessage = authErrorMessage(error)
     authMessageIsError = true
@@ -481,8 +506,16 @@ async function startApplication() {
   else renderAuth()
 }
 
+function inventoryRows(rows, emptyText) {
+  return rows.map((p) => `<tr><td><div class="product-cell"><span class="product-thumb ${escapeHtml(p.color)}">${escapeHtml(p.emoji)}</span><span><b>${escapeHtml(p.name)}</b><small>${escapeHtml(p.category)}</small></span></div></td><td><span class="sku">${escapeHtml(p.sku)}</span></td><td class="price">${money(p.price)}</td><td><span class="stock-number ${stockStatus(p) !== 'Aman' ? 'stock-low' : ''}">${p.stock}</span><span class="stock-unit">unit</span></td><td><span class="status status-${stockStatus(p).toLowerCase()}"><i></i>${stockStatus(p)}</span></td><td><button type="button" class="row-menu" title="Aksi barang" aria-label="Aksi untuk ${escapeHtml(p.name)}" data-product-menu="${escapeHtml(p.id)}">${icon('more')}</button></td></tr>`).join('') || `<tr><td colspan="6" class="empty-state">${emptyText}</td></tr>`
+}
+
 function inventoryTable(rows, emptyText = 'Tidak ada barang yang cocok.') {
-  return `<div class="table-scroll"><table><thead><tr><th>NAMA BARANG</th><th>SKU / BARCODE</th><th>HARGA</th><th>STOK</th><th>STATUS</th><th></th></tr></thead><tbody>${rows.map((p) => `<tr><td><div class="product-cell"><span class="product-thumb ${p.color}">${p.emoji}</span><span><b>${escapeHtml(p.name)}</b><small>${escapeHtml(p.category)}</small></span></div></td><td><span class="sku">${escapeHtml(p.sku)}</span></td><td class="price">${money(p.price)}</td><td><span class="stock-number ${stockStatus(p) !== 'Aman' ? 'stock-low' : ''}">${p.stock}</span><span class="stock-unit">unit</span></td><td><span class="status status-${stockStatus(p).toLowerCase()}"><i></i>${stockStatus(p)}</span></td><td><button class="row-menu" title="Aksi barang" data-product-menu="${p.id}">${icon('more')}</button></td></tr>`).join('') || `<tr><td colspan="6" class="empty-state">${emptyText}</td></tr>`}</tbody></table></div>`
+  return `<div class="table-scroll"><table><thead><tr><th>NAMA BARANG</th><th>SKU / BARCODE</th><th>HARGA</th><th>STOK</th><th>STATUS</th><th><span class="sr-only">Aksi</span></th></tr></thead><tbody data-inventory-rows>${inventoryRows(rows, emptyText)}</tbody></table></div>`
+}
+
+function loadingMarkup() {
+  return `<section class="loading-state" role="status" aria-live="polite"><span class="loading-lantern" aria-hidden="true"></span><b>Memuat data dana usaha…</b><p>Mengambil stok dan transaksi terbaru.</p></section>`
 }
 
 function renderDashboard(metrics) {
@@ -490,74 +523,148 @@ function renderDashboard(metrics) {
   const revDelta = deltaLabel(week.revenue, week.prevRevenue)
   const maxBar = Math.max(...week.daily.map((d) => d.revenue), 1)
   const watch = state.products.filter((p) => p.stock <= p.minStock).slice(0, 6)
+  const snippet = state.products.slice(0, 8)
+  const hour = new Date().getHours()
+  const greeting = hour < 11 ? 'Selamat pagi' : hour < 15 ? 'Selamat siang' : hour < 18 ? 'Selamat sore' : 'Selamat malam'
+  const eyebrow = serverProblem ? 'SERVER TIDAK TERHUBUNG' : isDemo ? 'MODE DEMO · DATA CONTOH' : 'RINGKASAN DANA USAHA'
+  const subheading = serverProblem || (isDemo ? 'Angka ini contoh. Kosongkan demo lalu isi stok merchandise yang sebenarnya.' : 'Stok, omzet hari ini, dan barang yang menipis — dibaca dari pergerakan barang.')
+  const heroActions = serverProblem
+    ? `<button type="button" class="primary-button" data-action="retry">Coba lagi ${icon('arrow')}</button>`
+    : `<button type="button" class="secondary-button" data-action="quick-sale">${icon('scan')} Catat penjualan</button><button type="button" class="primary-button" data-action="add-product">${icon('plus')} Tambah barang</button>`
+  const onboarding = !serverProblem && !state.products.length ? `
+    <section class="onboarding panel">
+      <div><p class="eyebrow">MULAI DI SINI</p><h2>Inventori masih kosong</h2><p class="subheading">Tiga langkah supaya booth siap jualan.</p></div>
+      <ol class="onboarding-steps">
+        <li><b>Daftarkan merchandise</b><span>Nama, harga jual, stok awal, dan batas minimum.</span></li>
+        <li><b>Cetak label barcode</b><span>Pakai barcode bawaan atau buat kode otomatis.</span></li>
+        <li><b>Pindai saat terjual</b><span>Stok berkurang dan omzet tercatat otomatis.</span></li>
+      </ol>
+      <button type="button" class="primary-button" data-action="add-product">${icon('plus')} Tambah barang pertama</button>
+    </section>` : ''
   return `
-    <section class="welcome-row hero-banner"><div><p class="eyebrow">${serverProblem ? 'SERVER TIDAK TERHUBUNG' : isDemo ? 'MODE DEMO · DATA CONTOH' : 'RINGKASAN TOKO'}</p><h1>${escapeHtml(metrics.storeName)}</h1><p class="subheading">${escapeHtml(serverProblem || (isDemo ? 'Angka ini contoh. Kosongkan demo lalu isi stok toko yang sebenarnya.' : 'Stok, omzet hari ini, dan SKU yang menipis — dibaca dari pergerakan barang.'))}</p>${isDemo && !serverProblem ? '<button class="demo-clear" data-action="clear-demo">Mulai dengan stok kosong →</button>' : ''}</div>${serverProblem ? '<button class="primary-button" data-action="retry">Coba lagi</button>' : '<button class="primary-button" data-action="add-product">' + icon('plus') + ' Tambah barang</button>'}</section>
+    <section class="welcome-row hero-banner${serverProblem ? ' is-offline' : ''}"><div class="hero-copy"><p class="eyebrow">${eyebrow}</p><p class="hero-greeting">${greeting}!</p><h1>${escapeHtml(metrics.storeName)}</h1><p class="subheading">${escapeHtml(subheading)}</p>${isDemo && !serverProblem ? '<button type="button" class="demo-clear" data-action="clear-demo">Mulai dengan stok kosong →</button>' : ''}</div><div class="hero-actions">${heroActions}</div></section>
+    ${onboarding}
     <section class="stats-grid">
-      <article class="stat-card"><div class="stat-heading"><span>Unit di rak</span><span class="stat-icon">${icon('box')}</span></div><strong>${totalItems.toLocaleString('id-ID')} <small>unit</small></strong><div class="stat-foot"><span class="foot-note">${state.products.length} SKU</span></div></article>
-      <article class="stat-card"><div class="stat-heading"><span>Perlu restock</span><span class="stat-icon">${icon('bell')}</span></div><strong>${needsRestock} <small>SKU</small></strong><div class="stat-foot"><span class="${needsRestock ? 'foot-warning' : 'foot-neutral'}">${needsRestock ? 'Di atau di bawah minimum' : 'Semua di atas minimum'}</span></div></article>
-      <article class="stat-card"><div class="stat-heading"><span>Nilai inventori</span><span class="stat-icon">${icon('chart')}</span></div><strong class="value-stat">${money(totalValue)}</strong><div class="stat-foot"><span class="foot-note">Harga jual × stok</span></div></article>
-      <article class="stat-card"><div class="stat-heading"><span>Omzet hari ini</span><span class="stat-icon">${icon('trend')}</span></div><strong class="value-stat">${money(salesToday)}</strong><div class="stat-foot"><span class="foot-note">${ticketsToday} transaksi</span></div></article>
+      <article class="stat-card"><div class="stat-heading"><span>Unit di rak</span><span class="stat-icon blue">${icon('box')}</span></div><strong>${totalItems.toLocaleString('id-ID')} <small>unit</small></strong><div class="stat-foot"><span class="foot-note">${state.products.length} SKU</span></div></article>
+      <article class="stat-card"><div class="stat-heading"><span>Perlu restock</span><span class="stat-icon peach">${icon('bell')}</span></div><strong>${needsRestock} <small>SKU</small></strong><div class="stat-foot"><span class="${needsRestock ? 'foot-warning' : 'foot-neutral'}">${needsRestock ? 'Di atau di bawah minimum' : 'Semua di atas minimum'}</span></div></article>
+      <article class="stat-card"><div class="stat-heading"><span>Nilai inventori</span><span class="stat-icon lavender">${icon('chart')}</span></div><strong class="value-stat">${money(totalValue)}</strong><div class="stat-foot"><span class="foot-note">Harga jual × stok</span></div></article>
+      <article class="stat-card"><div class="stat-heading"><span>Omzet hari ini</span><span class="stat-icon mint">${icon('trend')}</span></div><strong class="value-stat">${money(salesToday)}</strong><div class="stat-foot"><span class="foot-note">${ticketsToday} transaksi</span></div></article>
     </section>
-    ${needsRestock ? `<section class="attention-banner"><span class="attention-icon">!</span><div class="attention-copy"><b>${needsRestock} SKU butuh restock</b><span>Buka daftar restock, atau catat barang masuk dari menu barang.</span></div><button data-filter-shortage>Buka restock ${icon('arrow')}</button></section>` : ''}
+    ${needsRestock ? `<section class="attention-banner"><span class="attention-icon">!</span><div class="attention-copy"><b>${needsRestock} SKU butuh restock</b><span>Buka daftar restock, atau catat barang masuk dari menu barang.</span></div><button type="button" data-filter-shortage>Buka restock ${icon('arrow')}</button></section>` : ''}
     <section class="workspace-grid">
       <div class="panel chart-frame">
         <div class="chart-legend"><h2>Omzet 7 hari</h2><span class="delta ${revDelta.cls}">${revDelta.text} vs 7 hari sebelumnya</span></div>
-        <div class="bar-chart">${week.daily.map((day) => `<div class="bar-col ${day.key === week.peak?.key && day.revenue ? 'is-peak' : ''}" title="${escapeHtml(day.label)} · ${money(day.revenue)}"><i style="height:${Math.max(3, Math.round((day.revenue / maxBar) * 100))}%"></i><small>${escapeHtml(day.label)}</small></div>`).join('')}</div>
+        ${barChart(week.daily, week.peak, maxBar, () => true)}
       </div>
       <div class="panel activity-panel">
         <div class="panel-heading"><div><h2>Perlu dicek</h2><p>SKU di atau di bawah minimum.</p></div></div>
-        <div class="dead-list">${watch.map((p) => `<button type="button" data-watch-product="${p.id}"><span><b>${escapeHtml(p.name)}</b><br><small>Sisa ${p.stock} · min ${p.minStock}</small></span><span class="status status-${stockStatus(p).toLowerCase()}">${stockStatus(p)}</span></button>`).join('') || '<div class="empty-activity">Tidak ada yang menipis.</div>'}</div>
+        <div class="dead-list">${watch.map((p) => `<button type="button" data-watch-product="${escapeHtml(p.id)}"><span><b>${escapeHtml(p.name)}</b><br><small>Sisa ${p.stock} · min ${p.minStock}</small></span><span class="status status-${stockStatus(p).toLowerCase()}">${stockStatus(p)}</span></button>`).join('') || '<div class="empty-activity">Tidak ada yang menipis. 🎉</div>'}</div>
       </div>
     </section>
-    <section class="workspace-grid" style="margin-top:12px">
+    <section class="workspace-grid">
       <div class="panel">
-        <div class="panel-heading"><div><h2>Inventori singkat</h2><p>${state.products.length} barang terdaftar.</p></div><button class="secondary-button" data-action="quick-sale">${icon('scan')} Catat penjualan</button></div>
-        ${inventoryTable(filteredProducts().slice(0, 8), 'Belum ada barang.')}
-        <div class="table-footer"><span>Cuplikan 8 baris</span><button class="text-button" data-go="#inventory">Buka inventori ${icon('arrow')}</button></div>
+        <div class="panel-heading"><div><h2>Inventori singkat</h2><p>${state.products.length} barang terdaftar.</p></div><button type="button" class="text-button" data-go="#inventory">Kelola ${icon('arrow')}</button></div>
+        ${inventoryTable(snippet, 'Belum ada barang. Tambahkan merchandise pertama.')}
+        <div class="table-footer"><span>Menampilkan <b>${snippet.length}</b> dari <b>${state.products.length}</b> barang</span><button type="button" class="text-button" data-go="#inventory">Buka inventori ${icon('arrow')}</button></div>
       </div>
       <div class="panel activity-panel">
         <div class="panel-heading"><div><h2>Aktivitas</h2><p>Keluar-masuk terakhir.</p></div></div>
-        <div class="activity-list">${recent.map((m) => { const p = state.products.find((x) => x.id === m.productId); return `<div class="activity-item"><span class="activity-symbol ${m.type}">${m.type === 'sale' ? '−' : '+'}</span><div class="activity-description"><b>${escapeHtml(p?.name || m.productName || 'Barang dihapus')}</b><small>${m.type === 'sale' ? 'Penjualan' : 'Restock'} · ${timeLabel(m.date)}</small></div><span class="activity-qty ${m.type}">${m.type === 'sale' ? '−' : '+'}${m.qty}</span></div>` }).join('') || '<div class="empty-activity">Belum ada aktivitas stok.</div>'}</div>
-        <button class="activity-link" data-go="#transactions">Semua transaksi ${icon('arrow')}</button>
+        <div class="activity-list">${recent.map((m) => { const p = state.products.find((x) => x.id === m.productId); return `<div class="activity-item"><span class="activity-symbol ${m.type}">${m.type === 'sale' ? '−' : '+'}</span><div class="activity-description"><b>${escapeHtml(p?.name || m.productName || 'Barang dihapus')}</b><small>${m.type === 'sale' ? 'Penjualan' : 'Restock'} · ${shortDateTime(m.date)}</small></div><span class="activity-qty ${m.type}">${m.type === 'sale' ? '−' : '+'}${m.qty}</span></div>` }).join('') || '<div class="empty-activity">Belum ada aktivitas stok.</div>'}</div>
+        <button type="button" class="activity-link" data-go="#transactions">Semua transaksi ${icon('arrow')}</button>
       </div>
     </section>
   `
+}
+
+function shortDateTime(date) {
+  const value = new Date(date)
+  // Older entries need a date, otherwise "10.15" reads as today.
+  if (value.toDateString() === new Date().toDateString()) return timeLabel(value)
+  return new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(value)
+}
+
+function barChart(daily, peak, maxBar, showLabel) {
+  return `<div class="bar-chart" role="img" aria-label="Grafik omzet harian">${daily.map((day, index) => `<div class="bar-col ${day.key === peak?.key && day.revenue ? 'is-peak' : ''}" title="${escapeHtml(day.label)} · ${money(day.revenue)} · ${day.units} unit"><i style="height:${Math.max(3, Math.round((day.revenue / maxBar) * 100))}%"></i><small>${showLabel(index) ? escapeHtml(day.label) : ''}</small></div>`).join('')}</div>`
 }
 
 function renderInventoryView() {
   const rows = filteredProducts()
   return `
-    <section class="page-toolbar"><div><p class="eyebrow">STOK</p><h1>Inventori</h1><p class="subheading">Cari SKU, filter status, catat penjualan atau restock dari baris barang.</p></div><div class="top-actions">${'<button class="secondary-button" data-action="quick-sale">' + icon('scan') + ' Catat penjualan</button>'}<button class="primary-button" data-action="add-product">${icon('plus')} Tambah barang</button></div></section>
+    <section class="page-toolbar"><div><p class="eyebrow">STOK</p><h1>Inventori</h1><p class="subheading">Cari SKU, filter status, catat penjualan atau restock dari baris barang.</p></div><div class="top-actions"><button type="button" class="secondary-button" data-action="quick-sale">${icon('scan')} Catat penjualan</button><button type="button" class="primary-button" data-action="add-product">${icon('plus')} Tambah barang</button></div></section>
     <section class="panel">
-      <div class="table-tools"><label class="search-box">${icon('search')}<input id="search" type="search" placeholder="Cari nama, SKU, atau barcode" value="${escapeHtml(query)}"><span class="shortcut" title="Tekan / untuk mencari">/</span></label><div class="filter-wrap"><select id="filter" aria-label="Filter stok">${['Semua barang', 'Perlu restock', 'Stok menipis', 'Stok habis', 'Stok aman'].map((filter) => `<option ${activeFilter === filter ? 'selected' : ''}>${filter}</option>`).join('')}</select><span class="filter-caret" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m7 10 5 5 5-5" /></svg></span></div></div>
-      ${inventoryTable(rows)}
-      <div class="table-footer"><span>Menampilkan <b>${rows.length}</b> dari <b>${state.products.length}</b> barang</span><button class="text-button" data-action="export-products">Unduh CSV ${icon('arrow')}</button></div>
+      <div class="table-tools"><label class="search-box">${icon('search')}<input id="search" type="search" placeholder="Cari nama, SKU, atau barcode" aria-label="Cari barang" autocomplete="off" value="${escapeHtml(query)}"><span class="shortcut" title="Tekan / untuk mencari">/</span></label><div class="filter-wrap"><select id="filter" aria-label="Filter stok">${['Semua barang', 'Perlu restock', 'Stok menipis', 'Stok habis', 'Stok aman'].map((filter) => `<option ${activeFilter === filter ? 'selected' : ''}>${filter}</option>`).join('')}</select><span class="filter-caret" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m7 10 5 5 5-5" /></svg></span></div></div>
+      ${inventoryTable(rows, inventoryEmptyText())}
+      <div class="table-footer"><span data-inventory-count>${inventoryCountLabel(rows)}</span><button type="button" class="text-button" data-action="export-products">Unduh CSV ${icon('arrow')}</button></div>
     </section>
   `
+}
+
+function inventoryEmptyText() {
+  if (!state.products.length) return 'Belum ada barang. Pilih <b>Tambah barang</b> untuk mulai.'
+  return `Tidak ada barang yang cocok. <button type="button" class="text-button" data-action="reset-filter">Hapus pencarian & filter</button>`
+}
+
+function inventoryCountLabel(rows) {
+  return `Menampilkan <b>${rows.length}</b> dari <b>${state.products.length}</b> barang`
+}
+
+// Typing only swaps the result rows; rebuilding the whole page would replace the
+// focused input and break mobile keyboards mid-word.
+function refreshInventoryResults() {
+  const body = document.querySelector('[data-inventory-rows]')
+  const count = document.querySelector('[data-inventory-count]')
+  if (!body || !count) { render(); return }
+  const rows = filteredProducts()
+  body.innerHTML = inventoryRows(rows, inventoryEmptyText())
+  count.innerHTML = inventoryCountLabel(rows)
+  bindProductMenus(body)
+  body.querySelector('[data-action="reset-filter"]')?.addEventListener('click', resetInventoryFilter)
+}
+
+function resetInventoryFilter() {
+  query = ''
+  activeFilter = 'Semua barang'
+  render()
 }
 
 function renderTransactionsView() {
   const rows = filteredMovements()
   return `
-    <section class="page-toolbar"><div><p class="eyebrow">MUTASI</p><h1>Transaksi</h1><p class="subheading">${state.movements.length} catatan keluar-masuk. Filter penjualan atau restock.</p></div><button class="primary-button" data-action="quick-sale">${icon('scan')} Catat penjualan</button></section>
+    <section class="page-toolbar"><div><p class="eyebrow">MUTASI</p><h1>Transaksi</h1><p class="subheading">${state.movements.length} catatan keluar-masuk. Filter penjualan atau restock.</p></div><button type="button" class="primary-button" data-action="quick-sale">${icon('scan')} Catat penjualan</button></section>
     <section class="panel">
       <div class="table-tools">
-        <label class="search-box">${icon('search')}<input id="tx-search" type="search" placeholder="Cari barang, SKU, atau catatan" value="${escapeHtml(txQuery)}"></label>
-        <div class="segmented" role="tablist">
-          <button type="button" class="${txType === 'all' ? 'active' : ''}" data-tx-type="all">Semua</button>
-          <button type="button" class="${txType === 'sale' ? 'active' : ''}" data-tx-type="sale">Penjualan</button>
-          <button type="button" class="${txType === 'restock' ? 'active' : ''}" data-tx-type="restock">Restock</button>
+        <label class="search-box">${icon('search')}<input id="tx-search" type="search" placeholder="Cari barang, SKU, atau catatan" aria-label="Cari transaksi" autocomplete="off" value="${escapeHtml(txQuery)}"></label>
+        <div class="segmented" role="group" aria-label="Jenis transaksi">
+          ${[['all', 'Semua'], ['sale', 'Penjualan'], ['restock', 'Restock']].map(([type, label]) => `<button type="button" class="${txType === type ? 'active' : ''}" aria-pressed="${txType === type}" data-tx-type="${type}">${label}</button>`).join('')}
         </div>
       </div>
-      <div class="table-scroll"><table><thead><tr><th>WAKTU</th><th>BARANG</th><th>JENIS</th><th>QTY</th><th>NILAI</th><th>CATATAN</th></tr></thead><tbody>${rows.map((m) => {
-        const p = state.products.find((item) => item.id === m.productId)
-        const when = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(m.date))
-        const amount = m.type === 'sale' ? saleAmount(m) : 0
-        return `<tr><td class="sku">${escapeHtml(when)}</td><td><div class="product-cell"><span><b>${escapeHtml(p?.name || m.productName || 'Barang dihapus')}</b><small>${escapeHtml(p?.sku || m.productSKU || '—')}</small></span></div></td><td><span class="status ${m.type === 'sale' ? 'status-habis' : 'status-aman'}">${m.type === 'sale' ? 'Penjualan' : 'Restock'}</span></td><td class="stock-number ${m.type === 'sale' ? 'stock-low' : ''}">${m.type === 'sale' ? '−' : '+'}${m.qty}</td><td class="price">${m.type === 'sale' ? money(amount) : '—'}</td><td class="sku">${escapeHtml(m.note || '—')}</td></tr>`
-      }).join('') || '<tr><td colspan="6" class="empty-state">Belum ada transaksi pada filter ini.</td></tr>'}</tbody></table></div>
-      <div class="table-footer"><span><b>${rows.length}</b> baris ditampilkan</span></div>
+      <div class="table-scroll"><table><thead><tr><th>WAKTU</th><th>BARANG</th><th>JENIS</th><th>QTY</th><th>NILAI</th><th>CATATAN</th></tr></thead><tbody data-tx-rows>${transactionRows(rows)}</tbody></table></div>
+      <div class="table-footer"><span data-tx-count>${transactionCountLabel(rows)}</span></div>
     </section>
   `
+}
+
+function transactionRows(rows) {
+  return rows.map((m) => {
+    const p = state.products.find((item) => item.id === m.productId)
+    const when = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(m.date))
+    const amount = m.type === 'sale' ? saleAmount(m) : 0
+    return `<tr><td class="sku">${escapeHtml(when)}</td><td><div class="product-cell"><span><b>${escapeHtml(p?.name || m.productName || 'Barang dihapus')}</b><small>${escapeHtml(p?.sku || m.productSKU || '—')}</small></span></div></td><td><span class="status ${m.type === 'sale' ? 'status-sale' : 'status-aman'}">${m.type === 'sale' ? 'Penjualan' : 'Restock'}</span></td><td class="stock-number ${m.type === 'sale' ? 'stock-low' : 'stock-in'}">${m.type === 'sale' ? '−' : '+'}${m.qty}</td><td class="price">${m.type === 'sale' ? money(amount) : '—'}</td><td class="note-cell">${escapeHtml(m.note || '—')}</td></tr>`
+  }).join('') || `<tr><td colspan="6" class="empty-state">${state.movements.length ? 'Belum ada transaksi pada filter ini.' : 'Belum ada transaksi. Catat penjualan atau restock pertama.'}</td></tr>`
+}
+
+function transactionCountLabel(rows) {
+  const revenue = rows.reduce((sum, m) => sum + saleAmount(m), 0)
+  return `<b>${rows.length}</b> baris ditampilkan${revenue ? ` · omzet <b>${money(revenue)}</b>` : ''}`
+}
+
+function refreshTransactionResults() {
+  const body = document.querySelector('[data-tx-rows]')
+  const count = document.querySelector('[data-tx-count]')
+  if (!body || !count) { render(); return }
+  const rows = filteredMovements()
+  body.innerHTML = transactionRows(rows)
+  count.innerHTML = transactionCountLabel(rows)
 }
 
 function renderReportsView() {
@@ -569,7 +676,7 @@ function renderReportsView() {
   const safeEnd = `${report.health.safePct}%`
   const lowEnd = `${report.health.safePct + report.health.lowPct}%`
   return `
-    <section class="page-toolbar"><div><p class="eyebrow">ANALITIK</p><h1>Laporan toko</h1><p class="subheading">Periode ${reportRange} hari, dibanding ${reportRange} hari sebelumnya. Omzet dari harga tercatat saat penjualan.</p></div><div class="segmented">${[1, 7, 30].map((days) => `<button type="button" class="${reportRange === days ? 'active' : ''}" data-report-range="${days}">${days === 1 ? 'Hari ini' : days + ' hari'}</button>`).join('')}</div></section>
+    <section class="page-toolbar"><div><p class="eyebrow">ANALITIK</p><h1>Laporan dana usaha</h1><p class="subheading">${reportRange === 1 ? 'Hari ini, dibanding kemarin' : `Periode ${reportRange} hari, dibanding ${reportRange} hari sebelumnya`}. Omzet dari harga tercatat saat penjualan.</p></div><div class="segmented" role="group" aria-label="Periode laporan">${[1, 7, 30].map((days) => `<button type="button" class="${reportRange === days ? 'active' : ''}" aria-pressed="${reportRange === days}" data-report-range="${days}">${days === 1 ? 'Hari ini' : days + ' hari'}</button>`).join('')}</div></section>
     <section class="stats-grid">
       <article class="stat-card"><div class="stat-heading"><span>Omzet</span><span class="delta ${revDelta.cls}">${revDelta.text}</span></div><strong class="value-stat">${money(report.revenue)}</strong><div class="stat-foot"><span class="foot-note">${report.tickets} transaksi</span></div></article>
       <article class="stat-card"><div class="stat-heading"><span>Unit terjual</span><span class="delta ${unitDelta.cls}">${unitDelta.text}</span></div><strong>${report.unitsSold.toLocaleString('id-ID')}</strong><div class="stat-foot"><span class="foot-note">Rata transaksi ${money(report.avgTicket)}</span></div></article>
@@ -579,16 +686,13 @@ function renderReportsView() {
     ${report.insights.length ? `<ul class="insight-list">${report.insights.map((item) => `<li><b>${item.k}</b><span>${escapeHtml(item.t)}</span></li>`).join('')}</ul>` : ''}
     <section class="analytics-grid">
       <div class="panel chart-frame">
-        <div class="chart-legend"><h2>Tren omzet</h2><span>Puncak ditandai merah bata</span></div>
-        <div class="bar-chart">${report.daily.map((day, index) => {
-          const labeled = report.days <= 7 || index === 0 || index === report.daily.length - 1 || index % 5 === 0
-          return `<div class="bar-col ${day.key === report.peak?.key && day.revenue ? 'is-peak' : ''}" title="${escapeHtml(day.label)} · ${money(day.revenue)}"><i style="height:${Math.max(2, Math.round((day.revenue / maxBar) * 100))}%"></i><small>${labeled ? escapeHtml(day.label) : ''}</small></div>`
-        }).join('')}</div>
+        <div class="chart-legend"><h2>Tren omzet</h2><span><i class="legend-swatch peak"></i>Hari terkuat</span></div>
+        ${barChart(report.daily, report.peak, maxBar, (index) => report.days <= 7 || index === 0 || index === report.daily.length - 1 || index % 5 === 0)}
       </div>
       <div class="panel chart-frame">
         <div class="chart-legend"><h2>Kesehatan stok</h2><span>${state.products.length} SKU</span></div>
         <div class="mix-row">
-          <div class="donut" style="--safe:${safeEnd};--low:${lowEnd}"></div>
+          <div class="donut${state.products.length ? '' : ' is-empty'}" style="--safe:${safeEnd};--low:${lowEnd}" role="img" aria-label="Aman ${report.health.safePct}%, menipis ${report.health.lowPct}%, habis ${report.health.outPct}%"></div>
           <div class="mix-legend">
             <span><i class="c-safe"></i>Aman ${report.health.safe} · ${report.health.safePct}%</span>
             <span><i class="c-low"></i>Menipis ${report.health.low} · ${report.health.lowPct}%</span>
@@ -607,35 +711,36 @@ function renderReportsView() {
         <div class="dead-list">${report.deadStock.map((p) => `<div class="dead-row"><span><b>${escapeHtml(p.name)}</b><br><small>${p.stock} unit · ${money(p.stock * p.price)}</small></span><span class="sku">${escapeHtml(p.sku)}</span></div>`).join('') || '<div class="empty-state">Semua SKU berstok bergerak, atau stok masih kosong.</div>'}</div>
       </div>
     </section>
-    <div class="table-footer" style="margin-top:8px;border:0;padding:0"><button class="text-button" data-action="export-report">Unduh CSV periode ini ${icon('arrow')}</button></div>
+    <div class="report-footer"><button type="button" class="secondary-button" data-action="export-report">Unduh CSV periode ini ${icon('arrow')}</button></div>
   `
 }
 
 function render() {
-  if (!useLocalMode && !authUser && supabaseConfigured) {
-    renderAuth()
-    return
-  }
-  if (!useLocalMode && !authUser && !supabaseConfigured) {
+  if (!useLocalMode && !authUser) {
     renderAuth()
     return
   }
   const remoteBackend = Boolean(supabase && authUser && !useLocalMode)
   const storeName = isDemo ? 'Dana Usaha KPK' : remoteBackend ? (authUser.user_metadata?.store_name || 'Dana Usaha KPK') : 'Dana Usaha KPK'
   const accountLabel = remoteBackend ? authUser.email : 'Mode lokal'
-  const accountInitial = String(accountLabel || storeName || 'DU').slice(0, 2).toUpperCase()
+  const accountInitial = remoteBackend ? String(authUser.email || 'DU').slice(0, 2).toUpperCase() : 'LK'
+  const now = new Date()
   const totalItems = state.products.reduce((sum, p) => sum + p.stock, 0)
   const needsRestock = state.products.filter((p) => p.stock <= p.minStock).length
   const totalValue = state.products.reduce((sum, p) => sum + p.stock * p.price, 0)
-  const todaySales = state.movements.filter((m) => m.type === 'sale' && new Date(m.date).toDateString() === today.toDateString())
+  const todaySales = state.movements.filter((m) => m.type === 'sale' && new Date(m.date).toDateString() === now.toDateString())
   const salesToday = todaySales.reduce((sum, m) => sum + saleAmount(m), 0)
   const recent = [...state.movements].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 6)
   const title = pageTitles[activeNav] || 'Ringkasan'
-  const week = computeAnalytics(7)
-  const page = activeNav === '#inventory' ? renderInventoryView()
+  const loading = state.dataMode === 'loading' && !serverProblem
+  const page = loading ? loadingMarkup()
+    : activeNav === '#inventory' ? renderInventoryView()
     : activeNav === '#transactions' ? renderTransactionsView()
     : activeNav === '#reports' ? renderReportsView()
-    : renderDashboard({ storeName, totalItems, needsRestock, totalValue, salesToday, ticketsToday: todaySales.length, recent, week })
+    : renderDashboard({ storeName, totalItems, needsRestock, totalValue, salesToday, ticketsToday: todaySales.length, recent, week: computeAnalytics(7) })
+  // Live updates re-render while someone may be typing; put the caret back where it was.
+  const focused = document.activeElement?.id && document.querySelector('#app')?.contains(document.activeElement) ? document.activeElement : undefined
+  const focusState = focused && { id: focused.id, start: focused.selectionStart, end: focused.selectionEnd }
   document.querySelector('#app').innerHTML = `
     <aside class="sidebar">
       <a class="brand" href="#dashboard">
@@ -658,14 +763,19 @@ function render() {
       </div>
     </aside>
     <main class="main-area">
-      <header class="topbar"><div class="breadcrumbs">${escapeHtml(storeName)} <span>/</span> <b>${title}</b></div><div class="top-actions"><div class="date-pill">${icon('chart')}<span>${dayName}</span></div><button class="icon-button notification" aria-label="Notifikasi stok">${icon('bell')}${needsRestock ? '<i></i>' : ''}</button><button type="button" class="mobile-logout" data-action="${remoteBackend ? 'sign-out' : 'leave-local'}">${remoteBackend ? 'Keluar' : 'Kembali'}</button><span class="top-avatar">${escapeHtml(accountInitial)}</span></div></header>
+      <header class="topbar"><div class="breadcrumbs">${escapeHtml(storeName)} <span>/</span> <b>${title}</b></div><div class="top-actions"><div class="date-pill">${icon('calendar')}<span>${dayLabel(now)}</span></div><button type="button" class="icon-button topbar-help" data-action="help" aria-label="Buka panduan">${icon('help')}</button><button type="button" class="icon-button notification" aria-label="${needsRestock ? `${needsRestock} barang perlu restock` : 'Notifikasi stok'}">${icon('bell')}${needsRestock ? `<i>${needsRestock > 9 ? '9+' : needsRestock}</i>` : ''}</button><button type="button" class="mobile-logout" data-action="${remoteBackend ? 'sign-out' : 'leave-local'}">${remoteBackend ? 'Keluar' : 'Kembali'}</button><span class="top-avatar" title="${escapeHtml(accountLabel)}">${escapeHtml(accountInitial)}</span></div></header>
       <div class="content">
         ${page}
-        <footer class="footer"><span>© ${today.getFullYear()} KPK × Ini Lho ITS! — Dana Usaha</span><span><i class="live-dot"></i> ${remoteBackend ? 'Sinkron antar perangkat' : 'Sinkron antar tab'}</span></footer>
+        <footer class="footer"><span>© ${now.getFullYear()} KPK × Ini Lho ITS! — Dana Usaha</span><span class="${serverProblem ? 'is-offline' : ''}"><i class="live-dot"></i> ${serverProblem ? 'Tidak tersinkron' : remoteBackend ? 'Sinkron antar perangkat' : 'Sinkron antar tab'}</span></footer>
       </div>
     </main>
     `
   bindEvents()
+  if (focusState) {
+    const input = document.getElementById(focusState.id)
+    input?.focus({ preventScroll: true })
+    try { input?.setSelectionRange(focusState.start, focusState.end) } catch { /* not a text input */ }
+  }
 }
 function escapeHtml(text) { return String(text).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) }
 
@@ -754,33 +864,153 @@ function showProductBarcode(product) {
   }
 }
 
-function showToast(message) {
+function showToast(message, tone = 'info') {
   const toast = document.querySelector('#toast')
   toast.textContent = message
+  toast.classList.toggle('is-error', tone === 'error')
   toast.classList.add('show')
   clearTimeout(toastTimer)
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 2500)
+  toastTimer = setTimeout(() => toast.classList.remove('show'), tone === 'error' ? 4500 : 2600)
 }
 
-function openInfoModal(title, content) {
+const showError = (error) => showToast(error.message, 'error')
+const modalRoot = () => document.querySelector('#modal-root')
+let modalReturnFocus
+
+function closeModal() {
   activeCameraStopper?.()
-  const root = document.querySelector('#modal-root')
-  root.innerHTML = `<div class="modal-backdrop"><section class="modal info-modal" role="dialog" aria-modal="true"><div class="modal-head"><div><p class="eyebrow">DANA USAHA · KPK × ILITS</p><h2>${title}</h2></div><button class="icon-button close-modal" aria-label="Tutup">${icon('close')}</button></div><div class="info-content">${content}</div><div class="modal-actions"><button type="button" class="secondary-button close-modal">Tutup</button></div></section></div>`
-  root.querySelectorAll('.close-modal').forEach((el) => el.addEventListener('click', () => { activeCameraStopper?.(); root.innerHTML = '' }))
-  root.querySelector('.modal-backdrop').addEventListener('click', (event) => { if (event.target.classList.contains('modal-backdrop')) { activeCameraStopper?.(); root.innerHTML = '' } })
+  const root = modalRoot()
+  if (!root?.firstElementChild) return
+  root.innerHTML = ''
+  document.body.classList.remove('modal-open')
+  if (modalReturnFocus?.isConnected) modalReturnFocus.focus({ preventScroll: true })
+  modalReturnFocus = undefined
 }
 
+function mountModal(markup) {
+  activeCameraStopper?.()
+  const root = modalRoot()
+  // Chained modals (menu → sale) should hand focus back to what opened the first one.
+  if (!root.firstElementChild) modalReturnFocus = document.activeElement
+  root.innerHTML = markup
+  document.body.classList.add('modal-open')
+  const backdrop = root.querySelector('.modal-backdrop')
+  root.querySelectorAll('.close-modal').forEach((el) => el.addEventListener('click', closeModal))
+  // Only a press that starts and ends on the backdrop closes it, so selecting text in a field doesn't.
+  let pressedBackdrop = false
+  backdrop.addEventListener('pointerdown', (event) => { pressedBackdrop = event.target === backdrop })
+  backdrop.addEventListener('click', (event) => { if (pressedBackdrop && event.target === backdrop) closeModal() })
+  return backdrop
+}
+
+const modalHead = (title) => `<div class="modal-head"><div><p class="eyebrow">DANA USAHA · KPK × ILITS</p><h2 id="modal-title">${title}</h2></div><button type="button" class="icon-button close-modal" aria-label="Tutup">${icon('close')}</button></div>`
+
+function openInfoModal(title, content, { actions = '<button type="button" class="secondary-button close-modal">Tutup</button>' } = {}) {
+  const backdrop = mountModal(`<div class="modal-backdrop"><section class="modal info-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">${modalHead(title)}<div class="info-content">${content}</div>${actions ? `<div class="modal-actions">${actions}</div>` : ''}</section></div>`)
+  backdrop.querySelector('.modal-head .close-modal')?.focus({ preventScroll: true })
+  return backdrop
+}
+
+function openConfirmModal(title, message, confirmLabel, onConfirm) {
+  const backdrop = openInfoModal(title, `${message}<p class="form-error" data-form-error role="alert" hidden></p>`, {
+    actions: `<button type="button" class="secondary-button close-modal">Batal</button><button type="button" class="danger-button" data-confirm>${icon('trash')} ${confirmLabel}</button>`,
+  })
+  const confirm = backdrop.querySelector('[data-confirm]')
+  confirm.addEventListener('click', async () => {
+    setButtonBusy(confirm, true, 'Memproses…')
+    try {
+      await onConfirm()
+      if (backdrop.isConnected) closeModal()
+    } catch (error) {
+      setButtonBusy(confirm, false)
+      showFormError(backdrop, error.message)
+    }
+  })
+}
+
+function setButtonBusy(button, busy, label) {
+  if (busy) {
+    button.dataset.idleHtml = button.innerHTML
+    button.innerHTML = `<span class="spinner" aria-hidden="true"></span>${label}`
+  } else if (button.dataset.idleHtml) button.innerHTML = button.dataset.idleHtml
+  button.disabled = busy
+  button.setAttribute('aria-busy', String(busy))
+}
+
+function showFormError(root, message) {
+  const error = root.querySelector('[data-form-error]')
+  if (!error) { showToast(message, 'error'); return }
+  error.textContent = message
+  error.hidden = !message
+}
+
+// onSubmit may return a promise; the form stays open until it settles, so a failed
+// save keeps what was typed and shows the reason next to the buttons.
 function openModal(title, content, onSubmit, submitLabel = 'Simpan') {
-  activeCameraStopper?.()
-  const root = document.querySelector('#modal-root')
-  root.innerHTML = `<div class="modal-backdrop"><section class="modal" role="dialog" aria-modal="true"><div class="modal-head"><div><p class="eyebrow">DANA USAHA · KPK × ILITS</p><h2>${title}</h2></div><button class="icon-button close-modal">${icon('close')}</button></div><form id="modal-form">${content}<div class="modal-actions"><button type="button" class="secondary-button close-modal">Batal</button><button type="submit" class="primary-button">${submitLabel} ${icon('arrow')}</button></div></form></section></div>`
-  root.querySelectorAll('.close-modal').forEach((el) => el.addEventListener('click', () => { activeCameraStopper?.(); root.innerHTML = '' }))
-  root.querySelector('.modal-backdrop').addEventListener('click', (event) => { if (event.target.classList.contains('modal-backdrop')) { activeCameraStopper?.(); root.innerHTML = '' } })
-  root.querySelector('form').addEventListener('submit', (event) => { event.preventDefault(); const data = new FormData(event.currentTarget); activeCameraStopper?.(); root.innerHTML = ''; onSubmit(data) })
-  if (!window.matchMedia('(max-width: 768px)').matches) root.querySelector('input')?.focus()
+  const backdrop = mountModal(`<div class="modal-backdrop"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">${modalHead(title)}<form id="modal-form" novalidate>${content}<p class="form-error" data-form-error role="alert" hidden></p><div class="modal-actions"><button type="button" class="secondary-button close-modal">Batal</button><button type="submit" class="primary-button">${submitLabel} ${icon('arrow')}</button></div></form></section></div>`)
+  const form = backdrop.querySelector('form')
+  const submit = form.querySelector('[type="submit"]')
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault()
+    if (submit.disabled) return
+    if (!form.checkValidity()) {
+      const invalid = form.querySelector(':invalid')
+      showFormError(backdrop, validationText(invalid))
+      invalid?.focus()
+      return
+    }
+    showFormError(backdrop, '')
+    activeCameraStopper?.()
+    setButtonBusy(submit, true, 'Menyimpan…')
+    try {
+      await onSubmit(new FormData(form))
+      // onSubmit may have opened the next modal; only close the one we own.
+      if (backdrop.isConnected) closeModal()
+    } catch (error) {
+      if (!backdrop.isConnected) { showError(error); return }
+      setButtonBusy(submit, false)
+      showFormError(backdrop, error.message)
+    }
+  })
+  if (!window.matchMedia('(max-width: 768px)').matches) form.querySelector('input')?.focus()
+  return backdrop
 }
 
-const field = (label, name, opts = {}) => `<label class="form-field ${opts.wide ? 'wide' : ''}"><span>${label}</span><input name="${name}" type="${opts.type || 'text'}" ${opts.required === false ? '' : 'required'} ${opts.placeholder ? `placeholder="${opts.placeholder}"` : ''} ${opts.value !== undefined ? `value="${opts.value}"` : ''} ${opts.min !== undefined ? `min="${opts.min}"` : ''} ${opts.max !== undefined ? `max="${opts.max}"` : ''}></label>`
+// Browser messages follow the device language; spell the common cases out in Indonesian.
+function validationText(input) {
+  if (!input) return 'Lengkapi isian yang wajib.'
+  const label = input.getAttribute('aria-label') || input.closest('label')?.querySelector('span')?.firstChild?.textContent?.trim() || 'Isian'
+  const { validity } = input
+  if (validity.valueMissing) return `${label} wajib diisi.`
+  if (validity.rangeUnderflow) return `${label} minimal ${input.min}.`
+  if (validity.rangeOverflow) return `${label} maksimal ${input.max}.`
+  if (validity.stepMismatch || validity.badInput) return `${label} harus berupa angka bulat.`
+  return `${label}: ${input.validationMessage}`
+}
+
+function handleGlobalKeydown(event) {
+  const modal = modalRoot()?.querySelector('.modal')
+  if (modal) {
+    if (event.key === 'Escape') { event.preventDefault(); closeModal(); return }
+    if (event.key === 'Tab') {
+      const focusable = [...modal.querySelectorAll('button:not([disabled]), input:not([type="hidden"]):not([hidden]), select, a[href]')].filter((el) => el.offsetParent !== null)
+      if (!focusable.length) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (event.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) { event.preventDefault(); last.focus() }
+      else if (!event.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) { event.preventDefault(); first.focus() }
+    }
+    return
+  }
+  if (event.key === '/' && !event.ctrlKey && !event.metaKey && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
+    const input = document.querySelector('#search') || document.querySelector('#tx-search')
+    if (!input) return
+    event.preventDefault()
+    input.focus()
+  }
+}
+
+const field = (label, name, opts = {}) => `<label class="form-field ${opts.wide ? 'wide' : ''}"><span>${label}${opts.required === false ? ' <em>opsional</em>' : ''}</span><input name="${name}" type="${opts.type || 'text'}" ${opts.type === 'number' ? 'inputmode="numeric" step="1"' : ''} ${opts.required === false ? '' : 'required'} ${opts.placeholder ? `placeholder="${opts.placeholder}"` : ''} ${opts.value !== undefined ? `value="${opts.value}"` : ''} ${opts.min !== undefined ? `min="${opts.min}"` : ''} ${opts.max !== undefined ? `max="${opts.max}"` : ''} ${opts.autocomplete ? `autocomplete="${opts.autocomplete}"` : ''}></label>`
 
 function cameraPanelMarkup() {
   return `<div class="camera-panel" data-camera-panel hidden><div class="camera-viewfinder"><video data-camera-video autoplay muted playsinline aria-label="Pratinjau kamera untuk memindai barcode"></video><span class="scan-reticle" aria-hidden="true"></span></div><div class="camera-panel-footer"><span data-camera-status role="status">Arahkan barcode ke dalam bingkai.</span><div class="camera-panel-actions"><button type="button" class="text-button" data-camera-photo>Foto barcode</button><input type="file" accept="image/*" capture="environment" data-camera-file hidden><button type="button" class="text-button" data-camera-stop>Tutup kamera</button></div></div></div><p class="camera-message" data-camera-message role="status"></p>`
@@ -913,217 +1143,226 @@ function wireCameraScanner(root, input, onScan) {
   })
 }
 
-function addProduct() {
-  openModal('Tambah barang baru', `<p class="modal-hint">Gunakan barcode yang sudah ada atau buat kode internal otomatis. Cetak labelnya lalu tempelkan pada barang.</p><div class="form-grid">${field('Nama barang', 'name', { placeholder: 'Contoh: Kopi Arabika' })}${cameraSkuField()}${barcodeToolsMarkup()}${field('Kategori', 'category', { placeholder: 'Contoh: Minuman' })}${field('Harga jual (Rp)', 'price', { type: 'number', min: 0 })}${field('Stok awal', 'stock', { type: 'number', min: 0 })}${field('Batas minimum stok', 'minStock', { type: 'number', min: 0 })}</div>${cameraPanelMarkup()}`, (data) => {
-    const product = { name: data.get('name').trim(), sku: data.get('sku').trim(), category: data.get('category').trim() || 'Umum', price: Number(data.get('price')), stock: Number(data.get('stock')), minStock: Number(data.get('minStock')) }
-    apiRequest('/products', { method: 'POST', body: product }).then(({ state: nextState }) => { applyState(nextState); render(); showToast(`${product.name} ditambahkan ke inventori`) }).catch((error) => showToast(error.message))
-  })
-  const root = document.querySelector('#modal-root')
-  wireCameraScanner(root, root.querySelector('input[name="sku"]'), (code) => { root.querySelector('[data-camera-message]').textContent = `Barcode ${code} terbaca. Kode dimasukkan ke kolom SKU.` })
-  wireBarcodeTools(root)
-}
-function editProduct(product) {
-  openModal('Edit detail barang', `<p class="modal-hint">Perubahan harga, SKU, dan batas minimum tidak mengubah jumlah stok. Kamu bisa membuat ulang atau mencetak label barcode dari sini.</p><div class="form-grid">${field('Nama barang', 'name', { value: escapeHtml(product.name) })}${cameraSkuField(escapeHtml(product.sku))}${barcodeToolsMarkup()}${field('Kategori', 'category', { value: escapeHtml(product.category) })}${field('Harga jual (Rp)', 'price', { type: 'number', min: 0, value: product.price })}${field('Batas minimum stok', 'minStock', { type: 'number', min: 0, value: product.minStock })}</div>${cameraPanelMarkup()}`, (data) => {
-    const changes = { name: data.get('name').trim(), sku: data.get('sku').trim() || product.sku, category: data.get('category').trim() || 'Umum', price: Number(data.get('price')), minStock: Number(data.get('minStock')) }
-    apiRequest(`/products/${encodeURIComponent(product.id)}`, { method: 'PATCH', body: changes }).then(({ state: nextState }) => { applyState(nextState); render(); showToast(`${changes.name} diperbarui`) }).catch((error) => showToast(error.message))
-  })
-  const root = document.querySelector('#modal-root')
-  wireCameraScanner(root, root.querySelector('input[name="sku"]'), (code) => { root.querySelector('[data-camera-message]').textContent = `Barcode ${code} terbaca. Kode dimasukkan ke kolom SKU.` })
-  wireBarcodeTools(root)
-}
-function stockAction(product, type) {
-  const selling = type === 'sale'
-  if (selling && product.stock === 0) { showToast('Stok barang ini habis. Catat restock dulu sebelum menjual.'); return }
-  openModal(selling ? 'Catat penjualan' : 'Tambah stok', `<div class="selected-product"><span class="product-thumb ${product.color}">${product.emoji}</span><span><b>${escapeHtml(product.name)}</b><small>Stok tersedia: <strong>${product.stock} unit</strong> · ${escapeHtml(product.sku)}</small></span></div>${field(selling ? 'Jumlah terjual' : 'Jumlah barang masuk', 'qty', { type: 'number', min: 1, max: selling ? product.stock : undefined, value: 1 })}${selling ? field('Catatan (opsional)', 'note', { required: false, placeholder: 'Contoh: Transaksi kasir' }) : field('Catatan (opsional)', 'note', { required: false, placeholder: 'Contoh: Restock dari supplier' })}`, (data) => {
-    const qty = Number(data.get('qty'))
-    apiRequest('/movements', { method: 'POST', body: { productId: product.id, type, qty, note: data.get('note').trim() || (selling ? 'Penjualan kasir' : 'Restock') } }).then(({ state: nextState, movement }) => {
-      applyState(nextState); render()
-      const updated = state.products.find((item) => item.id === product.id)
-      showToast(selling ? `Penjualan tercatat · stok tersisa ${updated?.stock ?? 0} unit` : `Stok bertambah ${movement.qty} unit`)
-    }).catch((error) => showToast(error.message))
-  }, selling ? 'Simpan penjualan' : 'Tambah stok')
-}
-function quickSale() {
-  openModal('Catat penjualan', `<div class="scanner-guide"><span class="scanner-guide-icon">${icon('scan')}</span><div><b>Pindai barcode dengan kamera HP</b><p>Arahkan kamera belakang HP ke barcode. Pastikan kode barcode sudah tersimpan di SKU barang.</p></div></div><p class="modal-hint">Setelah barcode terbaca, pilih jumlah terjual lalu simpan agar stok berkurang. Bisa juga ketik SKU atau nama barang.</p><div class="form-grid">${field('SKU / barcode / nama barang', 'searchTerm', { placeholder: 'Contoh: KPG-001', wide: true })}</div><div class="camera-actions"><button type="button" class="secondary-button" data-camera-trigger>${icon('scan')} Buka kamera HP</button></div>${cameraPanelMarkup()}`, (data) => {
-    const term = data.get('searchTerm').trim().toLowerCase()
-    if (!term) { showToast('Scan atau masukkan SKU / nama barang terlebih dahulu.'); return }
-    const product = state.products.find((p) => p.sku.toLowerCase() === term) || state.products.find((p) => p.name.toLowerCase().includes(term))
-    if (!product) { showToast('Barang tidak ditemukan. Pastikan barcode atau nama benar.'); return }
-    stockAction(product, 'sale')
-  }, 'Lanjutkan')
-  const root = document.querySelector('#modal-root')
-  const input = root.querySelector('input[name="searchTerm"]')
-  wireCameraScanner(root, input, (code) => {
-    const product = state.products.find((item) => item.sku.toLowerCase() === code.toLowerCase())
-    if (!product) {
-      root.querySelector('[data-camera-message]').textContent = `Barcode ${code} belum terdaftar. Tambahkan barang dengan kode tersebut terlebih dahulu.`
-      return
-    }
-    root.innerHTML = ''
-    stockAction(product, 'sale')
-  })
+const scanMessage = (root, text, isError = false) => {
+  const message = root.querySelector('[data-camera-message]')
+  message.textContent = text
+  message.classList.toggle('is-error', isError)
 }
 
-function showReports() {
-  goTo('#reports')
+function productFormFields(product) {
+  return `<div class="form-grid">${field('Nama barang', 'name', { placeholder: 'Contoh: Kaos KPK 2026', value: product ? escapeHtml(product.name) : undefined, autocomplete: 'off' })}${cameraSkuField(product ? escapeHtml(product.sku) : undefined)}${barcodeToolsMarkup()}${field('Kategori', 'category', { required: false, placeholder: 'Contoh: Merchandise', value: product ? escapeHtml(product.category) : undefined })}${field('Harga jual (Rp)', 'price', { type: 'number', min: 0, placeholder: 'Contoh: 75000', value: product?.price })}${product ? '' : field('Stok awal', 'stock', { type: 'number', min: 0, placeholder: '0' })}${field('Batas minimum stok', 'minStock', { type: 'number', min: 0, placeholder: 'Contoh: 5', value: product?.minStock })}</div>${cameraPanelMarkup()}`
+}
+
+function wireProductForm(root) {
+  wireCameraScanner(root, root.querySelector('input[name="sku"]'), (code) => scanMessage(root, `Barcode ${code} terbaca dan dimasukkan ke kolom SKU.`))
+  wireBarcodeTools(root)
+}
+
+function addProduct() {
+  const root = openModal('Tambah barang baru', `<p class="modal-hint">Gunakan barcode yang sudah ada atau buat kode internal otomatis. Cetak labelnya lalu tempelkan pada barang.</p>${productFormFields()}`, async (data) => {
+    const product = { name: data.get('name').trim(), sku: data.get('sku').trim(), category: data.get('category').trim() || 'Umum', price: Number(data.get('price')), stock: Number(data.get('stock')), minStock: Number(data.get('minStock')) }
+    const { state: nextState } = await apiRequest('/products', { method: 'POST', body: product })
+    applyState(nextState); render(); showToast(`${product.name} ditambahkan ke inventori`)
+  }, 'Simpan barang')
+  wireProductForm(root)
+}
+
+function editProduct(product) {
+  const root = openModal('Edit detail barang', `<p class="modal-hint">Perubahan harga, SKU, dan batas minimum tidak mengubah jumlah stok. Kamu bisa membuat ulang atau mencetak label barcode dari sini.</p>${productFormFields(product)}`, async (data) => {
+    const changes = { name: data.get('name').trim(), sku: data.get('sku').trim() || product.sku, category: data.get('category').trim() || 'Umum', price: Number(data.get('price')), minStock: Number(data.get('minStock')) }
+    const { state: nextState } = await apiRequest(`/products/${encodeURIComponent(product.id)}`, { method: 'PATCH', body: changes })
+    applyState(nextState); render(); showToast(`${changes.name} diperbarui`)
+  })
+  wireProductForm(root)
+}
+
+function stockAction(product, type) {
+  const selling = type === 'sale'
+  if (selling && product.stock === 0) { showToast(`Stok ${product.name} habis. Catat restock dulu sebelum menjual.`, 'error'); return }
+  const root = openModal(selling ? 'Catat penjualan' : 'Tambah stok', `<div class="selected-product"><span class="product-thumb ${escapeHtml(product.color)}">${escapeHtml(product.emoji)}</span><span><b>${escapeHtml(product.name)}</b><small>Stok tersedia: <strong>${product.stock} unit</strong> · ${escapeHtml(product.sku)}</small></span>${selling ? `<span class="selected-price">${money(product.price)}</span>` : ''}</div><div class="qty-field"><span>${selling ? 'Jumlah terjual' : 'Jumlah barang masuk'}</span><div class="qty-stepper"><button type="button" data-qty-step="-1" aria-label="Kurangi jumlah">−</button><input name="qty" type="number" inputmode="numeric" step="1" min="1" ${selling ? `max="${product.stock}"` : ''} value="1" required aria-label="${selling ? 'Jumlah terjual' : 'Jumlah barang masuk'}"><button type="button" data-qty-step="1" aria-label="Tambah jumlah">+</button></div>${selling ? `<p class="qty-total">Total <b data-qty-total>${money(product.price)}</b></p>` : ''}</div>${field('Catatan', 'note', { required: false, placeholder: selling ? 'Contoh: Booth hari ke-2' : 'Contoh: Restock dari vendor' })}`, async (data) => {
+    const qty = Number(data.get('qty'))
+    const { state: nextState, movement } = await apiRequest('/movements', { method: 'POST', body: { productId: product.id, type, qty, note: data.get('note').trim() || (selling ? 'Penjualan kasir' : 'Restock') } })
+    applyState(nextState); render()
+    const updated = state.products.find((item) => item.id === product.id)
+    showToast(selling ? `Penjualan tercatat · stok tersisa ${updated?.stock ?? 0} unit` : `Stok bertambah ${movement.qty} unit`)
+  }, selling ? 'Simpan penjualan' : 'Tambah stok')
+  const qty = root.querySelector('input[name="qty"]')
+  const total = root.querySelector('[data-qty-total]')
+  const syncTotal = () => { if (total) total.textContent = money(product.price * Math.max(0, Number(qty.value) || 0)) }
+  qty.addEventListener('input', syncTotal)
+  root.querySelectorAll('[data-qty-step]').forEach((button) => button.addEventListener('click', () => {
+    const max = selling ? product.stock : Infinity
+    qty.value = String(Math.min(max, Math.max(1, (Number(qty.value) || 0) + Number(button.dataset.qtyStep))))
+    syncTotal()
+  }))
+}
+
+// Exact SKU, then exact name, then a single partial match — never guess between several.
+function findProduct(rawTerm) {
+  const term = rawTerm.trim().toLowerCase()
+  if (!term) return { error: 'Pindai atau ketik SKU / nama barang terlebih dahulu.' }
+  const exact = state.products.find((p) => p.sku.toLowerCase() === term) || state.products.find((p) => p.name.toLowerCase() === term)
+  if (exact) return { product: exact }
+  const matches = state.products.filter((p) => `${p.name} ${p.sku}`.toLowerCase().includes(term))
+  if (matches.length === 1) return { product: matches[0] }
+  if (matches.length > 1) return { error: `Ada ${matches.length} barang cocok (${matches.slice(0, 3).map((p) => p.name).join(', ')}${matches.length > 3 ? ', …' : ''}). Ketik lebih spesifik atau pindai barcodenya.` }
+  return { error: `"${rawTerm.trim()}" belum terdaftar. Pastikan barcode sudah disimpan di SKU barang.` }
+}
+
+function quickSale() {
+  const options = state.products.map((p) => `<option value="${escapeHtml(p.sku)}">${escapeHtml(p.name)} · stok ${p.stock}</option>`).join('')
+  const root = openModal('Catat penjualan', `<div class="scanner-guide"><span class="scanner-guide-icon">${icon('scan')}</span><div><b>Pindai barcode dengan kamera HP</b><p>Arahkan kamera belakang ke barcode. Barang yang cocok langsung membuka form jumlah terjual.</p></div></div><div class="form-grid"><label class="form-field wide"><span>SKU / barcode / nama barang</span><div class="field-with-action"><input name="searchTerm" list="product-options" placeholder="Contoh: KPG-001" autocomplete="off" required><button type="button" class="camera-field-button" data-camera-trigger aria-label="Buka kamera HP untuk memindai barcode">${icon('scan')}<span>Kamera HP</span></button></div><datalist id="product-options">${options}</datalist></label></div>${cameraPanelMarkup()}`, (data) => {
+    const { product, error } = findProduct(data.get('searchTerm'))
+    if (error) throw new Error(error)
+    if (!product.stock) throw new Error(`Stok ${product.name} habis. Catat restock dulu sebelum menjual.`)
+    stockAction(product, 'sale')
+  }, 'Lanjutkan')
+  wireCameraScanner(root, root.querySelector('input[name="searchTerm"]'), (code) => {
+    const { product, error } = findProduct(code)
+    if (error) { scanMessage(root, error, true); return }
+    if (!product.stock) { scanMessage(root, `Stok ${product.name} habis. Catat restock dulu sebelum menjual.`, true); return }
+    stockAction(product, 'sale')
+  })
 }
 
 function goTo(hash) {
+  closeModal()
   activeNav = hash
-  if (hash === '#inventory' || hash === '#dashboard') {
-    /* keep inventory filters */
-  }
-  window.history.replaceState(null, '', hash)
+  // pushState (not replace) so the phone's back button returns to the previous page.
+  if (window.location.hash !== hash) window.history.pushState(null, '', hash)
   render()
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-function exportReport() {
-  const report = computeAnalytics(reportRange)
-  const columns = ['Tanggal', 'Omzet', 'Unit terjual', 'Unit masuk']
-  const rows = report.daily.map((day) => [day.label, day.revenue, day.units, day.restock])
-  const csv = '\uFEFF' + [columns, ...rows].map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(',')).join('\r\n')
+function downloadCsv(filename, columns, rows) {
+  const csv = '﻿' + [columns, ...rows].map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(',')).join('\r\n')
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }))
-  const link = document.createElement('a'); link.href = url; link.download = `analitik-stokly-${reportRange}hari.csv`; link.click()
+  const link = document.createElement('a'); link.href = url; link.download = filename; link.click()
   setTimeout(() => URL.revokeObjectURL(url), 1000)
-  showToast(`Omzet ${reportRange} hari diekspor ke CSV`)
 }
 
-function showAllActivity() {
-  const allMoves = [...state.movements].sort((a, b) => new Date(b.date) - new Date(a.date))
-  const rows = allMoves.map((m) => {
-    const p = state.products.find((item) => item.id === m.productId)
-    const date = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(m.date))
-    return `<div class="history-row"><span class="activity-symbol ${m.type}">${m.type === 'sale' ? '↗' : '↙'}</span><div><b>${escapeHtml(p?.name || m.productName || 'Barang dihapus')}</b><small>${m.type === 'sale' ? 'Penjualan' : 'Barang masuk'} · ${escapeHtml(m.note || '')} · ${date}</small></div><strong class="activity-qty ${m.type}">${m.type === 'sale' ? '−' : '+'}${m.qty}</strong></div>`
-  }).join('')
-  openInfoModal('Riwayat pergerakan stok', `<p class="modal-hint">${allMoves.length} catatan tersimpan di server ini.</p><div class="history-list">${rows || '<div class="empty-state">Belum ada transaksi atau restock.</div>'}</div>`)
+function exportReport() {
+  const report = computeAnalytics(reportRange)
+  const rows = report.daily.map((day) => [new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).format(day.date), day.revenue, day.units, day.restock])
+  downloadCsv(`analitik-dana-kpk-${reportRange}hari.csv`, ['Tanggal', 'Omzet', 'Unit terjual', 'Unit masuk'], rows)
+  showToast(`Omzet ${reportRange === 1 ? 'hari ini' : `${reportRange} hari`} diekspor ke CSV`)
+}
+
+function exportProducts() {
+  if (!state.products.length) { showToast('Belum ada barang untuk diekspor.', 'error'); return }
+  const rows = state.products.map((p) => [p.name, p.sku, p.category, p.price, p.stock, p.minStock, stockStatus(p)])
+  downloadCsv('inventori-dana-kpk.csv', ['Nama barang', 'SKU / barcode', 'Kategori', 'Harga jual', 'Stok', 'Batas minimum', 'Status'], rows)
+  showToast(`${state.products.length} barang diekspor ke CSV`)
 }
 
 function showStockAlerts() {
   const lowStock = state.products.filter((p) => p.stock <= p.minStock)
-  const rows = lowStock.map((p) => `<button class="alert-row" data-alert-product="${p.id}"><span class="product-thumb ${p.color}">${p.emoji}</span><span><b>${escapeHtml(p.name)}</b><small>Sisa ${p.stock} unit · batas minimum ${p.minStock}</small></span><span class="status status-${stockStatus(p).toLowerCase()}">${stockStatus(p)}</span></button>`).join('')
-  openInfoModal('Perlu diperiksa', `<p class="modal-hint">${lowStock.length ? 'Pilih barang untuk melihatnya di daftar inventori.' : 'Belum ada barang yang perlu direstock.'}</p><div class="alert-list">${rows || '<div class="empty-state">Stok semua barang masih di atas batas minimum.</div>'}</div>`)
-  document.querySelectorAll('[data-alert-product]').forEach((button) => button.addEventListener('click', () => {
+  const rows = lowStock.map((p) => `<button type="button" class="alert-row" data-alert-product="${escapeHtml(p.id)}"><span class="product-thumb ${escapeHtml(p.color)}">${escapeHtml(p.emoji)}</span><span><b>${escapeHtml(p.name)}</b><small>Sisa ${p.stock} unit · batas minimum ${p.minStock}</small></span><span class="status status-${stockStatus(p).toLowerCase()}">${stockStatus(p)}</span></button>`).join('')
+  const root = openInfoModal('Perlu diperiksa', `<p class="modal-hint">${lowStock.length ? 'Pilih barang untuk mencatat restock.' : 'Belum ada barang yang perlu direstock.'}</p><div class="alert-list">${rows || '<div class="empty-state">Stok semua barang masih di atas batas minimum. 🎉</div>'}</div>`, {
+    actions: lowStock.length ? '<button type="button" class="secondary-button close-modal">Tutup</button><button type="button" class="primary-button" data-alert-all>Lihat di inventori</button>' : undefined,
+  })
+  root.querySelectorAll('[data-alert-product]').forEach((button) => button.addEventListener('click', () => {
     const product = state.products.find((p) => p.id === button.dataset.alertProduct)
-    document.querySelector('#modal-root').innerHTML = ''
-    activeFilter = 'Perlu restock'
-    query = product?.name || ''
-    goTo('#inventory')
+    if (product) stockAction(product, 'restock')
   }))
+  root.querySelector('[data-alert-all]')?.addEventListener('click', () => { activeFilter = 'Perlu restock'; query = ''; goTo('#inventory') })
 }
 
-function exportProducts() {
-  const columns = ['Nama barang', 'SKU / barcode', 'Kategori', 'Harga jual', 'Stok', 'Batas minimum', 'Status']
-  const rows = state.products.map((p) => [p.name, p.sku, p.category, p.price, p.stock, p.minStock, stockStatus(p)])
-  const csv = '\uFEFF' + [columns, ...rows].map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(',')).join('\r\n')
-  const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }))
-  const link = document.createElement('a'); link.href = url; link.download = 'inventori-stokly.csv'; link.click()
-  setTimeout(() => URL.revokeObjectURL(url), 1000)
-  showToast(`${state.products.length} barang diekspor ke CSV`)
+function showHelp() {
+  openInfoModal('Panduan dana usaha', `<ol class="help-guide">
+    <li><b>Daftarkan merchandise</b><p>Isi nama, harga jual, stok awal, dan batas minimum. Pindai barcode bawaan dengan kamera HP, atau pilih <em>Buat kode otomatis</em> lalu cetak labelnya.</p></li>
+    <li><b>Catat penjualan</b><p>Pilih <em>Catat penjualan</em> → <em>Kamera HP</em>. Arahkan kamera belakang ke barcode, atur jumlah terjual, lalu simpan. Scanner USB juga bisa: ketik/pindai di kolom cari Inventori lalu tekan Enter.</p></li>
+    <li><b>Pantau restock</b><p>Barang yang stoknya sama dengan atau di bawah batas minimum muncul di ikon lonceng. Pilih barangnya untuk langsung mencatat barang masuk.</p></li>
+    <li><b>Pakai di beberapa perangkat</b><p>Masuk dengan akun yang sama di setiap HP/laptop booth; perubahan stok tersinkron otomatis. Kamera langsung butuh HTTPS — di HTTP gunakan <em>Foto barcode</em>.</p></li>
+  </ol><p class="help-shortcuts"><kbd>/</kbd> cari barang · <kbd>Esc</kbd> tutup jendela</p>`)
 }
 
 function clearDemo() {
-  openInfoModal('Mulai dengan data toko', '<p class="modal-hint">Ini akan menghapus barang contoh dan catatan aktivitas di browser ini. Setelah itu, masukkan inventori toko yang sebenarnya.</p>')
-  const root = document.querySelector('#modal-root')
-  root.querySelector('.modal-actions').innerHTML = '<button type="button" class="secondary-button close-modal">Batal</button><button type="button" class="primary-button" data-confirm-clear>Kosongkan data contoh</button>'
-  root.querySelector('.modal-actions .close-modal').addEventListener('click', () => root.innerHTML = '')
-  root.querySelector('[data-confirm-clear]').addEventListener('click', async () => {
-    try {
-      const nextState = await apiRequest('/demo', { method: 'DELETE' })
-      applyState(nextState); activeFilter = 'Semua barang'; query = ''; activeNav = '#dashboard'; root.innerHTML = ''; render(); showToast('Data demo dihapus. Tambahkan barang tokomu untuk mulai.')
-    } catch (error) { showToast(error.message) }
+  openConfirmModal('Mulai dengan data asli?', '<p class="modal-hint">Semua barang contoh beserta catatan aktivitasnya akan dihapus. Setelah itu, masukkan merchandise dan stok yang sebenarnya.</p>', 'Kosongkan data contoh', async () => {
+    const nextState = await apiRequest('/demo', { method: 'DELETE' })
+    applyState(nextState); activeFilter = 'Semua barang'; query = ''; activeNav = '#dashboard'
+    closeModal(); render(); showToast('Data contoh dihapus. Tambahkan barang untuk mulai.')
   })
 }
 
 function deleteProduct(product) {
-  openInfoModal('Hapus barang?', `<p class="modal-hint"><b>${escapeHtml(product.name)}</b> akan dihapus dari inventori. Riwayat transaksi lama tetap disimpan.</p>`)
-  const root = document.querySelector('#modal-root')
-  root.querySelector('.modal-actions').innerHTML = '<button type="button" class="secondary-button close-modal">Batal</button><button type="button" class="primary-button" data-confirm-delete>Hapus barang</button>'
-  root.querySelector('.modal-actions .close-modal').addEventListener('click', () => root.innerHTML = '')
-  root.querySelector('[data-confirm-delete]').addEventListener('click', async () => {
-    try {
-      const nextState = await apiRequest(`/products/${encodeURIComponent(product.id)}`, { method: 'DELETE' })
-      applyState(nextState); root.innerHTML = ''; render(); showToast(`${product.name} dihapus; riwayat transaksi dipertahankan.`)
-    } catch (error) { showToast(error.message) }
+  openConfirmModal('Hapus barang?', `<p class="modal-hint"><b>${escapeHtml(product.name)}</b> (${escapeHtml(product.sku)}) akan dihapus dari inventori. Riwayat transaksinya tetap disimpan untuk laporan.</p>`, 'Hapus barang', async () => {
+    const nextState = await apiRequest(`/products/${encodeURIComponent(product.id)}`, { method: 'DELETE' })
+    applyState(nextState); closeModal(); render(); showToast(`${product.name} dihapus; riwayat transaksi dipertahankan.`)
   })
 }
 
+function openProductMenu(product) {
+  const root = openInfoModal(escapeHtml(product.name), `<div class="selected-product"><span class="product-thumb ${escapeHtml(product.color)}">${escapeHtml(product.emoji)}</span><span><b>${escapeHtml(product.sku)} · ${money(product.price)}</b><small>Stok <strong>${product.stock} unit</strong> · minimum ${product.minStock}</small></span><span class="status status-${stockStatus(product).toLowerCase()}">${stockStatus(product)}</span></div><div class="action-list"><button type="button" data-do="sale" ${product.stock ? '' : 'disabled'}>${icon('receipt')}<span><b>Catat penjualan</b><small>${product.stock ? 'Kurangi stok setelah barang terjual' : 'Stok habis — restock dulu'}</small></span>${icon('arrow')}</button><button type="button" data-do="restock">${icon('plus')}<span><b>Tambah stok</b><small>Catat barang masuk atau restock</small></span>${icon('arrow')}</button><button type="button" data-do="barcode">${icon('scan')}<span><b>Lihat / cetak barcode</b><small>Buat label untuk dipindai dari HP</small></span>${icon('arrow')}</button><button type="button" data-do="edit">${icon('box')}<span><b>Edit detail barang</b><small>Ubah nama, barcode, harga, atau batas minimum</small></span>${icon('arrow')}</button><button type="button" class="is-danger" data-do="delete">${icon('trash')}<span><b>Hapus barang</b><small>Riwayat transaksi lama tetap tersimpan</small></span>${icon('arrow')}</button></div>`, { actions: '' })
+  root.querySelectorAll('[data-do]').forEach((action) => action.addEventListener('click', () => {
+    const type = action.dataset.do
+    if (type === 'edit') editProduct(product)
+    else if (type === 'delete') deleteProduct(product)
+    else if (type === 'barcode') showProductBarcode(product)
+    else stockAction(product, type)
+  }))
+}
+
+function bindProductMenus(scope = document) {
+  scope.querySelectorAll('[data-product-menu]').forEach((button) => button.addEventListener('click', () => {
+    const product = state.products.find((p) => p.id === button.dataset.productMenu)
+    if (product) openProductMenu(product)
+  }))
+}
+
+function leaveLocalMode() {
+  useLocalMode = false
+  state = emptyState()
+  void stopInventoryRealtime()
+  renderAuth()
+}
+
 function bindEvents() {
-  document.querySelectorAll('[data-action="sign-out"]').forEach((button) => button.addEventListener('click', async (event) => {
+  const on = (selector, handler) => document.querySelectorAll(selector).forEach((element) => element.addEventListener('click', handler))
+  on('[data-action="sign-out"]', async (event) => {
     const button = event.currentTarget
     button.disabled = true
     const { error } = await supabase.auth.signOut()
-    if (error) { button.disabled = false; showToast(authErrorMessage(error)) }
-  }))
-  document.querySelectorAll('[data-action="leave-local"]').forEach((button) => button.addEventListener('click', () => {
-    useLocalMode = false
-    state = { products: [], movements: [], dataMode: 'custom' }
-    void stopInventoryRealtime()
-    renderAuth()
-  }))
-  document.querySelector('[data-action="add-product"]')?.addEventListener('click', addProduct)
-  document.querySelector('[data-action="retry"]')?.addEventListener('click', loadInventory)
-  document.querySelectorAll('[data-action="quick-sale"]').forEach((button) => button.addEventListener('click', quickSale))
-  document.querySelector('[data-filter-shortage]')?.addEventListener('click', () => { activeFilter = 'Perlu restock'; query = ''; goTo('#inventory') })
-  document.querySelector('[data-action="help"]').addEventListener('click', (event) => {
-    event.preventDefault()
-  openInfoModal('Panduan stok', '<div class="help-guide"><h3>1. Daftarkan barang</h3><p>Isi nama, stok awal, batas minimum, dan barcode pada kolom SKU / barcode. Kamu juga bisa memindai barcode memakai kamera HP.</p><h3>2. Catat penjualan</h3><p>Pilih Catat penjualan → Buka kamera HP. Arahkan kamera belakang ke barcode, pilih jumlah terjual, lalu simpan.</p><h3>3. Pantau restock</h3><p>Barang yang tersisa sama dengan atau di bawah batas minimum muncul di notifikasi. Gunakan menu barang untuk mencatat barang masuk.</p><h3>4. Gunakan beberapa tab/perangkat</h3><p>Semua perangkat harus membuka alamat server yang sama. Pemindaian langsung memerlukan HTTPS; di HTTP gunakan Foto barcode bila tersedia.</p></div>')
+    if (error) { button.disabled = false; showToast(authErrorMessage(error), 'error') }
   })
-  document.querySelector('[data-action="clear-demo"]')?.addEventListener('click', clearDemo)
-  document.querySelector('.notification')?.addEventListener('click', showStockAlerts)
-  document.querySelector('.small-more')?.addEventListener('click', () => goTo('#transactions'))
-  document.querySelector('[data-action="all-activity"]')?.addEventListener('click', () => goTo('#transactions'))
-  document.querySelector('[data-action="export-products"]')?.addEventListener('click', exportProducts)
-  document.querySelector('[data-action="export-report"]')?.addEventListener('click', exportReport)
-  document.querySelectorAll('[data-go]').forEach((button) => button.addEventListener('click', () => goTo(button.dataset.go)))
-  document.querySelectorAll('[data-report-range]').forEach((button) => button.addEventListener('click', () => { reportRange = Number(button.dataset.reportRange); render() }))
-  document.querySelectorAll('[data-tx-type]').forEach((button) => button.addEventListener('click', () => { txType = button.dataset.txType; render() }))
-  document.querySelectorAll('[data-watch-product]').forEach((button) => button.addEventListener('click', () => {
-    const product = state.products.find((p) => p.id === button.dataset.watchProduct)
-    activeFilter = 'Perlu restock'
-    query = product?.name || ''
-    goTo('#inventory')
-  }))
+  on('[data-action="leave-local"]', leaveLocalMode)
+  on('[data-action="add-product"]', addProduct)
+  on('[data-action="retry"]', (event) => { setButtonBusy(event.currentTarget, true, 'Menghubungkan…'); loadInventory() })
+  on('[data-action="quick-sale"]', quickSale)
+  on('[data-action="help"]', (event) => { event.preventDefault(); showHelp() })
+  on('[data-action="clear-demo"]', clearDemo)
+  on('[data-action="export-products"]', exportProducts)
+  on('[data-action="export-report"]', exportReport)
+  on('[data-action="reset-filter"]', resetInventoryFilter)
+  on('.notification', showStockAlerts)
+  on('[data-filter-shortage]', () => { activeFilter = 'Perlu restock'; query = ''; goTo('#inventory') })
+  on('[data-go]', (event) => goTo(event.currentTarget.dataset.go))
+  on('[data-report-range]', (event) => { reportRange = Number(event.currentTarget.dataset.reportRange); render() })
+  on('[data-tx-type]', (event) => { txType = event.currentTarget.dataset.txType; render() })
+  on('[data-watch-product]', (event) => {
+    const product = state.products.find((p) => p.id === event.currentTarget.dataset.watchProduct)
+    if (product) stockAction(product, 'restock')
+  })
+  on('.nav-item, .brand', (event) => {
+    event.preventDefault()
+    goTo(event.currentTarget.getAttribute('href'))
+  })
+  bindProductMenus()
+
   const search = document.querySelector('#search')
-  search?.addEventListener('input', (event) => { query = event.target.value; const pos = event.target.selectionStart; render(); const input = document.querySelector('#search'); input?.focus(); input?.setSelectionRange(pos, pos) })
+  search?.addEventListener('input', (event) => { query = event.target.value; refreshInventoryResults() })
+  // USB barcode scanners type the code and press Enter: open the sale form for that item.
   search?.addEventListener('keydown', (event) => {
     if (event.key !== 'Enter' || !query.trim()) return
-    const term = query.trim().toLowerCase()
-    const product = state.products.find((p) => p.sku.toLowerCase() === term) || state.products.find((p) => p.name.toLowerCase().includes(term))
-    if (product) stockAction(product, 'sale')
-    else showToast('Barang tidak ditemukan. Coba nama atau SKU yang terdaftar.')
-  })
-  document.querySelector('#tx-search')?.addEventListener('input', (event) => {
-    txQuery = event.target.value
-    const pos = event.target.selectionStart
-    render()
-    const input = document.querySelector('#tx-search')
-    input?.focus()
-    input?.setSelectionRange(pos, pos)
-  })
-  document.querySelector('#filter')?.addEventListener('change', (event) => { activeFilter = event.target.value; render() })
-  document.querySelectorAll('[data-product-menu]').forEach((button) => button.addEventListener('click', () => {
-    const product = state.products.find((p) => p.id === button.dataset.productMenu)
-    if (!product) return
-    openModal(escapeHtml(product.name), `<div class="action-list"><button type="button" data-do="sale">${icon('receipt')}<span><b>Catat penjualan</b><small>Kurangi stok setelah barang terjual</small></span>${icon('arrow')}</button><button type="button" data-do="restock">${icon('plus')}<span><b>Tambah stok</b><small>Catat barang masuk atau restock</small></span>${icon('arrow')}</button><button type="button" data-do="barcode">${icon('scan')}<span><b>Lihat / cetak barcode</b><small>Buat label untuk dipindai dari HP</small></span>${icon('arrow')}</button><button type="button" data-do="edit">${icon('box')}<span><b>Edit detail barang</b><small>Ubah nama, barcode, harga, atau batas minimum</small></span>${icon('arrow')}</button><button type="button" data-do="delete">${icon('close')}<span><b>Hapus barang</b><small>Riwayat transaksi lama tetap tersimpan</small></span>${icon('arrow')}</button></div>`, () => {})
-    document.querySelectorAll('[data-do]').forEach((action) => action.addEventListener('click', () => { const type = action.dataset.do; document.querySelector('#modal-root').innerHTML = ''; if (type === 'edit') editProduct(product); else if (type === 'delete') deleteProduct(product); else if (type === 'barcode') showProductBarcode(product); else stockAction(product, type) }))
-    document.querySelector('.modal-actions').innerHTML = ''
-  }))
-  document.querySelectorAll('.nav-item').forEach((link) => link.addEventListener('click', (event) => {
     event.preventDefault()
-    goTo(link.getAttribute('href'))
-  }))
-  document.querySelector('.brand')?.addEventListener('click', (event) => {
-    event.preventDefault()
-    goTo('#dashboard')
+    const rows = filteredProducts()
+    const { product, error } = findProduct(query)
+    const target = product || (rows.length === 1 ? rows[0] : undefined)
+    if (target) stockAction(target, 'sale')
+    else showToast(error, 'error')
   })
-  document.onkeydown = (event) => {
-    if (event.key === '/' && !event.ctrlKey && !event.metaKey && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
-      event.preventDefault()
-      const input = document.querySelector('#search') || document.querySelector('#tx-search')
-      input?.focus()
-    }
-  }
+  document.querySelector('#tx-search')?.addEventListener('input', (event) => { txQuery = event.target.value; refreshTransactionResults() })
+  document.querySelector('#filter')?.addEventListener('change', (event) => { activeFilter = event.target.value; refreshInventoryResults() })
 }
 
 startApplication()
