@@ -903,11 +903,12 @@ function mountModal(markup) {
   return backdrop
 }
 
-const modalHead = (title) => `<div class="modal-head"><div><p class="eyebrow">DANA USAHA · KPK × ILITS</p><h2 id="modal-title">${title}</h2></div><button type="button" class="icon-button close-modal" aria-label="Tutup">${icon('close')}</button></div>`
+// The corner × only appears when the footer has no Batal/Tutup, so there is never two ways to close.
+const modalHead = (title, withClose) => `<div class="modal-head"><div><p class="eyebrow">DANA USAHA · KPK × ILITS</p><h2 id="modal-title">${title}</h2></div>${withClose ? `<button type="button" class="icon-button close-modal" aria-label="Tutup">${icon('close')}</button>` : ''}</div>`
 
 function openInfoModal(title, content, { actions = '<button type="button" class="secondary-button close-modal">Tutup</button>' } = {}) {
-  const backdrop = mountModal(`<div class="modal-backdrop"><section class="modal info-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">${modalHead(title)}<div class="info-content">${content}</div>${actions ? `<div class="modal-actions">${actions}</div>` : ''}</section></div>`)
-  backdrop.querySelector('.modal-head .close-modal')?.focus({ preventScroll: true })
+  const backdrop = mountModal(`<div class="modal-backdrop"><section class="modal info-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">${modalHead(title, !actions.includes('close-modal'))}<div class="info-content">${content}</div>${actions ? `<div class="modal-actions">${actions}</div>` : ''}</section></div>`)
+  backdrop.querySelector('.close-modal')?.focus({ preventScroll: true })
   return backdrop
 }
 
@@ -947,7 +948,7 @@ function showFormError(root, message) {
 // onSubmit may return a promise; the form stays open until it settles, so a failed
 // save keeps what was typed and shows the reason next to the buttons.
 function openModal(title, content, onSubmit, submitLabel = 'Simpan') {
-  const backdrop = mountModal(`<div class="modal-backdrop"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">${modalHead(title)}<form id="modal-form" novalidate>${content}<p class="form-error" data-form-error role="alert" hidden></p><div class="modal-actions"><button type="button" class="secondary-button close-modal">Batal</button><button type="submit" class="primary-button">${submitLabel} ${icon('arrow')}</button></div></form></section></div>`)
+  const backdrop = mountModal(`<div class="modal-backdrop"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">${modalHead(title, false)}<form id="modal-form" novalidate>${content}<p class="form-error" data-form-error role="alert" hidden></p><div class="modal-actions"><button type="button" class="secondary-button close-modal">Batal</button><button type="submit" class="primary-button">${submitLabel} ${icon('arrow')}</button></div></form></section></div>`)
   const form = backdrop.querySelector('form')
   const submit = form.querySelector('[type="submit"]')
   form.addEventListener('submit', async (event) => {
