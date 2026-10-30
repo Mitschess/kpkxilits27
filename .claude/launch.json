@@ -1,0 +1,38 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "fund-local",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "fund",
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "5180",
+        "--strictPort"
+      ],
+      "env": {
+        "VITE_SUPABASE_URL": "",
+        "VITE_SUPABASE_ANON_KEY": "",
+        "VITE_SUPABASE_PUBLISHABLE_KEY": ""
+      },
+      "port": 5180
+    },
+    {
+      "name": "site",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "5173",
+        "--strictPort"
+      ],
+      "port": 5173
+    }
+  ]
+}
