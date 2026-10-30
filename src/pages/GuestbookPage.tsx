@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, Heart, Inbox, MessageCircle, MessageSquareHeart, PenLine, Send } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart, Inbox, MessageCircle, MessageSquareHeart, PenLine, Send } from "lucide-react";
 import PageHero from "@/components/ui/PageHero";
 import { buttonClass } from "@/components/ui/button";
 import { supabase, type GuestbookMessage } from "@/lib/supabase";
-import { safeStorage } from "@/lib/utils";
+import { scrollToElement } from "@/lib/motion";
+import { cn, safeStorage } from "@/lib/utils";
 import { useReveal } from "@/hooks/useReveal";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
@@ -13,7 +14,9 @@ const QUOTA_KEY = "kpk_gb_quota"; // {"day":"2026-10-22","sent":1}
 // messages per device per day; the database enforces the same (supabase/schema.sql)
 const MAX_PER_DAY = 2;
 const COLORS = ["yellow", "pink", "blue", "green", "orange", "purple"];
-const PAGE_SIZE = 20;
+// messages per page: two columns of 4 on wider screens, a single column of 4 on phones
+const PAGE_SIZE_WIDE = 8;
+const PAGE_SIZE_PHONE = 4;
 // only what's shown: device_id stays private (see supabase/schema.sql)
 const FIELDS = "id, name, message, color, created_at";
 
@@ -25,6 +28,16 @@ function subscribeTwoCols(onChange: () => void) {
   return () => mq.removeEventListener("change", onChange);
 }
 const getTwoCols = () => twoColsQuery().matches;
+
+// 1 … 4 5 6 … 12: both ends, the current page and its neighbours
+function pageNumbers(current: number, last: number) {
+  const pages: (number | "gap")[] = [];
+  for (let p = 1; p <= last; p++) {
+    if (p === 1 || p === last || Math.abs(p - current) <= 1) pages.push(p);
+    else if (pages[pages.length - 1] !== "gap") pages.push("gap");
+  }
+  return pages;
+}
 
 // stored colour name → bubble colours
 const BUBBLE: Record<string, { bg: string; dot: string }> = {
@@ -65,9 +78,8 @@ export default function GuestbookPage() {
 
   const [messages, setMessages] = useState<GuestbookMessage[]>([]);
   const [total, setTotal] = useState(0);
-  const [hasMore, setHasMore] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [moreError, setMoreError] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageLoading, setPageLoading] = useState(false);
   const [name, setName] = useState("");
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
@@ -76,58 +88,56 @@ export default function GuestbookPage() {
   const [success, setSuccess] = useState(false);
   const [remaining, setRemaining] = useState(() => Math.max(0, MAX_PER_DAY - sentToday()));
   const twoCols = useSyncExternalStore(subscribeTwoCols, getTwoCols);
+  const pageSize = twoCols ? PAGE_SIZE_WIDE : PAGE_SIZE_PHONE;
+  const listTop = useRef<HTMLDivElement>(null);
+  const request = useRef(0);
+  const firstShown = useRef(0); // position of the first message on screen
 
-  // the newest page, plus how many messages there are in all
-  const loadMessages = useCallback(async () => {
+  // one page of messages (newest first), plus how many there are in all
+  const loadPage = useCallback(async (p: number, size: number) => {
     if (!supabase) {
       setError("Database belum siap.");
       setLoading(false);
       return;
     }
+    const id = ++request.current;
+    setPageLoading(true);
+    const from = (p - 1) * size;
     const { data, count, error } = await supabase
       .from("guestbook")
       .select(FIELDS, { count: "exact" })
       .order("created_at", { ascending: false })
-      .limit(PAGE_SIZE);
-    if (error) setError("Gagal memuat pesan.");
-    else {
-      const rows = data ?? [];
-      setMessages(rows);
-      setTotal(count ?? rows.length);
-      setHasMore(rows.length === PAGE_SIZE && (count ?? 0) > rows.length);
-      setMoreError(false);
-    }
+      .range(from, from + size - 1);
+    if (id !== request.current) return; // another page was asked for meanwhile
+    // the page no longer exists (messages were removed): start over
+    if (error?.code === "PGRST103" && p > 1) return loadPage(1, size);
+    setPageLoading(false);
     setLoading(false);
-  }, []);
-
-  async function loadMore() {
-    const last = messages[messages.length - 1];
-    if (!supabase || !last) return;
-    setLoadingMore(true);
-    setMoreError(false);
-    // older than the last one shown, so messages posted meanwhile don't shift or repeat anything
-    const { data, error } = await supabase
-      .from("guestbook")
-      .select(FIELDS)
-      .order("created_at", { ascending: false })
-      .lt("created_at", last.created_at)
-      .limit(PAGE_SIZE);
-    setLoadingMore(false);
     if (error) {
-      setMoreError(true);
+      setError("Gagal memuat pesan.");
       return;
     }
-    const rows = data ?? [];
-    setMessages((prev) => [...prev, ...rows]);
-    setHasMore(rows.length === PAGE_SIZE && messages.length + rows.length < total);
+    setMessages(data ?? []);
+    setTotal(count ?? 0);
+    setPage(p);
+    firstShown.current = from;
+  }, []);
+
+  function goToPage(p: number) {
+    void loadPage(p, pageSize);
+    // back to the top of the list if it has been scrolled past
+    if (listTop.current && listTop.current.getBoundingClientRect().top < 0) scrollToElement(listTop.current);
   }
 
-  // split alternately so loading more only adds to the bottom of each column
+  const lastPage = Math.max(1, Math.ceil(total / pageSize));
+  // split alternately so each page reads left to right, newest first
   const columns = twoCols ? [messages.filter((_, i) => i % 2 === 0), messages.filter((_, i) => i % 2 === 1)] : [messages];
 
+  // on first load, and when the page size changes (e.g. the phone is turned), open the page
+  // that holds the message that was first on screen
   useEffect(() => {
-    void loadMessages();
-  }, [loadMessages]);
+    void loadPage(Math.floor(firstShown.current / pageSize) + 1, pageSize);
+  }, [loadPage, pageSize]);
 
   useEffect(() => {
     if (!success) return;
@@ -169,7 +179,7 @@ export default function GuestbookPage() {
     setSuccess(true);
     setName("");
     setText("");
-    void loadMessages();
+    void loadPage(1, pageSize);
   }
 
   return (
@@ -259,7 +269,7 @@ export default function GuestbookPage() {
 
         {/* messages */}
         <div>
-          <div className="mb-6 flex items-center justify-between">
+          <div ref={listTop} className="mb-6 flex items-center justify-between">
             <h2 className="flex items-center gap-2 font-display text-2xl font-extrabold text-ink">
               <MessageCircle size={22} strokeWidth={2.5} aria-hidden="true" /> Pesan masuk
             </h2>
@@ -282,7 +292,7 @@ export default function GuestbookPage() {
             </div>
           ) : (
             <>
-              <div className="flex items-start gap-4">
+              <div aria-busy={pageLoading} className={cn("flex items-start gap-4 transition-opacity", pageLoading && "opacity-50")}>
                 {columns.map((col, c) => (
                   <div key={c} className="flex min-w-0 flex-1 flex-col gap-4">
                     <AnimatePresence initial={false}>
@@ -296,31 +306,50 @@ export default function GuestbookPage() {
                 ))}
               </div>
 
-              {hasMore ? (
-                <div className="mt-8 text-center">
-                  <button type="button" onClick={loadMore} disabled={loadingMore} className={buttonClass("white")}>
-                    {loadingMore ? (
-                      "Memuat…"
-                    ) : (
-                      <>
-                        Muat lebih banyak <ChevronDown size={16} strokeWidth={2.5} />
-                      </>
-                    )}
-                  </button>
-                  {moreError && (
-                    <p role="alert" className="mt-3 text-sm font-semibold text-pink-dark">
-                      Gagal memuat, coba lagi ya!
-                    </p>
-                  )}
-                </div>
-              ) : (
-                total > PAGE_SIZE && <p className="mt-8 text-center text-sm font-semibold text-ink-soft">Udah sampai pesan pertama~</p>
-              )}
+              {lastPage > 1 && <Pagination page={page} lastPage={lastPage} disabled={pageLoading} onChange={goToPage} />}
             </>
           )}
         </div>
       </div>
     </div>
+  );
+}
+
+const PAGE_BTN = "grid h-10 min-w-10 place-items-center rounded-full px-3 text-sm font-bold transition-all duration-200 ease-bounce disabled:pointer-events-none";
+
+function Pagination({ page, lastPage, disabled, onChange }: { page: number; lastPage: number; disabled: boolean; onChange: (p: number) => void }) {
+  const arrow = cn(PAGE_BTN, "bg-white text-ink ring-2 ring-ink/10 hover:-translate-y-0.5 disabled:opacity-40");
+  return (
+    <nav aria-label="Halaman pesan" className="mt-8 flex flex-wrap items-center justify-center gap-2">
+      <button type="button" onClick={() => onChange(page - 1)} disabled={disabled || page <= 1} aria-label="Halaman sebelumnya" className={arrow}>
+        <ChevronLeft size={18} strokeWidth={2.5} />
+      </button>
+      {pageNumbers(page, lastPage).map((p, i) =>
+        p === "gap" ? (
+          <span key={`gap${i}`} className="px-1 font-bold text-ink-soft" aria-hidden="true">
+            …
+          </span>
+        ) : (
+          <button
+            key={p}
+            type="button"
+            onClick={() => onChange(p)}
+            disabled={disabled || p === page}
+            aria-current={p === page ? "page" : undefined}
+            aria-label={`Halaman ${p}`}
+            className={cn(
+              PAGE_BTN,
+              p === page ? "bg-its text-white shadow-[0_3px_0_#1d3fb5]" : "bg-white text-ink ring-2 ring-ink/10 hover:-translate-y-0.5",
+            )}
+          >
+            {p}
+          </button>
+        ),
+      )}
+      <button type="button" onClick={() => onChange(page + 1)} disabled={disabled || page >= lastPage} aria-label="Halaman berikutnya" className={arrow}>
+        <ChevronRight size={18} strokeWidth={2.5} />
+      </button>
+    </nav>
   );
 }
 
