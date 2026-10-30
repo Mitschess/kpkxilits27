@@ -332,7 +332,7 @@ function MerchDetailDialog({
                     )}
                   </div>
                   {merchandise.images.length > 1 && (
-                    <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                    <div className="-mx-1 mt-2 flex gap-2 overflow-x-auto p-1">
                       {merchandise.images.map((image, index) => (
                         <button key={image} type="button" onClick={() => onSelectImage(index)} aria-label={`Pilih foto ${index + 1}`} aria-pressed={currentImage === index} className={`h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white p-1 ring-2 transition ${currentImage === index ? "ring-pink" : "ring-ink/10 hover:ring-its/50"}`}>
                           <img src={image} alt="" className="h-full w-full object-contain" />
