@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Heart, Inbox, MessageCircle, MessageSquareHeart, PenLine, Send } from "lucide-react";
+import { ChevronDown, Heart, Inbox, MessageCircle, MessageSquareHeart, PenLine, Send } from "lucide-react";
 import PageHero from "@/components/ui/PageHero";
 import { buttonClass } from "@/components/ui/button";
 import { supabase, type GuestbookMessage } from "@/lib/supabase";
@@ -13,6 +13,18 @@ const QUOTA_KEY = "kpk_gb_quota"; // {"day":"2026-10-22","sent":1}
 // messages per device per day; the database enforces the same (supabase/schema.sql)
 const MAX_PER_DAY = 2;
 const COLORS = ["yellow", "pink", "blue", "green", "orange", "purple"];
+const PAGE_SIZE = 20;
+// only what's shown: device_id stays private (see supabase/schema.sql)
+const FIELDS = "id, name, message, color, created_at";
+
+// two message columns from Tailwind's sm breakpoint up
+const twoColsQuery = () => window.matchMedia("(min-width: 640px)");
+function subscribeTwoCols(onChange: () => void) {
+  const mq = twoColsQuery();
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
+const getTwoCols = () => twoColsQuery().matches;
 
 // stored colour name → bubble colours
 const BUBBLE: Record<string, { bg: string; dot: string }> = {
@@ -52,6 +64,10 @@ export default function GuestbookPage() {
   useReveal(root);
 
   const [messages, setMessages] = useState<GuestbookMessage[]>([]);
+  const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [moreError, setMoreError] = useState(false);
   const [name, setName] = useState("");
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
@@ -59,22 +75,55 @@ export default function GuestbookPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [remaining, setRemaining] = useState(() => Math.max(0, MAX_PER_DAY - sentToday()));
+  const twoCols = useSyncExternalStore(subscribeTwoCols, getTwoCols);
 
+  // the newest page, plus how many messages there are in all
   const loadMessages = useCallback(async () => {
     if (!supabase) {
       setError("Database belum siap.");
       setLoading(false);
       return;
     }
-    // only what's shown: device_id stays private (see supabase/schema.sql)
-    const { data, error } = await supabase
+    const { data, count, error } = await supabase
       .from("guestbook")
-      .select("id, name, message, color, created_at")
-      .order("created_at", { ascending: false });
+      .select(FIELDS, { count: "exact" })
+      .order("created_at", { ascending: false })
+      .limit(PAGE_SIZE);
     if (error) setError("Gagal memuat pesan.");
-    else setMessages(data ?? []);
+    else {
+      const rows = data ?? [];
+      setMessages(rows);
+      setTotal(count ?? rows.length);
+      setHasMore(rows.length === PAGE_SIZE && (count ?? 0) > rows.length);
+      setMoreError(false);
+    }
     setLoading(false);
   }, []);
+
+  async function loadMore() {
+    const last = messages[messages.length - 1];
+    if (!supabase || !last) return;
+    setLoadingMore(true);
+    setMoreError(false);
+    // older than the last one shown, so messages posted meanwhile don't shift or repeat anything
+    const { data, error } = await supabase
+      .from("guestbook")
+      .select(FIELDS)
+      .order("created_at", { ascending: false })
+      .lt("created_at", last.created_at)
+      .limit(PAGE_SIZE);
+    setLoadingMore(false);
+    if (error) {
+      setMoreError(true);
+      return;
+    }
+    const rows = data ?? [];
+    setMessages((prev) => [...prev, ...rows]);
+    setHasMore(rows.length === PAGE_SIZE && messages.length + rows.length < total);
+  }
+
+  // split alternately so loading more only adds to the bottom of each column
+  const columns = twoCols ? [messages.filter((_, i) => i % 2 === 0), messages.filter((_, i) => i % 2 === 1)] : [messages];
 
   useEffect(() => {
     void loadMessages();
@@ -214,7 +263,7 @@ export default function GuestbookPage() {
             <h2 className="flex items-center gap-2 font-display text-2xl font-extrabold text-ink">
               <MessageCircle size={22} strokeWidth={2.5} aria-hidden="true" /> Pesan masuk
             </h2>
-            <span className="rounded-full bg-white px-3 py-1 text-sm font-bold text-ink ring-2 ring-ink/10">{messages.length} pesan</span>
+            <span className="rounded-full bg-white px-3 py-1 text-sm font-bold text-ink ring-2 ring-ink/10">{total} pesan</span>
           </div>
 
           {loading ? (
@@ -232,15 +281,42 @@ export default function GuestbookPage() {
               <p className="mt-1 text-ink-soft">Jadilah yang pertama nulis!</p>
             </div>
           ) : (
-            <div className="columns-1 gap-4 sm:columns-2">
-              <AnimatePresence initial={false}>
-                {messages.map((m) => (
-                  <motion.div key={m.id} layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="mb-4 break-inside-avoid">
-                    <MessageBubble message={m} />
-                  </motion.div>
+            <>
+              <div className="flex items-start gap-4">
+                {columns.map((col, c) => (
+                  <div key={c} className="flex min-w-0 flex-1 flex-col gap-4">
+                    <AnimatePresence initial={false}>
+                      {col.map((m) => (
+                        <motion.div key={m.id} layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
+                          <MessageBubble message={m} />
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
                 ))}
-              </AnimatePresence>
-            </div>
+              </div>
+
+              {hasMore ? (
+                <div className="mt-8 text-center">
+                  <button type="button" onClick={loadMore} disabled={loadingMore} className={buttonClass("white")}>
+                    {loadingMore ? (
+                      "Memuat…"
+                    ) : (
+                      <>
+                        Muat lebih banyak <ChevronDown size={16} strokeWidth={2.5} />
+                      </>
+                    )}
+                  </button>
+                  {moreError && (
+                    <p role="alert" className="mt-3 text-sm font-semibold text-pink-dark">
+                      Gagal memuat, coba lagi ya!
+                    </p>
+                  )}
+                </div>
+              ) : (
+                total > PAGE_SIZE && <p className="mt-8 text-center text-sm font-semibold text-ink-soft">Udah sampai pesan pertama~</p>
+              )}
+            </>
           )}
         </div>
       </div>
