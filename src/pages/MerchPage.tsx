@@ -5,7 +5,8 @@ import PageHero from "@/components/ui/PageHero";
 import { buttonClass } from "@/components/ui/button";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useReveal } from "@/hooks/useReveal";
-import { merchandises, type Merch } from "@/data/merch/merch-data";
+import { merchandises, merchSku, type Merch } from "@/data/merch/merch-data";
+import { supabase } from "@/lib/supabase";
 
 type Category = "all" | "satuan" | "bundle";
 
@@ -46,7 +47,39 @@ const maskStyle = (mask: string) => ({ mask, WebkitMask: mask });
 const SWAP_MASK = "[mask:var(--mask)] [-webkit-mask:var(--mask)] md:[mask:var(--mask-md)] md:[-webkit-mask:var(--mask-md)]";
 const swapMaskVars = (mobile: string, desktop: string) => ({ "--mask": mobile, "--mask-md": desktop }) as CSSProperties;
 
-function MerchCard({ item, index, onOpen }: { item: Merch; index: number; onOpen: () => void }) {
+/** Stock per merch SKU from the /fund inventory; null while it is unknown (no database, loading or failed). */
+function useMerchStock() {
+  const [stock, setStock] = useState<Map<string, number> | null>(null);
+
+  useEffect(() => {
+    if (!supabase) return;
+    let active = true;
+    void supabase.rpc("get_merch_stock").then(({ data, error }) => {
+      if (!active) return;
+      if (error) {
+        console.error("Error fetching merch stock:", error);
+        return;
+      }
+      setStock(new Map((data as { sku: string; stock: number }[]).map((row) => [row.sku, row.stock])));
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  return stock;
+}
+
+function StockPill({ stock }: { stock: number }) {
+  const low = stock <= 5;
+  return (
+    <span className={`absolute left-2 top-2 z-10 rounded-full px-2 py-0.5 text-[0.65rem] font-extrabold leading-tight sm:text-[0.7rem] ${low ? "bg-orange text-ink" : "bg-mint-light text-mint-dark"}`}>
+      {low ? `Sisa ${stock}` : `Stok ${stock}`}
+    </span>
+  );
+}
+
+function MerchCard({ item, index, stock, onOpen }: { item: Merch; index: number; stock: number | null; onOpen: () => void }) {
   const [imageIndex, setImageIndex] = useState(0);
   const imageCount = item.images.length;
 
@@ -59,6 +92,7 @@ function MerchCard({ item, index, onOpen }: { item: Merch; index: number; onOpen
   }, [imageCount, index]);
 
   const accent = TICKET_ACCENTS[index % TICKET_ACCENTS.length];
+  const soldOut = stock === 0;
 
   return (
     <button
@@ -73,8 +107,9 @@ function MerchCard({ item, index, onOpen }: { item: Merch; index: number; onOpen
           style={{ background: `linear-gradient(160deg, #fff8ec, #fff 45%, ${accent.tint})`, ...maskStyle(notchMask("bottom", TICKET_BORDER)) }}
         >
           <span className="relative block aspect-[5/4] w-full overflow-hidden">
+            {stock !== null && stock > 0 && <StockPill stock={stock} />}
             <motion.span
-              className="absolute inset-3 bottom-5 block sm:inset-4 sm:bottom-6"
+              className={`absolute inset-3 bottom-5 block sm:inset-4 sm:bottom-6 ${soldOut ? "opacity-55 grayscale" : ""}`}
               animate={{ y: [0, -6, 0, 6, 0], rotate: [0, 0.7, 0, -0.7, 0] }}
               transition={{ duration: 3.8 + (index % 4) * 0.35, delay: (index % 4) * 0.18, repeat: Infinity, ease: "easeInOut" }}
             >
@@ -93,6 +128,11 @@ function MerchCard({ item, index, onOpen }: { item: Merch; index: number; onOpen
                 />
               </AnimatePresence>
             </motion.span>
+            {soldOut && (
+              <span className="absolute inset-0 z-10 grid place-items-center">
+                <span className="-rotate-12 rounded-lg border-[3px] border-pink-dark bg-white/80 px-3 py-0.5 font-display text-lg font-extrabold uppercase tracking-[0.14em] text-pink-dark sm:text-xl">Habis</span>
+              </span>
+            )}
             {imageCount > 1 && (
               <span className="absolute bottom-2 left-1/2 inline-flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-white/85 px-2.5 py-1 shadow-sm backdrop-blur-sm" aria-hidden="true">
                 {item.images.map((image, dotIndex) => (
@@ -148,6 +188,9 @@ export default function MerchPage() {
   }, [selectedMerch]);
 
   const products = category === "all" ? merchandises : merchandises.filter((item) => item.category === category);
+  const merchStock = useMerchStock();
+  // Once stock has loaded, a merch item with no matching Fund product counts as sold out.
+  const stockOf = (item: Merch) => (merchStock ? (merchStock.get(merchSku(item.id)) ?? 0) : null);
 
   function openDetails(item: Merch) {
     setCurrentImage(0);
@@ -203,7 +246,7 @@ export default function MerchPage() {
               className="grid grid-cols-2 justify-items-center gap-4 sm:gap-5 md:grid-cols-3 md:gap-7 lg:grid-cols-4 lg:gap-8"
             >
               {products.map((item, index) => (
-                <MerchCard key={item.id} item={item} index={index} onOpen={() => openDetails(item)} />
+                <MerchCard key={item.id} item={item} index={index} stock={stockOf(item)} onOpen={() => openDetails(item)} />
               ))}
             </motion.div>
           </AnimatePresence>
@@ -212,6 +255,7 @@ export default function MerchPage() {
 
       <MerchDetailDialog
         merchandise={selectedMerch}
+        stock={selectedMerch ? stockOf(selectedMerch) : null}
         accent={TICKET_ACCENTS[Math.max(0, products.findIndex((item) => item.id === selectedMerch?.id)) % TICKET_ACCENTS.length]}
         currentImage={currentImage}
         onClose={() => setSelectedMerch(null)}
@@ -225,6 +269,7 @@ export default function MerchPage() {
 
 function MerchDetailDialog({
   merchandise,
+  stock,
   accent,
   currentImage,
   onClose,
@@ -233,6 +278,7 @@ function MerchDetailDialog({
   onSelectImage,
 }: {
   merchandise: Merch | null;
+  stock: number | null;
   accent: TicketAccent;
   currentImage: number;
   onClose: () => void;
@@ -315,11 +361,16 @@ function MerchDetailDialog({
                   <h2 id="merch-detail-title" className="mt-4 font-display text-2xl font-extrabold leading-tight text-ink sm:text-3xl">{merchandise.name}</h2>
                   {merchandise.description && <p className="mt-3 leading-relaxed text-ink-soft">{merchandise.description}</p>}
                   <p className="mt-4 font-display text-2xl font-extrabold text-pink-dark">{rupiah(merchandise.price)}</p>
+                  {stock !== null && (
+                    <p className={`mt-2 w-fit rounded-full px-3 py-1 text-xs font-extrabold ${stock === 0 ? "bg-pink-light text-pink-dark" : stock <= 5 ? "bg-orange text-ink" : "bg-mint-light text-mint-dark"}`}>
+                      {stock === 0 ? "Stok habis" : stock <= 5 ? `Tinggal ${stock} lagi` : `Stok tersedia: ${stock}`}
+                    </p>
+                  )}
                   <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                    <a href={merchandise.gformUrl} target="_blank" rel="noopener noreferrer" className={buttonClass("pink", "w-full sm:w-auto")}>
+                    <a href={stock === 0 ? undefined : merchandise.gformUrl} aria-disabled={stock === 0 || undefined} target="_blank" rel="noopener noreferrer" className={buttonClass("pink", `w-full sm:w-auto ${stock === 0 ? "pointer-events-none opacity-50" : ""}`)}>
                       <ExternalLink size={16} aria-hidden="true" /> Beli via Form
                     </a>
-                    <a href={merchandise.shopeeUrl} target="_blank" rel="noopener noreferrer" className={buttonClass("blue", "w-full sm:w-auto")}>
+                    <a href={stock === 0 ? undefined : merchandise.shopeeUrl} aria-disabled={stock === 0 || undefined} target="_blank" rel="noopener noreferrer" className={buttonClass("blue", `w-full sm:w-auto ${stock === 0 ? "pointer-events-none opacity-50" : ""}`)}>
                       <ExternalLink size={16} aria-hidden="true" /> Beli di Shopee
                     </a>
                   </div>

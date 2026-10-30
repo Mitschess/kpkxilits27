@@ -247,3 +247,6 @@ export const merchandises: Merch[] = [
     gformUrl: 'https://forms.gle/aGj6oi5yafmDwUCy7',
   },
 ];
+
+/** SKU a merch item uses in the /fund inventory — also the "No." printed on its ticket. */
+export const merchSku = (id: number) => `MERCH-${String(id).padStart(3, '0')}`;
